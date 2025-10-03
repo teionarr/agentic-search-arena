@@ -19,7 +19,7 @@ class CorrectnessGrade(BaseModel):
 @dataclass
 class CorrectnessConfig:
     """Configuration for correctness evaluation."""
-    model_name: str = "gpt-4.1-mini"
+    model_name: str = "gpt-4.1"
     temperature: float = 0.0
 
 

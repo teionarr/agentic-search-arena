@@ -8,7 +8,7 @@ class PostProcessor(object):
 
     def __init__(
             self,
-            llm_model: str = "gpt-4.1-mini",
+            llm_model: str = "gpt-4.1",
             temperature: float = 0.0
     ):
         """

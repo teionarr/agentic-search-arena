@@ -2,8 +2,18 @@ import pandas as pd
 import logging
 import csv
 import os
+import json
 from datetime import datetime
 from typing import Dict, List, Optional
+from quotientai import QuotientAI, DetectionType
+from enum import Enum
+import random
+import uuid
+
+
+class EvaluationType(Enum):
+    DOCUMENT_RELEVANCE = "document_relevance"
+    SIMPLEQA = "simpleqa"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,39 +24,56 @@ if not logger.handlers:
     logger.addHandler(console_handler)
 
 
-def save_summary(provider_results: Dict, output_dir: str):
+def save_summary(provider_results: Dict, output_dir: str, evaluation_type: EvaluationType):
     """Save evaluation results to CSV files.
 
     Args:
         provider_results: Dictionary of provider results
         output_dir: Directory to save results
+        evaluation_type: Type of evaluation
     """
     os.makedirs(output_dir, exist_ok=True)
     summary_file = f"{output_dir}/summary.csv"
 
     with open(summary_file, 'w', newline='') as csvfile:
-        fieldnames = ['provider', 'accuracy', 'correct_count', 'total_count', 'timestamp']
+        if evaluation_type == EvaluationType.SIMPLEQA:
+            fieldnames = ['provider', 'accuracy', 'correct_count', 'total_count', 'timestamp']
+        elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+            fieldnames = ['provider', 'relevant_docs_percentage', 'relevant_docs_count', 'total_docs_count', 'app_name', 'timestamp']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for provider_name, result in provider_results.items():
-            output_file = f"{output_dir}/{provider_name}_results.csv"
+            output_file = f"{output_dir}/{provider_name}_{evaluation_type.value}_results.csv"
             provider_full_results = pd.read_csv(output_file)
             examples_count = len(provider_full_results)
-            correct_count = len(provider_full_results[provider_full_results['is_correct'] == True])
+            
+            if evaluation_type == EvaluationType.SIMPLEQA:
+                correct_count = len(provider_full_results[provider_full_results['is_correct'] == True])
+                accuracy = correct_count / examples_count if examples_count > 0 else 0.0
+                accuracy = round(accuracy, 3)
 
-            accuracy = correct_count / examples_count if examples_count > 0 else 0.0
-            accuracy = round(accuracy, 3)
-
-            writer.writerow({
+                writer.writerow({
                 'provider': provider_name,
                 'accuracy': accuracy,
                 'correct_count': correct_count,
                 'total_count': examples_count,
                 'timestamp': timestamp
             })
+            elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+                # For Document Relevance, get the metrics from the provider_results directly
+                # since they're calculated at the provider level, not stored in individual CSV files
+                provider_metrics = provider_results.get(provider_name, {})
+                writer.writerow({
+                    'provider': provider_name,
+                    'relevant_docs_percentage': provider_metrics.get('relevant_docs_percentage', 0.0),
+                    'relevant_docs_count': provider_metrics.get('relevant_docs', 0),
+                    'total_docs_count': provider_metrics.get('total_docs', 0),
+                    'app_name': provider_metrics.get('app_name', ''),
+                    'timestamp': timestamp
+                })
 
     logger.info(f"Saved summary results to {summary_file}")
 
@@ -116,11 +143,12 @@ def prepare_examples(
         rerun: bool = False,
         results_dir: str = "results",
         random_sample: Optional[int] = None,
+        evaluation_type: EvaluationType = EvaluationType.SIMPLEQA,
 ) -> Dict[str, List[Dict]]:
     examples = {provider: [] for provider in provider_names}
 
     for provider in provider_names:
-        if (not rerun) or (random_sample is not None and random_sample > 0) or (not os.path.exists(f"{results_dir}/{provider}_results.csv")):
+        if not rerun or (random_sample is not None and random_sample > 0) or not os.path.exists(f"{results_dir}/{provider}_{evaluation_type.value}_results.csv"):
             for _, row in df.iterrows():
                 examples[provider].append({
                     "question": row["problem"],
@@ -128,8 +156,9 @@ def prepare_examples(
                     "index": int(row["index"])
                 })
         else:
-            if os.path.exists(f"{results_dir}/{provider}_results.csv"):
-                df_results = pd.read_csv(f"{results_dir}/{provider}_results.csv")
+            results_file = f"{results_dir}/{provider}_{evaluation_type.value}_results.csv"
+            if os.path.exists(results_file):
+                df_results = pd.read_csv(results_file)
                 processed_indices = df_results[df_results['grade'] != 'ERROR']['index'].tolist()
             else:
                 processed_indices = []
@@ -158,18 +187,111 @@ def get_output_dir(output_dir: str, rerun: bool = False):
     return output_dir
 
 
-def save_result(result: Dict, provider_name: str, output_dir: str):
+def save_result(result: Dict, provider_name: str, output_dir: str, evaluation_type: EvaluationType):
     """Appending a single result to the results CSV file."""
     os.makedirs(output_dir, exist_ok=True)
-    fieldnames = ['index', 'question', 'reference_answer', 'predicted_answer', 'is_correct', 'grade']
+    
+    if evaluation_type == EvaluationType.SIMPLEQA:
+        fieldnames = ['index', 'question', 'reference_answer', 'predicted_answer', 'is_correct', 'grade', 'token_count', 'token_avg']
+    elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+        fieldnames = ['index', 'question', 'token_count', 'token_avg', 'grade']
 
-    file_exists = os.path.exists(f"{output_dir}/{provider_name}_results.csv")
+    file_exists = os.path.exists(f"{output_dir}/{provider_name}_{evaluation_type.value}_results.csv")
     write_mode = 'a' if file_exists else 'w'
-    output_file = f"{output_dir}/{provider_name}_results.csv"
+    output_file = f"{output_dir}/{provider_name}_{evaluation_type.value}_results.csv"
 
     with open(output_file, write_mode) as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         if not file_exists:
             writer.writeheader()
 
-        writer.writerow(result)
+        # Only write fields that exist in the result
+        filtered_result = {k: v for k, v in result.items() if k in fieldnames}
+        writer.writerow(filtered_result)
+
+
+def get_quotient_ai_client(provider_name, environment="test"):
+    """Initialize Quotient AI client for evaluation logging.
+    
+    Args:
+        provider_name: Name of the provider for logging
+        environment: Environment for logging
+    
+    Returns:
+        QuotientAI client instance
+    """
+    quotient = QuotientAI(api_key=os.getenv('QUOTIENT_API_KEY'))
+    logger_uuid = uuid.uuid4()
+    app_name = f"{provider_name}_{logger_uuid}"
+
+    quotient.logger.init(
+        app_name=app_name,
+        environment=environment,
+        detections=[DetectionType.DOCUMENT_RELEVANCY],
+        detection_sample_rate=1.0,
+        # add any tags you want to be applied to all logs
+        tags={
+            'depth': 'standard',
+        },
+    )
+    return quotient, app_name
+
+
+def load_document_relevance_eval_data(
+    json_path: str,
+    start_index: int = 0,
+    end_index: Optional[int] = None,
+    random_sample: Optional[int] = None,
+) -> pd.DataFrame:
+    """Load data from dynamic dataset for document relevance evaluation - JSON file with question and answer fields.
+
+    Args:
+        json_path: Path to the JSON file
+        start_index: Starting index for examples (inclusive)
+        end_index: Ending index for examples (exclusive), defaults to the end of the dataset
+        random_sample: Number of random samples to select (overrides start_index and end_index)
+    
+    Returns:
+        pandas DataFrame with problem, answer, and index columns
+    """
+    try:
+        logger.info(f"Loading data from JSON file: {json_path}")
+        
+        with open(json_path, 'r') as f:
+            data = json.load(f)
+        
+        if 'dataset' in data:
+            dataset = data['dataset']
+        else:
+            dataset = data if isinstance(data, list) else []
+        
+        total_rows = len(dataset)
+
+        if random_sample is not None and random_sample > 0:
+            sample_size = min(random_sample, total_rows)
+            logger.info(f"Randomly sampling {sample_size} examples from {total_rows} total")
+            dataset_slice = random.sample(dataset, sample_size)
+        else:
+            if end_index is None:
+                end_index = total_rows
+
+            start_index = max(0, min(start_index, total_rows - 1))
+            end_index = max(start_index + 1, min(end_index, total_rows))
+
+            logger.info(f"Using examples from index {start_index} to {end_index - 1} (total: {end_index - start_index})")
+
+            dataset_slice = dataset[start_index:end_index]
+
+        examples = []
+        for i, item in enumerate(dataset_slice):
+            examples.append({
+                "problem": item["question"],  # Map "question" to "problem" for consistency
+                "answer": item["answer"],
+                "index": start_index + i if random_sample is None else i
+            })
+
+        return pd.DataFrame(examples)
+
+    except Exception as e:
+        logger.error(f"Error loading JSON data: {str(e)}")
+        raise

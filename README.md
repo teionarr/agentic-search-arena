@@ -1,31 +1,52 @@
-# **Search Providers Evaluation System**
+# **Evaluation Framework for Web Search APIs**
 
 ## **Overview**
-This repository provides an evaluation system for the [SimpleQA](https://openai.com/index/introducing-simpleqa/) benchmark, comparing different search providers.
+This repository provides evaluation frameworks for benchmarking web search APIs, combining static benchmarks and dynamic datasets to measure accuracy, relevance, and retrieval performance across different providers.
+Benchmakrs:
+1. [SimpleQA](https://openai.com/index/introducing-simpleqa/) Benchmark
+    -  Runs the full SimpleQA dataset against each provider.
+    - Retrieved documents are reformatted for an LLM (we used `gpt-4.1`) to extract a predicted answer.
+    - The predicted answer is graded using the official SimpleQA classifier.
+    - For providers that return direct answers, it is possible to bypass the LLM step and compare the returned answer directly with the SimpleQA ground truth (though our evaluations used the classifier route).
+2. Document Relevance Benchmark 
+    - Uses [QuotientAI](https://docs.quotientai.co/data-collection/logs) to assess the relevance of retrieved documents against a given query.
+    - Involves generating a dynamic dataset using the open-source [Dynamic Eval Datasets Generator](https://github.com/Eyalbenba/tavily-web-eval-generator).
+    - You can use the provided dataset (`datasets/document_relevance_dynamic_test_set.json`) or easily create new datasets on topics of your choice with the above generator.
+    - This flexibility allows evaluation on domain-specific or real-time topics, making the benchmark more reflective of production-like tasks than static datasets.
 
 ### **Features**
-- Evaluation of different search providers
+- Comparative evaluation of multiple search providers
+- Out-of-the-box support for Tavily, Exa, Brave, Google (SERP via Serper), Perplexity Search, Perplexity, and GPTR
+- Easy integration of additional providers (see [this section](#adding-a-new-search-provider-to-the-evaluation))
 - Customizable configuration for each provider
-- Parallel independent evaluation
-- Resume the evaluation from the point of failure if an error occurs
+- Parallelized, independent evaluation pipelines
+- Automatic resume from the last checkpoint in case of errors
 
 ---
 
 ## **Evaluation Results**
 
 The table below presents evaluation results across various search providers and LLMs on the SimpleQA benchmark. 
-**NOTE**: For transparency and accuracy, we present the higher score between our internal evaluation results and officially reported scores for supported providers. For other providers, we display their publicly reported results. 
 
 | Provider | Accuracy |
 |----------|-------|
 | Tavily   | 93.3%   |
-| Perplexity Sonar-Pro | 88.8% |
-| Serper Search | 82.2% |
-| Brave Search | 76.1% |
-| Exa Search ([link](https://exa.ai/blog/api-evals)) | 90.04%   |
-| OpenAI Web Search ([link](https://openai.com/index/new-tools-for-building-agents/)) | 90%  |
-| GPT 4.5 ([link](https://openai.com/index/introducing-gpt-4-5/#:~:text=remain%E2%80%94a%20mystery.-,Deeper,-world%20knowledge)) | 62.5%  |
-| Gemini 2.5 Pro ([link](https://deepmind.google/models/gemini/#:~:text=Factuality-,SimpleQA,-50.8%25)) | 50.8%  |
+| Perplexity Search | 85.92% |
+| Google (SERP) using SERPER | 82.15% |
+| Brave Search | 76.05% |
+| Exa Search | 71.24%   |
+
+The table below presents evaluation results across various search providers and LLMs on the Document Relevance benchmark. 
+
+| Provider | Accuracy |
+|----------|-------|
+| Tavily   | 83.02%   |
+| Perplexity Search | 71.2% |
+| Google (SERP) using SERPER | 58.11% |
+| Brave Search | 56.2% |
+| Exa Search | 51.33%   |
+
+NOTE: The `config.json` file contains the search parameters we used to evaluate each provider above. 
 
 ---
 
@@ -60,15 +81,41 @@ python run_evaluation.py
 
 ### **Command Line Options**
 
-- `--csv_path`: Path to CSV file with questions and answers (default: datasets/simple_qa_test_set.csv)
+- `--evaluation_type`: Type of evaluation to run (simpleqa or document_relevance, default: simpleqa)
 - `--config`: Path to JSON config file with provider parameters (default: configs/config.json)
 - `--start_index`: Starting index for examples (inclusive, default: 0)
 - `--end_index`: Ending index for examples (exclusive, default: all examples)
 - `--random_sample`: Number of random samples to select (overrides start/end index)
-- `--post_process_model`: Model for post-processing (default: gpt-4.1-mini)
+- `--post_process_model`: Model for post-processing (default: gpt-4.1)
 - `--output_dir`: Directory to save results (default: results)
 - `--sequential`: Run providers sequentially instead of in parallel
 - `--rerun`: Continue evaluation on existing results directory, output_dir must exist
+- `--token_model`: Model for token consumption calculation (default: gpt-4.1)
+- `--evaluator_model`: Model for correctness evaluation for SimpleQA (default: gpt-4.1)
+
+### **Output**
+
+Evaluation results are saved in the `results/` directory with the following structure:
+
+```
+results/
+└── YYYY-MM-DD_HH-MM-SS/                    # Timestamp-based folder
+    ├── summary.csv                         # Overall evaluation summary
+    ├── provider_simpleqa_results.csv       # Individual SimpleQA results
+    ├── provider_document_relevance_results.csv  # Individual Document Relevance results
+```
+
+#### **Example Output:**
+```bash
+results/
+└── 2025-01-15_14-30-25/
+    ├── summary.csv
+    ├── tavily_simpleqa_results.csv
+    ├── exa_simpleqa_results.csv
+    ├── serper_simpleqa_results.csv
+    ├── brave_simpleqa_results.csv
+    └── perplexity_search_simpleqa_results.csv
+```
 
 ### **Config Example**
 
@@ -77,21 +124,15 @@ Configuration file `config.json` might look like:
 {
   "tavily": {
     "search_depth": "advanced",
-    "include_raw_content": true,
+    "include_raw_content": false,
     "max_results": 10,
   },
-  "perplexity": {
-    "model": "sonar-pro",
+  "perplexity_search": {
+    "max_results": 10,
+    "max_tokens_per_page": 512
   }
 }
 ```
-
-### **Results Output**
-
-The script generates two types of output files in the specified output directory:
-- Detailed results CSV for each provider (questions, answers, and evaluation grades)
-- Summary CSV with accuracy metrics for all providers
-
 ### **Resume Evaluation**
 
 If your evaluation is interrupted, you can continue from where it stopped using the `--rerun` flag (`output_dir` folder must exist with the previous run's partial results):
@@ -113,10 +154,12 @@ This will:
 The current supported search providers are:
 - `tavily`
 - `perplexity`
+- `perplexity_search`
 - `gptr`
 - `exa`
 - `serper`
 - `brave`
+
 
 You can extend the system to evaluate additional search providers by following these steps:
 
@@ -144,3 +187,7 @@ NEW_PROVIDER_API_KEY=your_api_key_here
 Remember to implement appropriate error handling and respect any rate limits or API constraints for your new provider.
 
 ---
+
+## **License**
+
+This project is made available under the [MIT License](https://github.com/tavily-ai/tavily-mcp/blob/main/LICENCE).
