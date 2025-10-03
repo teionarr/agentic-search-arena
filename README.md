@@ -2,7 +2,7 @@
 
 ## **Overview**
 This repository provides evaluation frameworks for benchmarking web search APIs, combining static benchmarks and dynamic datasets to measure accuracy, relevance, and retrieval performance across different providers.
-Benchmakrs:
+### Benchmarks:
 1. [SimpleQA](https://openai.com/index/introducing-simpleqa/) Benchmark
     -  Runs the full SimpleQA dataset against each provider.
     - Retrieved documents are reformatted for an LLM (we used `gpt-4.1`) to extract a predicted answer.
@@ -54,8 +54,8 @@ NOTE: The `config.json` file contains the search parameters we used to evaluate 
 
 1. **Clone the repository**:
     ```sh
-    git clone https://github.com/simpleQA-eval.git
-    cd simpleQA-eval
+    git clone https://github.com/tavily-ai/tavily-search-evals
+    cd tavily-search-evals
     ```
 
 2. **Install dependencies**:
