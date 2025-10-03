@@ -1,7 +1,25 @@
 {
   "tavily": {
     "search_depth": "advanced",
-    "include_raw_content": true,
+    "include_raw_content": false,
     "max_results": 10
+  },
+  "exa": {
+    "type": "auto",
+    "contents": {
+      "highlights": true
+    },
+    "numResults": 10
+  },
+  "serper": {
+    "type": "search",
+    "num": 10
+  },
+  "brave": {
+    "count": 10
+  },
+  "perplexity_search": {
+    "max_results": 10,
+    "max_tokens_per_page": 512
   }
 }

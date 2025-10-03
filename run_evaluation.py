@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 import logging
 import os
 import json
@@ -6,9 +7,13 @@ import argparse
 import time
 from dotenv import load_dotenv
 from typing import Dict, Any, List, Optional
-from handlers import TavilyHandler, ExaHandler, GPTRHandler, PerplexityHandler, SerperHandler, BraveHandler
+from evaluators.correctness_evaluator import CorrectnessConfig
+
+
+from quotientai import QuotientAI
+from handlers import TavilyHandler, ExaHandler, GPTRHandler, PerplexityHandler, SerperHandler, BraveHandler, PerplexitySearchHandler
 from evaluators import CorrectnessEvaluator
-from utils import PostProcessor, save_summary, load_csv_data, prepare_examples, get_output_dir, save_result
+from utils import PostProcessor, save_summary, load_csv_data, load_document_relevance_eval_data, prepare_examples, get_output_dir, save_result, get_quotient_ai_client, EvaluationType
 
 load_dotenv()
 
@@ -27,34 +32,53 @@ TAVILY_DEFAULT_CONFIG = {
     "max_results": 10,
 }
 
+def get_dataset_path(evaluation_type: EvaluationType) -> str:
+    """Get the dataset path based on evaluation type."""
+    if evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+        return "datasets/document_relevance_dynamic_test_set.json"
+    elif evaluation_type == EvaluationType.SIMPLEQA:
+        return "datasets/simple_qa_test_set.csv"
 
-async def get_search_handlers(search_provider_params: Dict[str, Dict[str, Any]]):
+
+def load_data(evaluation_type: EvaluationType, start_index: int = 0, end_index: Optional[int] = None, random_sample: Optional[int] = None):
+    """Load data based on evaluation type."""
+    dataset_path = get_dataset_path(evaluation_type)
+    
+    if evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+        return load_document_relevance_eval_data(dataset_path, start_index, end_index, random_sample)
+    elif evaluation_type == EvaluationType.SIMPLEQA:
+        return load_csv_data(dataset_path, start_index, end_index, random_sample)
+
+
+async def get_search_handlers(search_provider_params: Dict[str, Dict[str, Any]], token_model: str = "gpt-4.1"):
     """Initialize search handlers based on provided parameters."""
     handler_map = {
         "tavily": TavilyHandler,
         "exa": ExaHandler,
         "gptr": GPTRHandler,
         "perplexity": PerplexityHandler,
+        "perplexity_search": PerplexitySearchHandler,
         "serper": SerperHandler,
         "brave": BraveHandler,
     }
     
     return [
-        handler_class(params)
+        handler_class(params, token_model=token_model)
         for provider_name, params in search_provider_params.items()
         if (handler_class := handler_map.get(provider_name.lower()))
     ]
 
 
-async def evaluate_provider(
+async def evaluate_provider_simple_qa(
     provider_name: str,
     search_handler,
     examples: List[Dict],
     post_processor: Optional[PostProcessor] = None,
+    evaluator_model: str = "gpt-4.1",
     batch_size: int = 15,
 ):
     """Evaluate a single search provider on the dataset."""
-    evaluator = CorrectnessEvaluator()
+    evaluator = CorrectnessEvaluator(CorrectnessConfig(model_name=evaluator_model))
     
     results = []
     correct_count = 0
@@ -75,14 +99,13 @@ async def evaluate_provider(
             if is_llm_response:
                 search_ans = original_answer
             else:
-                search_ans = await search_handler.post_process(search_result)
+                search_ans, token_count, token_avg = await search_handler.post_process(search_result)
             
             answer = post_processor.extract_answer(
                 query=query, 
                 is_llm_response=is_llm_response, 
                 search_result=search_ans
             )
-            
             # Evaluate the answer
             evaluation_result = await evaluator.evaluate(
                 {"question": query},
@@ -95,7 +118,6 @@ async def evaluate_provider(
                 correct_count += 1
 
             grade = evaluation_result['value']
-            
             result = {
                 "index": index,
                 "question": query,
@@ -103,11 +125,13 @@ async def evaluate_provider(
                 "predicted_answer": answer,
                 "is_correct": is_correct,
                 "grade": grade,
+                "token_count": token_count if not is_llm_response else 0,
+                "token_avg": token_avg if not is_llm_response else 0
             }
-            
+
             results.append(result)
             logger.info(f"[{provider_name}] Q{index}: Grade - {grade}, Query: '{query}'")
-            save_result(result, provider_name, output_dir)
+            save_result(result, provider_name, output_dir, evaluation_type)
 
             return result
         
@@ -120,7 +144,7 @@ async def evaluate_provider(
                 "predicted_answer": "ERROR",
                 "is_correct": False,
                 "grade": "ERROR",
-                "error": str(e)
+                "error": str(e),
             })
             return None
     
@@ -142,22 +166,82 @@ async def evaluate_provider(
         "total_count": len(examples)
     }
 
+async def evaluate_provider_document_relevance(
+    provider_name: str,
+    search_handler,
+    examples: List[Dict],
+    environment: str = "test",
+):
+    results = []
+    quotient_client, app_name = get_quotient_ai_client(provider_name, environment)
 
+    async def process_example(example):
+        query = example["question"]
+        
+        try:
+            search_result = await search_handler.search(query)
+
+            documents, token_count, token_avg = await search_handler.post_process(search_result, evaluation_type=EvaluationType.DOCUMENT_RELEVANCE)
+            quotient_client.log(
+                user_query=query,
+                documents=documents,
+            )
+
+            result = {
+                "index": example["index"],
+                "question": query,
+                "token_count": token_count,
+                "token_avg": token_avg,
+                "grade": "completed",
+            }
+
+            results.append(result)
+            save_result(result, provider_name, output_dir, evaluation_type)
+
+            return result
+        
+        except Exception as e:
+            logger.error(f"[{provider_name}] Error evaluating example {example['index']}: {str(e)}")
+            error_result = {
+                "index": example["index"],
+                "question": query,
+                "token_count": token_count,
+                "token_avg": token_avg,
+                "grade": "ERROR",
+                "error": str(e),
+            }
+            results.append(error_result)
+            return None
+    
+    # Process examples
+    for i, example in enumerate(examples):
+        if i % 100 == 0:
+            await asyncio.sleep(5) # to avoid Quotient AI rate limiting
+        await process_example(example)
+
+    return {
+        "provider": provider_name,
+        "results": results,
+        "quotient_client": quotient_client,
+        "app_name": app_name
+    }
 async def run_evaluation(
-    csv_path: str,
+    evaluation_type: EvaluationType,
     search_provider_params: Dict[str, Dict[str, Any]],
     start_index: int = 0,
     end_index: Optional[int] = None,
     random_sample: Optional[int] = None,
-    post_process_model: str = "gpt-4.1-mini",
+    post_process_model: str = "gpt-4.1",
+    token_model: str = "gpt-4.1",
+    evaluator_model: str = "gpt-4.1",
     parallel: bool = True,
     output_dir: str = "results",
     rerun: bool = False,
 ):
-    """Run the benchmark evaluation using the CSV test set.
+    """Run the benchmark evaluation using specified evaluation type.
     
     Args:
-        csv_path: Path to the CSV file with questions and answers
+        evaluation_type: Type of evaluation (EvaluationType.DOCUMENT_RELEVANCE or EvaluationType.SIMPLEQA)
         search_provider_params: Dictionary mapping search provider names to their parameters
         start_index: Starting index for examples (inclusive)
         end_index: Ending index for examples (exclusive), defaults to the end of the dataset
@@ -168,12 +252,16 @@ async def run_evaluation(
         rerun: Whether to rerun evaluation on existing results directory, output_dir must exist
     """
     try:
-        # Load and prepare data from CSV
-        examples = load_csv_data(csv_path, start_index, end_index, random_sample)
-        examples = prepare_examples(examples, list(search_provider_params.keys()), rerun, output_dir, random_sample)
+        if "exa" in search_provider_params:
+            if "contents" not in search_provider_params["exa"] or search_provider_params["exa"]["contents"] != {"highlights": True}:
+                raise ValueError("'contents' field with 'highlights' is required for Exa. Please add it to the configuration.")
+        
+        # Load and prepare data based on evaluation type
+        examples = load_data(evaluation_type, start_index, end_index, random_sample)
+        examples = prepare_examples(examples, list(search_provider_params.keys()), rerun, output_dir, random_sample, evaluation_type)
     
         # Initialize search handlers
-        search_handlers = await get_search_handlers(search_provider_params)
+        search_handlers = await get_search_handlers(search_provider_params, token_model)
         provider_names = list(search_provider_params.keys())
 
         if len(search_handlers) == 0:
@@ -188,12 +276,21 @@ async def run_evaluation(
             # Evaluate providers in parallel
             tasks = []
             for handler, provider_name in zip(search_handlers, provider_names):
-                task = evaluate_provider(
-                    provider_name,
-                    handler,
-                    examples[provider_name],
-                    post_processor,
-                )
+                if evaluation_type == EvaluationType.SIMPLEQA:
+                    task = evaluate_provider_simple_qa(
+                        provider_name,
+                        handler,
+                        examples[provider_name],
+                        post_processor,
+                        evaluator_model,
+                    ) 
+                elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+                    task = evaluate_provider_document_relevance(
+                        provider_name,
+                        handler,
+                        examples[provider_name],
+                        environment="test",
+                    )
                 tasks.append(task)
             
             # Wait for all evaluations to complete
@@ -205,21 +302,65 @@ async def run_evaluation(
             # Evaluate providers sequentially
             for handler, provider_name in zip(search_handlers, provider_names):
                 logger.info(f"Evaluating provider: {provider_name}")
-                result = await evaluate_provider(
-                    provider_name,
-                    handler,
-                    examples[provider_name],
-                    post_processor,
-                )
+                if evaluation_type == EvaluationType.SIMPLEQA:
+                    result = await evaluate_provider_simple_qa(
+                        provider_name,
+                        handler,
+                        examples[provider_name],
+                        post_processor,
+                        evaluator_model,
+                    )
+                elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+                    result = await evaluate_provider_document_relevance(
+                        provider_name,
+                        handler,
+                        examples[provider_name],
+                        environment="test",
+                    )
                 provider_results[provider_name] = result
         
-        save_summary(provider_results, output_dir)
+        # For Document Relevance evaluation, wait for Quotient AI logs to be processed and calculate stats
+        if evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+            QUOTIENT_AI_WAIT_TIME = 60
+            logger.info(f"Waiting for {QUOTIENT_AI_WAIT_TIME} seconds for logs to be processed in Quotient AI")
+            time.sleep(QUOTIENT_AI_WAIT_TIME)
+            
+            # Calculate relevance stats for each provider
+            for provider_name, result in provider_results.items():
+                quotient_client = result['quotient_client']
+                app_name = result['app_name']
+                if quotient_client:
+                    n_relevant_docs = 0
+                    n_docs = 0
+                    
+                    logs = quotient_client.logs.list(app_name=app_name)
+                    for log in logs:
+                        if hasattr(log, 'documents') and log.documents:
+                            n_docs += len(log.documents)
+                            for document in log.documents:
+                                if document.get('is_relevant', False):
+                                    n_relevant_docs += 1
+                    
+                    # Update the result with calculated stats
+                    result['relevant_docs'] = n_relevant_docs
+                    result['total_docs'] = n_docs
+                    result['relevant_docs_percentage'] = (n_relevant_docs / n_docs * 100) if n_docs > 0 else 0
+                    result['app_name'] = app_name
+                    
+                    logger.info(f"[{provider_name}] Relevance stats: {result['relevant_docs_percentage']:.1f}% ({result['relevant_docs']}/{result['total_docs']})")
+                    
+
+        save_summary(provider_results, output_dir, evaluation_type)
 
         print("\n===== EVALUATION RESULTS =====")
-        print(f"Dataset: {csv_path}")
+        print(f"Evaluation Type: {evaluation_type}")
+        print(f"Dataset: {get_dataset_path(evaluation_type)}")
         print("-----------------------------")
         for provider_name, result in provider_results.items():
-            print(f"{provider_name}: {result['accuracy']:.2%} ({result['correct_count']}/{result['total_count']})")
+            if evaluation_type == EvaluationType.SIMPLEQA:
+                print(f"{provider_name}: {result['accuracy']:.2%} ({result['correct_count']}/{result['total_count']})")
+            elif evaluation_type == EvaluationType.DOCUMENT_RELEVANCE:
+                print(f"{provider_name}: {result['relevant_docs_percentage']:.1f}% ({result['relevant_docs']}/{result['total_docs']})")
         print("=============================\n")
         
         return provider_results
@@ -228,13 +369,15 @@ async def run_evaluation(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run SimpleQA benchmark using local CSV file")
-    parser.add_argument("--csv_path", default="datasets/simple_qa_test_set.csv", help="Path to CSV file with questions and answers")
+    parser = argparse.ArgumentParser(description="Run benchmark evaluation using specified evaluation type")
+    parser.add_argument("--evaluation_type", default=EvaluationType.SIMPLEQA.value, choices=[EvaluationType.SIMPLEQA.value, EvaluationType.DOCUMENT_RELEVANCE.value], help="Type of evaluation to run (simpleqa or document_relevance)")
     parser.add_argument("--config", default="configs/config.json", type=str, help="Path to JSON config file with provider parameters")
     parser.add_argument("--start_index", type=int, default=0, help="Starting index for examples (inclusive)")
     parser.add_argument("--end_index", type=int, default=None, help="Ending index for examples (exclusive)")
     parser.add_argument("--random_sample", type=int, default=None, help="Number of random samples to select (overrides start/end index)")
-    parser.add_argument("--post_process_model", default="gpt-4.1-mini", help="Model for post-processing")
+    parser.add_argument("--post_process_model", default="gpt-4.1", help="Model for post-processing for SimpleQA")
+    parser.add_argument("--token_model", default="gpt-4.1", help="Model for token consumption calculation")
+    parser.add_argument("--evaluator_model", default="gpt-4.1", help="Model for correctness evaluation for SimpleQA")
     parser.add_argument("--output_dir", default="results", help="Directory to save results")
     parser.add_argument("--sequential", action="store_true", help="Run providers sequentially instead of in parallel")
     parser.add_argument("--rerun", action="store_true", help="Rerun evaluation on existing results directory, output_dir must exist")
@@ -254,13 +397,18 @@ if __name__ == "__main__":
     
     output_dir = get_output_dir(args.output_dir, args.rerun)
 
+    # Convert string argument to enum
+    evaluation_type = EvaluationType(args.evaluation_type)
+    
     asyncio.run(run_evaluation(
-        csv_path=args.csv_path,
+        evaluation_type=evaluation_type,
         search_provider_params=search_provider_params,
         start_index=args.start_index,
         end_index=args.end_index,
         random_sample=args.random_sample,
         post_process_model=args.post_process_model,
+        token_model=args.token_model,
+        evaluator_model=args.evaluator_model,
         parallel=not args.sequential,
         output_dir=output_dir,
         rerun=args.rerun,
