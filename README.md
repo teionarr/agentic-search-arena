@@ -86,7 +86,7 @@ python run_evaluation.py
 - `--start_index`: Starting index for examples (inclusive, default: 0)
 - `--end_index`: Ending index for examples (exclusive, default: all examples)
 - `--random_sample`: Number of random samples to select (overrides start/end index)
-- `--post_process_model`: Model for post-processing (default: gpt-4.1)
+- `--post_process_model`: Model for post-processing for SimpleQA (default: gpt-4.1)
 - `--output_dir`: Directory to save results (default: results)
 - `--sequential`: Run providers sequentially instead of in parallel
 - `--rerun`: Continue evaluation on existing results directory, output_dir must exist
@@ -99,22 +99,33 @@ Evaluation results are saved in the `results/` directory with the following stru
 
 ```
 results/
-└── YYYY-MM-DD_HH-MM-SS/                    # Timestamp-based folder
-    ├── summary.csv                         # Overall evaluation summary
-    ├── provider_simpleqa_results.csv       # Individual SimpleQA results
-    ├── provider_document_relevance_results.csv  # Individual Document Relevance results
+└── {evaluation_type}/                      # Evaluation type folder (simpleqa or document_relevance)
+    └── YYYY-MM-DD_HH-MM-SS/               
+        ├── summary.csv                     # Overall evaluation summary
+        ├── config.json                     # Configuration used for this evaluation
+        ├── {provider}_{evaluation_type}_results.csv   # Individual provider results
+        └── ...                             # Additional provider result files
 ```
 
 #### **Example Output:**
 ```bash
 results/
-└── 2025-01-15_14-30-25/
-    ├── summary.csv
-    ├── tavily_simpleqa_results.csv
-    ├── exa_simpleqa_results.csv
-    ├── serper_simpleqa_results.csv
-    ├── brave_simpleqa_results.csv
-    └── perplexity_search_simpleqa_results.csv
+├── simpleqa/
+│   └── 2025-01-15_14-30-25/
+│       ├── summary.csv
+│       ├── config.json
+│       ├── tavily_simpleqa_results.csv
+│       ├── exa_simpleqa_results.csv
+│       ├── serper_simpleqa_results.csv
+│       ├── brave_simpleqa_results.csv
+│       └── perplexity_search_simpleqa_results.csv
+└── document_relevance/
+    └── 2025-01-15_15-45-12/
+        ├── summary.csv
+        ├── config.json
+        ├── tavily_document_relevance_results.csv
+        ├── exa_document_relevance_results.csv
+        └── ...
 ```
 
 ### **Config Example**

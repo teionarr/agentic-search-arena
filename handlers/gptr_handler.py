@@ -14,7 +14,8 @@ class GPTRHandler(ProviderHandler):
 
     def __init__(
             self,
-            search_params: Optional[Dict[str, Any]] = None
+            search_params: Optional[Dict[str, Any]] = None,
+            token_model: Optional[str] = None,
     ):
         """Initialize the GPTRHandler.
 
@@ -26,7 +27,7 @@ class GPTRHandler(ProviderHandler):
         super().__init__(
             api_key="dummy_key",
             api_url="dummy_url",
-            search_params=search_params
+            search_params=search_params,
         )
         self.is_llm_response = True
 

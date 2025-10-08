@@ -9,6 +9,8 @@ from quotientai import QuotientAI, DetectionType
 from enum import Enum
 import random
 import uuid
+import shutil
+
 
 
 class EvaluationType(Enum):
@@ -179,13 +181,21 @@ def prepare_examples(
     return examples
 
 
-def get_output_dir(output_dir: str, rerun: bool = False):
+def get_output_dir(output_dir: str, evaluation_type: EvaluationType, rerun: bool = False):
     """Get the output directory."""
     if not rerun:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        output_dir = os.path.join(output_dir, timestamp)
+        output_dir = os.path.join(output_dir, evaluation_type.value, timestamp)
     return output_dir
 
+def copy_config_to_results(config_path: str, output_dir: str):
+    try:
+        if os.path.exists(config_path):
+            shutil.copy2(config_path, output_dir)
+        else:
+            logger.warning(f"Config file not found at {config_path}")
+    except Exception as e:
+        logger.error(f"Error copying config file: {str(e)}")
 
 def save_result(result: Dict, provider_name: str, output_dir: str, evaluation_type: EvaluationType):
     """Appending a single result to the results CSV file."""

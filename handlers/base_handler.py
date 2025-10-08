@@ -9,7 +9,8 @@ class ProviderHandler(ABC):
             self,
             api_key: Optional[str] = None,
             api_url: str = None,
-            search_params: Optional[Dict[str, Any]] = None
+            search_params: Optional[Dict[str, Any]] = None,
+            token_model: Optional[str] = "gpt-4.1",
     ):
         """Initialize the ProviderHandler.
 
@@ -29,6 +30,7 @@ class ProviderHandler(ABC):
             raise ValueError(
                 "API url not provided to initialize search provider handler"
             )
+        self.token_model = token_model
 
         # Store default search parameters
         self.search_params = search_params or {}

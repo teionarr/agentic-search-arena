@@ -10,10 +10,9 @@ from typing import Dict, Any, List, Optional
 from evaluators.correctness_evaluator import CorrectnessConfig
 
 
-from quotientai import QuotientAI
 from handlers import TavilyHandler, ExaHandler, GPTRHandler, PerplexityHandler, SerperHandler, BraveHandler, PerplexitySearchHandler
 from evaluators import CorrectnessEvaluator
-from utils import PostProcessor, save_summary, load_csv_data, load_document_relevance_eval_data, prepare_examples, get_output_dir, save_result, get_quotient_ai_client, EvaluationType
+from utils import PostProcessor, save_summary, load_csv_data, load_document_relevance_eval_data, prepare_examples, get_output_dir, save_result, get_quotient_ai_client, EvaluationType, copy_config_to_results
 
 load_dotenv()
 
@@ -228,6 +227,7 @@ async def evaluate_provider_document_relevance(
 async def run_evaluation(
     evaluation_type: EvaluationType,
     search_provider_params: Dict[str, Dict[str, Any]],
+    config_path: str,
     start_index: int = 0,
     end_index: Optional[int] = None,
     random_sample: Optional[int] = None,
@@ -268,6 +268,7 @@ async def run_evaluation(
             raise Exception("No search handlers found")
 
         os.makedirs(output_dir, exist_ok=True)
+        copy_config_to_results(config_path, output_dir=output_dir)
         
         provider_results = {}
         post_processor = PostProcessor(llm_model=post_process_model)
@@ -395,14 +396,14 @@ if __name__ == "__main__":
         logger.info("Using default Tavily config")
         search_provider_params = {"tavily": TAVILY_DEFAULT_CONFIG}
     
-    output_dir = get_output_dir(args.output_dir, args.rerun)
-
-    # Convert string argument to enum
     evaluation_type = EvaluationType(args.evaluation_type)
+    output_dir = get_output_dir(evaluation_type=evaluation_type, output_dir=args.output_dir, rerun=args.rerun)
+
     
     asyncio.run(run_evaluation(
         evaluation_type=evaluation_type,
         search_provider_params=search_provider_params,
+        config_path=args.config,
         start_index=args.start_index,
         end_index=args.end_index,
         random_sample=args.random_sample,

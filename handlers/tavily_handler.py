@@ -34,7 +34,8 @@ class TavilyHandler(ProviderHandler):
         super().__init__(
             api_key=os.getenv("TAVILY_API_KEY"),
             api_url=TAVILY_API_URL,
-            search_params=search_params
+            search_params=search_params,
+            token_model=token_model
         )
         self.token_model = token_model
         self.is_llm_response = search_params.get("include_answer", False)

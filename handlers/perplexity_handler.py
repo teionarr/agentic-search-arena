@@ -20,6 +20,7 @@ class PerplexityHandler(ProviderHandler):
     def __init__(
             self,
             search_params: Optional[Dict[str, Any]] = None,
+            token_model: Optional[str] = None,
     ):
         """
         Initialize the PerplexityHandler.

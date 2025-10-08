@@ -32,7 +32,8 @@ class SerperHandler(ProviderHandler):
         super().__init__(
             api_key=os.getenv("SERPER_API_KEY"),
             api_url=SERPER_API_URL,
-            search_params=search_params
+            search_params=search_params,
+            token_model=token_model
         )
         self.token_model = token_model
         self.is_llm_response = False
