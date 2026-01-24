@@ -74,7 +74,7 @@ async def evaluate_provider_simple_qa(
     examples: List[Dict],
     post_processor: Optional[PostProcessor] = None,
     evaluator_model: str = "gpt-4.1",
-    batch_size: int = 15,
+    batch_size: int = 3,
 ):
     """Evaluate a single search provider on the dataset."""
     evaluator = CorrectnessEvaluator(CorrectnessConfig(model_name=evaluator_model))
