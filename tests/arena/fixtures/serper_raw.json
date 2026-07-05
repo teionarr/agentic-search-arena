@@ -1,0 +1,102 @@
+{
+  "answer": "",
+  "search_response": {
+    "searchParameters": {
+      "q": "Who received the IEEE Frank Rosenblatt Award in 2010?",
+      "type": "search",
+      "num": 10,
+      "engine": "google"
+    },
+    "organic": [
+      {
+        "title": "IEEE Frank Rosenblatt Award",
+        "link": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award",
+        "snippet": "2010: Michio Sugeno 2009: John J. Hopfield 2008: Teuvo Kohonen 2007: James C. Bezdek 2006: Lawrence J.",
+        "position": 1
+      },
+      {
+        "title": "IEEE Frank Rosenblatt Award Recipients",
+        "link": "https://corporate-awards.ieee.org/wp-content/uploads/rosenblatt-rl.pdf",
+        "snippet": "2010 \u2013 MICHIO SUGENO. Faculty of Culture and Information. Science, Doshisha University. Kyoto, Japan. \u201cFor contributions to development and applications of the ...",
+        "position": 2
+      },
+      {
+        "title": "IEEE Awards",
+        "link": "https://cis.ieee.org/awards/ieee-awards",
+        "snippet": "Prize items include a bronze medal, certificate and honorarium. View past IEEE Frank Rosenblatt Award Recipients (PDF) ... 2010 to 2021. He was a \"Finland ...",
+        "position": 3
+      },
+      {
+        "title": "IEEE Frank Rosenblatt Award",
+        "link": "https://ethw.org/IEEE_Frank_Rosenblatt_Award",
+        "snippet": "Recipients Lawrence J. Fogel, 2006 James C. Bezdek, 2007 Teuvo Kohonen, 2008 John J. Hopfield, 2009 Michio Sugeno, 2010 Hans-Paul Schwefel, ...",
+        "date": "Dec 2, 2024",
+        "position": 4
+      },
+      {
+        "title": "Andrew Barto and Richard Sutton Receive 2026 IEEE Frank ...",
+        "link": "https://www.cics.umass.edu/news/barto-sutton-receive-ieee-frank-rosenblatt-award",
+        "snippet": "Andrew Barto and University of Alberta Professor Richard Sutton '80MS '84PhD have been named recipients of the 2026 IEEE Frank Rosenblatt Award ...",
+        "date": "Aug 29, 2025",
+        "position": 5
+      },
+      {
+        "title": "CIS Awards - IEEE Computational Intelligence Society",
+        "link": "https://cis.ieee.org/awards/ieeecis-awards?view=category&id=13",
+        "snippet": "2010: Vladimir Vapnik 2009: John G M. Guildford, U.K., from 2010 to 2021. Jin is IEEE Distinguished Lecturer in 2013-2015",
+        "position": 6
+      },
+      {
+        "title": "IEEE 2017 Frank Rosenblatt Award to Steve Grossberg",
+        "link": "http://www.dartmouth.org/classes/61/Grossberg--IEEE%202017%20Frank%20Rosenblatt%20Award%20to%20Steve%20Grossberg.pdf",
+        "snippet": "The IEEE has awarded Steve Grossberg its Frank Rosenblatt Award for 2017. IEEE stands for Institute for Electrical and Electronics Engineers.",
+        "position": 7
+      },
+      {
+        "title": "2019 IEEE Frank Rosenblatt Award Winner | PDF",
+        "link": "https://www.scribd.com/document/934173419/Professor-s-perceptron-paved-the-way-for-AI-60-years-too-soon",
+        "snippet": "Frank Rosenblatt's work on the perceptron laid the foundational principles for modern artificial intelligence, particularly deep learning and neural networks.",
+        "position": 8
+      },
+      {
+        "title": "IEEE Frank Rosenblatt Award Awarded",
+        "link": "https://edubilla.com/award/ieee-frank-rosenblatt-award/awarded/",
+        "snippet": "2010 IEEE Frank Rosenblatt Award Awarded ; Michio Sugeno. Dr. Sugeno first introduced fuzzy measures and the Sugeno Integrals leading to the concept of the ...",
+        "position": 9
+      },
+      {
+        "title": "MIND 2025",
+        "link": "https://www.ic-mind.org/keynote-speakers.html",
+        "snippet": "... IEEE CIS Evolutionary Computation Pioneer Award, and the 2020 IEEE Frank Rosenblatt Award. Website: https://www.ln.edu.hk/po/people/professor-xin-yao.",
+        "position": 10
+      }
+    ],
+    "peopleAlsoAsk": [
+      {
+        "question": "Who received the IEEE Frank Rosenblatt Award in 2013?"
+      },
+      {
+        "question": "What is the IEEE Rosenblatt Award?"
+      },
+      {
+        "question": "What is the highest award in IEEE?"
+      },
+      {
+        "question": "Who is the father of perceptron?"
+      }
+    ],
+    "relatedSearches": [
+      {
+        "query": "Frank Rosenblatt biography"
+      },
+      {
+        "query": "Frank Rosenblatt death"
+      },
+      {
+        "query": "Frank Rosenblatt boating accident"
+      }
+    ],
+    "credits": 1
+  },
+  "provider_latency": 1.3879802227020264
+}

@@ -192,3 +192,9 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+# search-arena arena mode: run outputs contain user queries + returned web content (sensitive)
+results/
+.venv/
+
+# user-local arena working config (copy from configs/arena.example.yaml)
+configs/arena.yaml

@@ -1,0 +1,426 @@
+{
+  "answer": "",
+  "search_response": {
+    "type": "search",
+    "query": {
+      "original": "Who received the IEEE Frank Rosenblatt Award in 2010?",
+      "show_strict_warning": false,
+      "is_navigational": false,
+      "is_news_breaking": false,
+      "spellcheck_off": false,
+      "country": "us",
+      "bad_results": false,
+      "should_fallback": false,
+      "postal_code": "",
+      "city": "",
+      "header_country": "",
+      "more_results_available": true,
+      "state": ""
+    },
+    "mixed": {
+      "type": "mixed",
+      "main": [
+        {
+          "type": "web",
+          "index": 0,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 1,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 2,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 3,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 4,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 5,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 6,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 7,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 8,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 9,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 10,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 11,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 12,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 13,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 14,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 15,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 16,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 17,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 18,
+          "all": false
+        },
+        {
+          "type": "web",
+          "index": 19,
+          "all": false
+        }
+      ],
+      "top": [],
+      "side": []
+    },
+    "web": {
+      "type": "search",
+      "results": [
+        {
+          "title": "IEEE FRANK ROSENBLATT AWARD RECIPIENTS 1 of 3 2026 \u2013 ANDREW G. BARTO",
+          "url": "https://corporate-awards.ieee.org/wp-content/uploads/rosenblatt-rl.pdf",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "2010 \u2013 <strong>MICHIO SUGENO</strong> \u00b7 Faculty of Culture and Information \u00b7 Science, Doshisha University \u00b7 Kyoto, Japan \u00b7 \u201cFor contributions to development and \u00b7 applications of the theory of fuzzy sets.\u201d \u00b7 IEEE FRANK ROSENBLATT AWARD \u00b7 RECIPIENTS \u00b7 3 of 3 \u00b7 2009 \u2013 JOHN J.",
+          "profile": {
+            "name": "IEEE",
+            "url": "https://corporate-awards.ieee.org/wp-content/uploads/rosenblatt-rl.pdf",
+            "long_name": "corporate-awards.ieee.org",
+            "img": "https://imgs.search.brave.com/5wO-RZurrZtObR08PA2ZAWns0v0ZNT1_HxQEHfOK_4s/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzdjMjVhN2Fi/NGI3MDUwZWRhNmEy/NmQxNjA1NDQ2MDIw/ODgxOWExMjU4MTVk/MGZkOTY0MjhlMGFi/NGM5MTlhYy9jb3Jw/b3JhdGUtYXdhcmRz/LmllZWUub3JnLw"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "corporate-awards.ieee.org",
+            "hostname": "corporate-awards.ieee.org",
+            "favicon": "https://imgs.search.brave.com/5wO-RZurrZtObR08PA2ZAWns0v0ZNT1_HxQEHfOK_4s/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzdjMjVhN2Fi/NGI3MDUwZWRhNmEy/NmQxNjA1NDQ2MDIw/ODgxOWExMjU4MTVk/MGZkOTY0MjhlMGFi/NGM5MTlhYy9jb3Jw/b3JhdGUtYXdhcmRz/LmllZWUub3JnLw",
+            "path": "\u203a wp-content  \u203a uploads  \u203a rosenblatt-rl.pdf"
+          },
+          "content_type": "pdf"
+        },
+        {
+          "title": "IEEE Frank Rosenblatt Award - Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "<strong>The</strong> <strong>IEEE</strong> <strong>Frank</strong> <strong>Rosenblatt</strong> <strong>Award</strong> is a Technical Field <strong>Award</strong> established by the Institute of Electrical and Electronics Engineers Board of Directors in 2004.",
+          "page_age": "2026-01-29T02:42:24",
+          "profile": {
+            "name": "Wikipedia",
+            "url": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award",
+            "long_name": "en.wikipedia.org",
+            "img": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "deep_results": {
+            "buttons": [
+              {
+                "type": "button_result",
+                "title": "Recipients",
+                "url": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award#Recipients"
+              }
+            ]
+          },
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "en.wikipedia.org",
+            "hostname": "en.wikipedia.org",
+            "favicon": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw",
+            "path": "\u203a wiki  \u203a IEEE_Frank_Rosenblatt_Award"
+          },
+          "age": "January 29, 2026"
+        },
+        {
+          "title": "IEEE Awards - IEEE Computational Intelligence Society",
+          "url": "https://cis.ieee.org/awards/ieee-awards",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "The award, established in 2004, is named in honor of Frank Rosenblatt, who is regarded as one of the founders of neural networks. Basing his research on study of fly vision, he developed the single-layer input layer and an output layer of neural cells. Frequent presentation of a pattern or patterns resulted in changes in the input to output connections, facilitating future recognition of these patterns, or memory.",
+          "profile": {
+            "name": "IEEE Computational Intelligence Society",
+            "url": "https://cis.ieee.org/awards/ieee-awards",
+            "long_name": "cis.ieee.org",
+            "img": "https://imgs.search.brave.com/87rW4RrUeTOEhUXm1o2sarVpUPBn2eix3AyJkwTWVW0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMGU5Yzc3YjU2/Njk1MTUzNjhmMWNj/MTc1YTcwM2JjYWQ0/ZWJjZGRkNGQ2YWIy/ODhiN2UzOWFjMjdl/NTVkY2QyMC9jaXMu/aWVlZS5vcmcv"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "cis.ieee.org",
+            "hostname": "cis.ieee.org",
+            "favicon": "https://imgs.search.brave.com/87rW4RrUeTOEhUXm1o2sarVpUPBn2eix3AyJkwTWVW0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMGU5Yzc3YjU2/Njk1MTUzNjhmMWNj/MTc1YTcwM2JjYWQ0/ZWJjZGRkNGQ2YWIy/ODhiN2UzOWFjMjdl/NTVkY2QyMC9jaXMu/aWVlZS5vcmcv",
+            "path": "\u203a awards  \u203a ieee-awards"
+          },
+          "thumbnail": {
+            "src": "https://imgs.search.brave.com/Erje5KxPMft1IOYbzv1vGSTU7ihQ7_3iZy7Wo5QyUzo/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9jaXMu/aWVlZS5vcmcv",
+            "original": "https://cis.ieee.org/",
+            "logo": false
+          }
+        },
+        {
+          "title": "Michio Sugeno - IEEE Frank Rosenblatt Award",
+          "url": "https://edubilla.com/award/ieee-frank-rosenblatt-award/michio-sugeno/",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "<strong>Sugeno</strong> next tackled intelligent control of an unmanned helicopter by demonstrating fuzzy control through verbal instructions combined with real-time flight data from the GPS and on-board cameras. This achievement has implications for agriculture industry and disaster recovery applications.He ...",
+          "profile": {
+            "name": "Edubilla",
+            "url": "https://edubilla.com/award/ieee-frank-rosenblatt-award/michio-sugeno/",
+            "long_name": "edubilla.com",
+            "img": "https://imgs.search.brave.com/Rof9sY4Xn0ILgj86SM0TSav4JDzA2eUzxbdiCjViLSw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmM5OGFhNWRk/NzRiOWMwMWY5Mzk4/MmNjMWY1NTZiYzNj/MzNlOWE0MDNlM2Y4/ZjllMWJkYWYxMzFl/NDhlZmM4Ni9lZHVi/aWxsYS5jb20v"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "edubilla.com",
+            "hostname": "edubilla.com",
+            "favicon": "https://imgs.search.brave.com/Rof9sY4Xn0ILgj86SM0TSav4JDzA2eUzxbdiCjViLSw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmM5OGFhNWRk/NzRiOWMwMWY5Mzk4/MmNjMWY1NTZiYzNj/MzNlOWE0MDNlM2Y4/ZjllMWJkYWYxMzFl/NDhlZmM4Ni9lZHVi/aWxsYS5jb20v",
+            "path": "\u203a award  \u203a ieee-frank-rosenblatt-award  \u203a michio-sugeno"
+          }
+        },
+        {
+          "title": "GitHub - THU-KEG/LRM-FactEval \u00b7 GitHub",
+          "url": "https://github.com/THU-KEG/LRM-FactEval",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "Alternatively, I can think of the IEEE website or databases, but since I can&#x27;t access external resources, I need to rely on my existing knowledge. I recall that the 2010 IEEE Frank Rosenblatt Award was given to <strong>Geoffrey Hinton</strong>.",
+          "profile": {
+            "name": "GitHub",
+            "url": "https://github.com/THU-KEG/LRM-FactEval",
+            "long_name": "github.com",
+            "img": "https://imgs.search.brave.com/xxsA4YxzaR0cl-DBsH9-lpv2gsif3KMYgM87p26bs_o/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvYWQyNWM1NjA5/ZjZmZjNlYzI2MDNk/N2VkNmJhYjE2MzZl/MDY5ZTMxMDUzZmY1/NmU3NWIzNWVmMjk0/NTBjMjJjZi9naXRo/dWIuY29tLw"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "software",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "github.com",
+            "hostname": "github.com",
+            "favicon": "https://imgs.search.brave.com/xxsA4YxzaR0cl-DBsH9-lpv2gsif3KMYgM87p26bs_o/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvYWQyNWM1NjA5/ZjZmZjNlYzI2MDNk/N2VkNmJhYjE2MzZl/MDY5ZTMxMDUzZmY1/NmU3NWIzNWVmMjk0/NTBjMjJjZi9naXRo/dWIuY29tLw",
+            "path": "\u203a THU-KEG  \u203a LRM-FactEval"
+          },
+          "thumbnail": {
+            "src": "https://imgs.search.brave.com/iOyvfQwUBGBKz78tNdrrf6oRXrx0pAaF8EyX5s6EoAw/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9vcGVu/Z3JhcGguZ2l0aHVi/YXNzZXRzLmNvbS9j/YWJhZWQxYWMwYzJk/OTM3MDM2OWEyMjFi/NzE0ZDc1ODllYzkz/ODZiNzFhMzc0MDI3/MjBlZDgxMTlhNzNh/NGEwL1RIVS1LRUcv/TFJNLUZhY3RFdmFs",
+            "original": "https://opengraph.githubassets.com/cabaed1ac0c2d9370369a221b714d7589ec9386b71a37402720ed8119a73a4a0/THU-KEG/LRM-FactEval",
+            "logo": false
+          }
+        },
+        {
+          "title": "IEEE Frank Rosenblatt Award awardees,IEEE Frank Rosenblatt Award winners,IEEE Frank Rosenblatt Award recipients | edubilla.com",
+          "url": "https://edubilla.com/award/ieee-frank-rosenblatt-award/awarded/",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "The IEEE Frank Rosenblatt Award is a Technical Field Award established by the IEEE Board of Directors in 2004. This award is presented for outstanding contributions to the advancement of the design, p",
+          "profile": {
+            "name": "Edubilla",
+            "url": "https://edubilla.com/award/ieee-frank-rosenblatt-award/awarded/",
+            "long_name": "edubilla.com",
+            "img": "https://imgs.search.brave.com/Rof9sY4Xn0ILgj86SM0TSav4JDzA2eUzxbdiCjViLSw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmM5OGFhNWRk/NzRiOWMwMWY5Mzk4/MmNjMWY1NTZiYzNj/MzNlOWE0MDNlM2Y4/ZjllMWJkYWYxMzFl/NDhlZmM4Ni9lZHVi/aWxsYS5jb20v"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "edubilla.com",
+            "hostname": "edubilla.com",
+            "favicon": "https://imgs.search.brave.com/Rof9sY4Xn0ILgj86SM0TSav4JDzA2eUzxbdiCjViLSw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmM5OGFhNWRk/NzRiOWMwMWY5Mzk4/MmNjMWY1NTZiYzNj/MzNlOWE0MDNlM2Y4/ZjllMWJkYWYxMzFl/NDhlZmM4Ni9lZHVi/aWxsYS5jb20v",
+            "path": "\u203a award  \u203a ieee-frank-rosenblatt-award  \u203a awarded"
+          }
+        },
+        {
+          "title": "pvduy/simpleqa \u00b7 Datasets at Hugging Face",
+          "url": "https://huggingface.co/datasets/pvduy/simpleqa",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "We\u2019re on a journey to advance and democratize artificial intelligence through open source and open science.",
+          "profile": {
+            "name": "Hugging Face",
+            "url": "https://huggingface.co/datasets/pvduy/simpleqa",
+            "long_name": "huggingface.co",
+            "img": "https://imgs.search.brave.com/L-O7pGsoxRbYSIBhk64OxIe19zjGm3DcqlEnCuoI678/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmYwNDg3ZTZh/YzcxMDgwYmRkOGFm/YTk1MTJiYzQ2NmM5/NWViOGEyNGYyZWEx/NDg4NzQ5NzlhYTA5/NTI0MDA4Yy9odWdn/aW5nZmFjZS5jby8"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "huggingface.co",
+            "hostname": "huggingface.co",
+            "favicon": "https://imgs.search.brave.com/L-O7pGsoxRbYSIBhk64OxIe19zjGm3DcqlEnCuoI678/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNmYwNDg3ZTZh/YzcxMDgwYmRkOGFm/YTk1MTJiYzQ2NmM5/NWViOGEyNGYyZWEx/NDg4NzQ5NzlhYTA5/NTI0MDA4Yy9odWdn/aW5nZmFjZS5jby8",
+            "path": "\u203a datasets  \u203a pvduy  \u203a simpleqa"
+          },
+          "thumbnail": {
+            "src": "https://imgs.search.brave.com/C2m3KpJsvdQoTZ9W1YdWUSPz6LENW79t4sj9XsoVb6c/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9jZG4t/dGh1bWJuYWlscy5o/dWdnaW5nZmFjZS5j/by9zb2NpYWwtdGh1/bWJuYWlscy9kYXRh/c2V0cy9wdmR1eS9z/aW1wbGVxYS5wbmc",
+            "original": "https://cdn-thumbnails.huggingface.co/social-thumbnails/datasets/pvduy/simpleqa.png",
+            "logo": false
+          }
+        },
+        {
+          "title": "IEEE Frank Rosenblatt Award - Engineering and Technology History Wiki",
+          "url": "https://ethw.org/IEEE_Frank_Rosenblatt_Award",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "Recipient selection is administered through the Technical Field Awards Council of the IEEE Awards Board.",
+          "page_age": "2024-12-02T19:35:27",
+          "profile": {
+            "name": "Engineering and Technology History Wiki",
+            "url": "https://ethw.org/IEEE_Frank_Rosenblatt_Award",
+            "long_name": "ethw.org",
+            "img": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "article",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "ethw.org",
+            "hostname": "ethw.org",
+            "favicon": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8",
+            "path": "\u203a IEEE_Frank_Rosenblatt_Award"
+          },
+          "thumbnail": {
+            "src": "https://imgs.search.brave.com/F71f7NwaBk1UazqokRViz4uIVPqsXcXq6fvweqIcuBU/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9ldGh3/Lm9yZy93L2xvZ28u/cG5n",
+            "original": "https://ethw.org/w/logo.png",
+            "logo": true
+          },
+          "age": "December 2, 2024"
+        },
+        {
+          "title": "First few questions for those who don't care to download. Most just seem to be a... | Hacker News",
+          "url": "https://news.ycombinator.com/item?id=42001816",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "<strong>Who received the IEEE Frank Rosenblatt Award in 2010?</strong> Who was awarded the Oceanography Society&#x27;s Jerlov Award in 2018? What&#x27;s the name of the women&#x27;s liberal arts college in Cambridge, Massachusetts? In whose honor was the Leipzig 1877 tournament organized? According to Karl K\u00fcchler, what ...",
+          "page_age": "2024-10-31T19:01:20",
+          "profile": {
+            "name": "Hacker News",
+            "url": "https://news.ycombinator.com/item?id=42001816",
+            "long_name": "news.ycombinator.com",
+            "img": "https://imgs.search.brave.com/IwlBJ1haXFCsBjLHWEmYcTLoygQjeo-P8RVhPJfs_Zc/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvY2Q0YzBhMWVj/ZmJjOTBiZmNlZDlm/MjNmNTdmZGU2NTAz/ZDIzOWNiNDgyMjA1/NTU2ZDkwNzcwY2Qz/ZjU4YmYxNi9uZXdz/Lnljb21iaW5hdG9y/LmNvbS8"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "news.ycombinator.com",
+            "hostname": "news.ycombinator.com",
+            "favicon": "https://imgs.search.brave.com/IwlBJ1haXFCsBjLHWEmYcTLoygQjeo-P8RVhPJfs_Zc/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvY2Q0YzBhMWVj/ZmJjOTBiZmNlZDlm/MjNmNTdmZGU2NTAz/ZDIzOWNiNDgyMjA1/NTU2ZDkwNzcwY2Qz/ZjU4YmYxNi9uZXdz/Lnljb21iaW5hdG9y/LmNvbS8",
+            "path": "\u203a item"
+          },
+          "age": "October 31, 2024"
+        },
+        {
+          "title": "Awards Archive | IEEE Awards",
+          "url": "https://corporate-awards.ieee.org/award/",
+          "is_source_local": false,
+          "is_source_both": false,
+          "description": "The award is named in honor of Frank Rosenblatt who is widely regarded as one of the founders of neural networks. Basing his research on the study of fly vision, he developed the single-layer input layer and an output layer of neural cells. Frequent presentation of a pattern or patterns resulted in changes in the input to output connections, facilitating future recognition of these patterns, or memory.",
+          "profile": {
+            "name": "IEEE",
+            "url": "https://corporate-awards.ieee.org/award/",
+            "long_name": "corporate-awards.ieee.org",
+            "img": "https://imgs.search.brave.com/5wO-RZurrZtObR08PA2ZAWns0v0ZNT1_HxQEHfOK_4s/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzdjMjVhN2Fi/NGI3MDUwZWRhNmEy/NmQxNjA1NDQ2MDIw/ODgxOWExMjU4MTVk/MGZkOTY0MjhlMGFi/NGM5MTlhYy9jb3Jw/b3JhdGUtYXdhcmRz/LmllZWUub3JnLw"
+          },
+          "language": "en",
+          "family_friendly": true,
+          "type": "search_result",
+          "subtype": "generic",
+          "is_live": false,
+          "meta_url": {
+            "scheme": "https",
+            "netloc": "corporate-awards.ieee.org",
+            "hostname": "corporate-awards.ieee.org",
+            "favicon": "https://imgs.search.brave.com/5wO-RZurrZtObR08PA2ZAWns0v0ZNT1_HxQEHfOK_4s/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzdjMjVhN2Fi/NGI3MDUwZWRhNmEy/NmQxNjA1NDQ2MDIw/ODgxOWExMjU4MTVk/MGZkOTY0MjhlMGFi/NGM5MTlhYy9jb3Jw/b3JhdGUtYXdhcmRz/LmllZWUub3JnLw",
+            "path": "  \u203a home"
+          },
+          "thumbnail": {
+            "src": "https://imgs.search.brave.com/x8Kj32wgJvGlfZAEpm7GWF30gTlzZ5udy8GNyqvJZwM/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9jb3Jw/b3JhdGUtYXdhcmRz/LmllZWUub3JnL3dw/LWNvbnRlbnQvdXBs/b2Fkcy9pZWVlX3By/ZXNpZGVudHNfYXdh/cmQtbWVkYWwtZTE3/MjA1NDkyNzAxNTQt/cmVtb3ZlYmctcHJl/dmlldy1lMTcyMDU1/MDA5MzY3OC5wbmc",
+            "original": "https://corporate-awards.ieee.org/wp-content/uploads/ieee_presidents_award-medal-e1720549270154-removebg-preview-e1720550093678.png",
+            "logo": false
+          }
+        }
+      ],
+      "family_friendly": true
+    }
+  },
+  "provider_latency": 0.7144069671630859
+}

@@ -1,0 +1,29 @@
+# search-arena — example config (OPTIONAL).
+# With no config, the arena runs across every in-scope provider whose key is present, using
+# strong defaults. This file only *overrides*. Secrets never live here — use .env / Doppler.
+
+providers:                      # each optional; absent => enabled if key present
+  tavily:            { enabled: true }
+  exa:               { enabled: true }
+  brave:             { enabled: true }
+  serper:            { enabled: true }
+  perplexity_search: { enabled: true }
+  # per-provider overrides go under `config:`, e.g.:
+  # tavily: { enabled: true, config: { max_results: 10 } }
+
+reader:
+  model: null                   # null => use the judge model
+
+judge:
+  primary: claude
+  secondary: null               # M1 — reserved, not wired in M0
+  order_swap: true
+  exclude_on_flip: true
+
+evidence_budget_tokens: 600     # common per-provider evidence cap (bounds the verbosity confound)
+
+# Metric weights (absent/partial metrics are dropped and the rest renormalized).
+weights: { accuracy: 0.0, latency: 0.5, coverage: 0.5 }
+
+output:
+  dir: results
