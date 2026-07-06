@@ -39,6 +39,11 @@ def main() -> int:
     parser.add_argument("--reader-model", default=None,
                         help="Reader/grader model (default = judge model). Use a cheaper model "
                              "here to cut cost — the reader/grader are less quality-sensitive.")
+    parser.add_argument("--repeats", type=int, default=None,
+                        help="Run each query N times per provider (default 1, or config "
+                             "'repeats'). Providers are non-deterministic — repeats turn a "
+                             "single-shot snapshot into a variance-aware ranking; the "
+                             "per-repeat win-rate spread is reported.")
     parser.add_argument("--benchmark-suite", action="store_true", default=None,
                         help="Also re-run public sets (SimpleQA/FRAMES/FreshQA) under one policy: "
                              "calibration report + marketing-claims ledger (§7). Defaults to a "
@@ -50,6 +55,11 @@ def main() -> int:
     config_path = resolve_config_path(args.config)  # honors configs/arena.yaml by default
     config = load_config(config_path)
     config.output_dir = args.output_dir
+    if args.repeats is not None:
+        if args.repeats < 1:
+            logger.error("--repeats must be >= 1")
+            return 1
+        config.repeats = args.repeats
     queries = load_queries(args.queries)
 
     scope = resolve_scope(config.providers)

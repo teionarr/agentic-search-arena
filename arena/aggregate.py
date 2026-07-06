@@ -126,6 +126,23 @@ def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
                        n_excluded=n_excluded, tie_groups=tie_groups)
 
 
+def point_winrates(comparisons: List[dict], providers: List[str]) -> Dict[str, Optional[float]]:
+    """Point win-rate per provider over the decided comparisons (no bootstrap).
+
+    Used for the per-repeat variance signal: with ``--repeats N`` the spread of these point
+    estimates across repeats shows how noisy each provider is on this workload."""
+    games: Dict[str, List[float]] = {p: [] for p in providers}
+    for c in comparisons:
+        a, b, w = c["a"], c["b"], c.get("winner")
+        if w == "tie":
+            games[a].append(0.5); games[b].append(0.5)
+        elif w == a:
+            games[a].append(1.0); games[b].append(0.0)
+        elif w == b:
+            games[a].append(0.0); games[b].append(1.0)
+    return {p: (float(np.mean(games[p])) if games[p] else None) for p in providers}
+
+
 def per_category_rankings(comparisons: List[dict], providers: List[str],
                           seed: int = 0) -> Dict[str, Aggregation]:
     """Re-run the identical aggregation per query-category slice (§8 use-case segmentation).

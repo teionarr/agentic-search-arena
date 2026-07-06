@@ -18,7 +18,7 @@ from typing import Callable, Dict, List, Optional
 
 from arena import reader as reader_mod
 from arena.adapters.base import UnifiedResult
-from arena.aggregate import aggregate, per_category_rankings
+from arena.aggregate import aggregate, per_category_rankings, point_winrates
 from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
@@ -121,6 +121,15 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     run_nonce = uuid.uuid4().hex
     provider_names = [a.name for a in adapters]
     conc = max(1, config.max_concurrency)
+
+    # Repeats (statistical honesty): providers are non-deterministic, so ``repeats: N`` runs
+    # every query N times — real re-searches, not replayed results. All comparisons feed one
+    # aggregation (CIs tighten with the extra samples); the per-repeat win-rate spread is
+    # reported as the noise signal. qi // base_n recovers a comparison's repeat index.
+    base_n = len(queries)
+    repeats = max(1, getattr(config, "repeats", 1))
+    if repeats > 1:
+        queries = [q for _ in range(repeats) for q in queries]
 
     # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
     # a Claude judge may favour a Claude-family native answer by style.
@@ -229,7 +238,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["cal_agree"] += int(winner == (x if cx else y))
                 else:
                     loc["cal_abstained"] += 1
-            loc["comparisons"].append({"a": x, "b": y, "winner": winner, "category": q.category})
+            loc["comparisons"].append({"a": x, "b": y, "winner": winner, "category": q.category,
+                                       "repeat": qi // base_n})
             loc["rationale"].append({
                 "query": q.query, "a": x, "b": y, "winner": winner,
                 "flipped": verdict["flipped"], "low_confidence": verdict["low_confidence"],
@@ -272,6 +282,20 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             freshness_tallies[p].extend(pv["freshness"])
 
     agg = aggregate(comparisons, provider_names, seed=0)
+
+    # Per-repeat win-rate spread: the visible noise floor for this workload. Only computed when
+    # repeats ran; a spread wider than the CI gap between two providers means "don't trust the
+    # order between them yet".
+    repeats_block: dict = {"n": repeats}
+    if repeats > 1:
+        per_repeat = {r: point_winrates([c for c in comparisons if c.get("repeat") == r],
+                                        provider_names)
+                      for r in range(repeats)}
+        repeats_block["per_repeat_win_rates"] = {str(r): wr for r, wr in per_repeat.items()}
+        repeats_block["win_rate_spread"] = {
+            p: (max(vals) - min(vals) if (vals := [per_repeat[r][p] for r in range(repeats)
+                                                   if per_repeat[r][p] is not None]) else None)
+            for p in provider_names}
 
     # Per-category rankings (§8 use-case segmentation): "best" is undefined without a job, so
     # when the queries file tags rows with `category`, each slice is re-ranked with the same
@@ -341,6 +365,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "ranking": [_score_dict(s) for s in agg.scores],
         "tie_groups": agg.tie_groups,
         "per_category": per_category,
+        "repeats": repeats_block,
         "n_decided_comparisons": agg.n_decided,
         "n_excluded_comparisons": agg.n_excluded,
         "metrics": per_provider,
@@ -359,7 +384,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "stage_status": stage_status,
         "degenerate_run": len(scope.included) < 3,
         "rationale_log": rationale_log,
-        "n_queries": len(queries),
+        "n_queries": base_n,
     }
 
 

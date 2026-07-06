@@ -52,6 +52,8 @@ class ArenaConfig:
     exclude_on_flip: bool = True
     evidence_budget_tokens: int = 600           # common per-provider evidence cap (§ heterogeneity)
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
+    repeats: int = 1                             # ×N runs per query — providers are non-deterministic;
+                                                 # single-shot numbers are noise (statistical honesty)
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
     config_path: Optional[str] = None
@@ -69,6 +71,8 @@ class ArenaConfig:
             raise ValueError("evidence_budget_tokens must be > 0")
         if self.max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
+        if self.repeats < 1:
+            raise ValueError("repeats must be >= 1")
 
 
 DEFAULT_CONFIG_PATH = "configs/arena.yaml"
@@ -122,6 +126,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         exclude_on_flip=judge.get("exclude_on_flip", True),
         evidence_budget_tokens=raw.get("evidence_budget_tokens", 600),
         max_concurrency=raw.get("max_concurrency", 8),
+        repeats=int(raw.get("repeats", 1)),
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,

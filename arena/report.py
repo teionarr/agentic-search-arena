@@ -80,6 +80,7 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "ranking": result["ranking"],
         "tie_groups": result["tie_groups"],
         "per_category": result.get("per_category", {}),
+        "repeats": result.get("repeats", {"n": 1}),
         "metrics": result["metrics"],
         "weights_effective": result.get("weights_effective", {}),
         "judge": result["judge"],
@@ -163,7 +164,9 @@ def render_cli_summary(doc: dict) -> str:
     sc = (doc.get("judge") or {}).get("swap_consistency")
     n_dec = doc.get("n_decided_comparisons", 0)
     n_tot = n_dec + doc.get("n_excluded_comparisons", 0)
-    out.append(f"  {doc['n_queries']} queries · judge {doc['model_id']}{cost_s}")
+    n_rep = (doc.get("repeats") or {}).get("n", 1)
+    rep_s = f" × {n_rep} repeats" if n_rep > 1 else ""
+    out.append(f"  {doc['n_queries']} queries{rep_s} · judge {doc['model_id']}{cost_s}")
     out.append(f"  {n_dec}/{n_tot} comparisons used" +
                (f" · judge reliability {sc:.2f}" if sc is not None else ""))
     judge = doc.get("judge") or {}
@@ -171,6 +174,12 @@ def render_cli_summary(doc: dict) -> str:
         n = judge.get("self_preference_flags", 0)
         out.append(f"  ⚠  native-answer mode: {n} pair(s) flagged possible-self-preference "
                    "(Claude judge, no secondary judge) — see rationale log")
+    spread = (doc.get("repeats") or {}).get("win_rate_spread") or {}
+    known_spread = {p: v for p, v in spread.items() if v is not None}
+    if known_spread:
+        parts = " · ".join(f"{p} {v:.2f}" for p, v in
+                           sorted(known_spread.items(), key=lambda kv: -kv[1]))
+        out.append(f"  win-rate spread across repeats (max−min): {parts}")
     cal = doc.get("calibration") or {}
     if cal.get("agreement") is not None:
         bar = "≥0.80 ok" if cal["agreement"] >= 0.80 else "below 0.80 bar"
