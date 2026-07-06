@@ -47,9 +47,11 @@ class ArenaConfig:
     providers: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # name -> {enabled, config}
     reader_model: Optional[str] = None          # None -> judge model (llm.py default)
     judge_primary: str = "claude"
-    judge_secondary: Optional[str] = None       # M1 — reserved, not wired
+    judge_secondary: Optional[str] = None       # optional 2nd judge model id -> ensemble κ (§6.4)
     order_swap: bool = True
     exclude_on_flip: bool = True
+    aggregation_method: str = "bradley_terry"   # §6.3 default; "winrate" keeps the M0 estimator
+    judge_reliability_weighting: str = "auto"   # §6.3 per-judge; engages only with a per-judge signal
     evidence_budget_tokens: int = 600           # common per-provider evidence cap (§ heterogeneity)
     consensus_min_providers: int = 3            # Tier-1 (§3): min converging providers for a silver label
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
@@ -120,6 +122,12 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
     datasets = bench.get("datasets", ["simpleqa"])
     if isinstance(datasets, str):  # `datasets: simpleqa` — don't explode the string into chars
         datasets = [datasets]
+    aggregation = raw.get("aggregation", {}) or {}
+    method = aggregation.get("method", "bradley_terry")
+    if method not in ("bradley_terry", "winrate"):
+        raise ValueError(
+            f"Unknown aggregation.method: {method!r}. Known: 'bradley_terry', 'winrate'"
+        )
     return ArenaConfig(
         providers=providers,
         reader_model=(raw.get("reader", {}) or {}).get("model"),
@@ -127,6 +135,8 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         judge_secondary=judge.get("secondary"),
         order_swap=judge.get("order_swap", True),
         exclude_on_flip=judge.get("exclude_on_flip", True),
+        aggregation_method=method,
+        judge_reliability_weighting=aggregation.get("judge_reliability_weighting", "auto"),
         evidence_budget_tokens=raw.get("evidence_budget_tokens", 600),
         consensus_min_providers=raw.get("consensus_min_providers", 3),
         max_concurrency=raw.get("max_concurrency", 8),

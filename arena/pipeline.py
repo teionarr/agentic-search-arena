@@ -23,10 +23,11 @@ from arena.anchors import compute_anchors, machine_verify
 from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
-from arena.judge import judge_pair
+from arena.judge import judge_pair, route_native_self_preference
 from arena.cost import attach_cost, effective_weights, load_pricing
 from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_score,
                            latency_percentiles, parse_freshness_window_days)
+from arena.reliability import cohens_kappa, consensus_agreements, judge_weights
 from arena.scope import Scope
 from arena.self_preference import self_preference_label
 from arena.tokens import calculate_token_consumption
@@ -114,12 +115,15 @@ def _pipelined_run(adapters: List, queries: List, conc: int, process_query: Call
 def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: Scope,
               reader_llm, judge_llm, token_model: str = "gpt-4.1",
               search_gatherer: Optional[Callable] = None, grader_llm=None,
-              tracer: Optional[Tracer] = None) -> dict:
+              secondary_judge_llm=None, tracer: Optional[Tracer] = None) -> dict:
     """Run the arena and return the canonical result dict (source of truth for report.py).
 
     When queries carry ``expected_answer``, each provider's answer is graded against gold to
     produce a judge-free **accuracy** column alongside the arena rank (§8). ``grader_llm`` is a
     Claude fallback grader used only when ``OPENAI_API_KEY`` is absent.
+
+    ``secondary_judge_llm`` (§5): when supplied every pair is judged by both judges; inter-judge
+    agreement (Cohen's κ, §6.4) is reported and per-judge reliability weighting (§6.3) engages.
     """
     run_nonce = uuid.uuid4().hex
     provider_names = [a.name for a in adapters]
@@ -132,10 +136,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     native_providers = {a.name for a in adapters if getattr(a, "native_answer", False)}
     claude_family = set(claude_family_providers())
     judge_is_claude = (config.judge_primary or "").lower() == "claude"
-    # A configured secondary judge is not actually invoked yet (config.judge_secondary is
-    # reserved, not wired), so it must NOT be allowed to suppress the mitigation: we neither
-    # route Claude-native pairs to it nor let its mere presence silence the label/caveat.
-    has_secondary_judge = False
+    # The secondary judge is now wired (M1): when one is actually supplied, Claude-native pairs
+    # ROUTE to it (the routing hook below) instead of carrying the ``possible-self-preference``
+    # flag. With no secondary invoked, the flag mitigation stands (§5: route XOR flag).
+    has_secondary_judge = secondary_judge_llm is not None
     # The caveat fires only for a *Claude-family* native provider — a non-Claude native
     # provider (e.g. a future Perplexity Sonar) shares the native-answer path but not the
     # self-preference risk.
@@ -169,7 +173,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     def _process_query(qi: int, results_for_q: Dict[str, UnifiedResult]) -> dict:
         q = queries[qi]
         trace = tracer.trace("query", input={"query": q.query})
-        loc = {"qi": qi, "comparisons": [], "rationale": [], "reader_answers": {},
+        loc = {"qi": qi, "comparisons": [], "rationale": [], "reader_answers": {}, "judge_labels": [],
                "swap_total": 0, "swap_flips": 0, "judge_skipped": 0, "injection_flags": 0,
                "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
@@ -228,13 +232,31 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     correct[name] = bool(c)
 
         for x, y in itertools.combinations([p for p in provider_names if p in answers], 2):
+            # Self-preference mitigation (§5), route XOR flag:
+            #  - with a secondary judge configured, a Claude-native pair ROUTES to it;
+            #  - with none, ``self_preference_label`` flags it ``possible-self-preference``.
+            # In M0/M1 synthesis is forced, so no pair is native and both stay no-op guards.
+            x_native, y_native = x in native_providers, y in native_providers
             sp_label = self_preference_label(
-                x, y, x in native_providers, y in native_providers, claude_family,
+                x, y, x_native, y_native, claude_family,
                 judge_is_claude, has_secondary_judge)
+            # Route ONLY a Claude-family native pair — a future non-Claude native provider shares
+            # the native path but carries no self-preference risk, so it must not be routed.
+            route = route_native_self_preference(
+                x_native and x in claude_family, y_native and y in claude_family,
+                secondary_judge_llm is not None)
             judge_span = trace.child("judge.compare", input={"query": q.query, "a": x, "b": y})
             verdict = judge_pair(judge_llm, q.query, answers[x], answers[y], run_nonce,
                                  order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip,
+                                 secondary_llm=secondary_judge_llm, route_to_secondary=route,
                                  self_preference=sp_label)
+            # If routing was intended but the secondary judge was unavailable, judge_pair fell back
+            # to primary. The pair was then neither routed nor flagged — restore the flag so the
+            # route-XOR-flag invariant holds (§5): recompute the label as if no secondary existed.
+            if route and verdict.get("decided_by") == "primary":
+                verdict["self_preference"] = self_preference_label(
+                    x, y, x_native, y_native, claude_family, judge_is_claude,
+                    has_secondary_judge=False)
             judge_span.end(output={"outcome": verdict["outcome"], "flipped": verdict["flipped"],
                                    "rationales": verdict["rationales"]})
             if verdict.get("skipped"):
@@ -249,6 +271,16 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 loc["self_pref_flags"] += 1
             outcome = verdict["outcome"]
             winner = x if outcome == "x" else y if outcome == "y" else ("tie" if outcome == "tie" else None)
+            # Record paired per-judge labels (only when both judges decided the same pair) so κ /
+            # reliability weighting can be computed downstream. Labels map "x"/"y" -> provider.
+            labels = verdict.get("judge_labels") or {}
+            if secondary_judge_llm is not None and labels.get("secondary") is not None \
+                    and labels.get("primary") is not None:
+                loc["judge_labels"].append({
+                    "a": x, "b": y,
+                    "primary": _lab(labels["primary"], x, y),
+                    "secondary": _lab(labels["secondary"], x, y),
+                })
             cx, cy = correct.get(x), correct.get(y)
             if cx is not None and cy is not None and cx != cy:
                 if winner in (x, y):
@@ -256,7 +288,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["cal_agree"] += int(winner == (x if cx else y))
                 else:
                     loc["cal_abstained"] += 1
-            loc["comparisons"].append({"a": x, "b": y, "winner": winner})
+            loc["comparisons"].append({"a": x, "b": y, "winner": winner,
+                                       "decided_by": verdict.get("decided_by", "primary")})
             loc["rationale"].append({
                 "query": q.query, "a": x, "b": y, "winner": winner,
                 "flipped": verdict["flipped"], "low_confidence": verdict["low_confidence"],
@@ -280,13 +313,15 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     rationale_log: List[dict] = []
     per_query_answers: List[Dict[str, Optional[str]]] = []   # Tier-1 consensus, ordered by qi
     per_query_comparisons: List[List[dict]] = []
+    paired_labels: List[dict] = []
     swap_flips = swap_total = judge_skipped = injection_flags = self_pref_flags = 0
     cal_agree = cal_decidable = cal_abstained = 0
-    for loc in sorted(locals_out, key=lambda l: l["qi"]):
+    for loc in sorted(locals_out, key=lambda local: local["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
         per_query_answers.append(loc["reader_answers"])
         per_query_comparisons.append(loc["comparisons"])
+        paired_labels.extend(loc["judge_labels"])
         swap_total += loc["swap_total"]; swap_flips += loc["swap_flips"]
         judge_skipped += loc["judge_skipped"]; injection_flags += loc["injection_flags"]
         self_pref_flags += loc["self_pref_flags"]
@@ -305,7 +340,29 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             mv_correct[p] += pv["mv_correct"]; mv_total[p] += pv["mv_total"]
 
     tracer.flush()  # no-op for NullTracer; sends buffered spans for LangfuseTracer
-    agg = aggregate(comparisons, provider_names, seed=0)
+
+    # ---- Inter-judge agreement (κ, §6.4) + judge-reliability weighting (§6.3) ----
+    # A secondary judge yields κ (reported regardless). Reliability weighting engages only when a
+    # signal actually DISCRIMINATES between judges: with just primary+secondary, cross-agreement is
+    # symmetric (it says how MUCH they agree, not WHICH is right), so ``judge_weights`` returns {}
+    # and BT stays UNWEIGHTED — the spec-correct default (weighting needs 3+ judges or gold, §6.3).
+    # A configured secondary that produced NO paired labels is a failure surfaced in stage_status.
+    inter_judge_kappa = None
+    secondary_failed = bool(secondary_judge_llm is not None and not paired_labels)
+    if secondary_judge_llm is not None and paired_labels:
+        prim = [pl["primary"] for pl in paired_labels]
+        sec = [pl["secondary"] for pl in paired_labels]
+        inter_judge_kappa = cohens_kappa(prim, sec)
+        per_judge = {"primary": prim, "secondary": sec}
+        weights = judge_weights(consensus_agreements(per_judge),
+                                mode=config.judge_reliability_weighting)
+        if weights:
+            for c in comparisons:
+                w = weights.get(c.get("decided_by", "primary"))
+                if w is not None:
+                    c["weight"] = w
+
+    agg = aggregate(comparisons, provider_names, seed=0, method=config.aggregation_method)
     anchors = compute_anchors(per_query_answers, per_query_comparisons, provider_names,
                               min_providers=config.consensus_min_providers)
     for p in provider_names:
@@ -343,6 +400,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     swap_consistency = 1.0 - (swap_flips / swap_total) if swap_total else None
     n_ranked = sum(1 for s in agg.scores if s.status == "ranked")
 
+    weighted = any("weight" in c for c in comparisons)
     stage_status = {
         "secrets": _ok(len(scope.included) > 0, f"{len(scope.included)} providers included"),
         "adapters": _ok(any(per_provider[p]["cells_succeeded"] > 0 for p in provider_names),
@@ -350,13 +408,16 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "reader": _ok(any((per_provider[p]["reader_degenerate_rate"] or 0) < 1.0
                           for p in provider_names if per_provider[p]["cells_succeeded"]),
                       "reader produced usable answers"),
-        "judge": _judge_status(swap_consistency, injection_flags, judge_skipped),
-        "aggregate": _ok(n_ranked >= 1, f"{n_ranked} providers ranked, {agg.n_excluded} comparisons excluded"),
+        "judge": _judge_status(swap_consistency, injection_flags, judge_skipped,
+                               kappa=inter_judge_kappa, secondary_failed=secondary_failed),
+        "aggregate": _ok(n_ranked >= 1, f"{n_ranked} providers ranked ({agg.method}"
+                         + (", reliability-weighted" if weighted else "")
+                         + f"), {agg.n_excluded} comparisons excluded"),
         "pipeline": _ok(True, "run completed"),
     }
 
     seen, cost = set(), 0.0
-    for c in (judge_llm, reader_llm, grader_llm):
+    for c in (judge_llm, reader_llm, grader_llm, secondary_judge_llm):
         if c is not None and id(c) not in seen and hasattr(c, "cost_usd"):
             cost += c.cost_usd()
             seen.add(id(c))
@@ -371,9 +432,11 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "n_excluded_comparisons": agg.n_excluded,
         "metrics": per_provider,
         "weights_effective": weights_effective,
+        "aggregation_method": agg.method,
+        "reliability_weighted": weighted,
         "judge": {"swap_consistency": swap_consistency, "swap_total": swap_total,
                   "swap_flips": swap_flips, "judge_skipped": judge_skipped,
-                  "injection_flags": injection_flags,
+                  "injection_flags": injection_flags, "inter_judge_kappa": inter_judge_kappa,
                   # Self-preference caveat (§5/§6): surfaced when a Claude-family native
                   # provider is ranked under a Claude judge.
                   "native_mode": claude_native_mode,
@@ -390,6 +453,11 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     }
 
 
+def _lab(outcome, x, y):
+    """Map a judge outcome ("x"/"y"/"tie") to a provider-name label for κ / weighting."""
+    return x if outcome == "x" else y if outcome == "y" else "tie"
+
+
 def _rate(num: int, denom: int):
     return (num / denom) if denom else None
 
@@ -402,7 +470,8 @@ def _ok(healthy: bool, reason: str) -> dict:
     return {"status": "green" if healthy else "red", "reason": reason}
 
 
-def _judge_status(swap_consistency, injection_flags, judge_skipped=0, bar: float = 0.85) -> dict:
+def _judge_status(swap_consistency, injection_flags, judge_skipped=0, bar: float = 0.85,
+                  kappa=None, kappa_bar: float = 0.6, secondary_failed: bool = False) -> dict:
     if swap_consistency is None:
         reason = "no comparisons judged"
         if judge_skipped:
@@ -414,6 +483,12 @@ def _judge_status(swap_consistency, injection_flags, judge_skipped=0, bar: float
         reason += f", {judge_skipped} skipped"
     if injection_flags:
         reason += f", {injection_flags} injection-flagged rationale(s)"
+    if kappa is not None:  # §6.4: inter-judge agreement, reported regardless of value
+        reason += f", inter-judge κ {kappa:.2f}"
+        healthy = healthy and kappa >= kappa_bar
+    if secondary_failed:  # configured secondary judge produced no paired verdicts -> broken path
+        reason += ", secondary judge produced no verdicts (check secondary model id / API access)"
+        healthy = False
     return {"status": "green" if healthy else "red", "reason": reason}
 
 
