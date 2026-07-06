@@ -30,8 +30,12 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 MIN_COMPARISONS = 2  # below this a provider is 'unranked — insufficient valid comparisons'
-BT_MAX_ITERS = 1000
-BT_TOL = 1e-9
+# MM fit converges fast; a 1e-9 tolerance is below float noise for this update, so the fit
+# used to burn all iterations every call — and it runs once per bootstrap resample (n_boot),
+# which made BT aggregation pathologically slow. 1e-7 lets it converge early (well inside the
+# <1e-6 tolerance the ranking is asserted at), with a lower hard cap as a backstop.
+BT_MAX_ITERS = 200
+BT_TOL = 1e-7
 
 
 @dataclass
@@ -152,25 +156,23 @@ def _bt_fit(decided: List[dict], providers: List[str]) -> Dict[str, float]:
 
     for comp in _components(games, played):
         members = np.array(comp)
+        sub_games = games[np.ix_(members, members)]  # m×m weighted games within the component
+        sub_wins = wins[members]
         cpi = np.ones(len(members))
         for _ in range(BT_MAX_ITERS):
             prev = cpi.copy()
-            for ci, i in enumerate(members):
-                denom = 0.0
-                for cj, j in enumerate(members):
-                    if j == i or games[i, j] == 0:
-                        continue
-                    denom += games[i, j] / (cpi[ci] + cpi[cj])
-                if denom > 0 and wins[i] > 0:
-                    cpi[ci] = wins[i] / denom
-                # wins[i] == 0 (no credited wins): leave tiny but positive.
-            gm = np.exp(np.mean(np.log(np.clip(cpi, 1e-12, None))))
-            cpi = cpi / gm
+            # Vectorized MM update: denom_i = Σ_j games_ij / (pi_i + pi_j). Same fixed point as the
+            # per-node loop, but O(m²) numpy instead of a pure-Python triple loop — the fit runs once
+            # per bootstrap resample (n_boot), so this is the difference between seconds and minutes.
+            # (diagonal games are 0, so no self-term; pair sums are always positive.)
+            denom = (sub_games / (cpi[:, None] + cpi[None, :])).sum(axis=1)
+            upd = (denom > 0) & (sub_wins > 0)  # nodes with no credited wins stay positive, unchanged
+            cpi = np.where(upd, sub_wins / np.where(denom > 0, denom, 1.0), cpi)
+            cpi = cpi / np.exp(np.mean(np.log(np.clip(cpi, 1e-12, None))))
             prev_gm = np.exp(np.mean(np.log(np.clip(prev, 1e-12, None))))
             if np.max(np.abs(cpi - prev / prev_gm)) < BT_TOL:
                 break
-        for ci, i in enumerate(members):
-            pi[i] = cpi[ci]
+        pi[members] = cpi
 
     return {p: (float(pi[idx[p]]) if active[idx[p]] else float("nan")) for p in providers}
 
@@ -199,7 +201,7 @@ def _point_estimate(method: str, decided: List[dict], providers: List[str]) -> D
 
 
 def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
-              n_boot: int = 2000, ci: float = 0.95, min_comparisons: int = MIN_COMPARISONS,
+              n_boot: int = 1000, ci: float = 0.95, min_comparisons: int = MIN_COMPARISONS,
               method: str = "bradley_terry") -> Aggregation:
     """Aggregate pairwise comparisons into a ranking.
 
