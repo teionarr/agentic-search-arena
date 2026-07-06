@@ -1,0 +1,27 @@
+name: Claude bot
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: "PR number to comment on"
+        required: true
+      body:
+        description: "Comment body"
+        required: true
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-pull-requests: write
+      - name: Post comment as the app bot
+        run: gh pr comment "$PR" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ inputs.pr }}
+          BODY: ${{ inputs.body }}
