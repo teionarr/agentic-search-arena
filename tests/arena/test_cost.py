@@ -3,15 +3,15 @@ to $/query, with the pricing ``as_of`` date surfaced; blank cost when a provider
 units, and its weight dropped + remaining weights renormalized. Deterministic, no AI, no network.
 """
 
-from arena.adapters.base import UnifiedResult
+from arena.adapters.base import EvidenceDoc, UnifiedResult
 from arena.config import ArenaConfig, Query
-from arena.cost import (attach_cost, cost_block, cost_per_query, load_pricing,
-                        present_cost_providers)
+from arena.cost import (attach_cost, cost_block, cost_per_query, effective_weights,
+                        load_pricing, present_cost_providers)
 from arena.metrics import renormalize_weights
 from arena.pipeline import run_arena
 from arena.report import _cost_as_of, render_cli_summary, write_results
 from arena.scope import INCLUDED, Scope, ScopeEntry
-from _fakes import FakeLLM, sync_gather
+from _fakes import FakeAdapter, FakeLLM, sync_gather
 
 
 PRICING = {"as_of": "2026-07-01",
@@ -60,6 +60,21 @@ def test_load_pricing_missing_file_is_blank_not_error():
     assert p == {"as_of": None, "providers": {}}
 
 
+def test_load_pricing_never_aborts_on_bad_file(tmp_path):
+    # Pricing is optional: invalid YAML, a non-mapping root, and a non-mapping `providers`
+    # must all leave cost blank (empty shape) rather than raising and killing the run.
+    bad_yaml = tmp_path / "bad.yaml"
+    bad_yaml.write_text("as_of: [unclosed\n  : broken")           # invalid YAML
+    non_mapping_root = tmp_path / "list.yaml"
+    non_mapping_root.write_text("- just\n- a\n- list\n")           # root is a list
+    bad_providers = tmp_path / "badprov.yaml"
+    bad_providers.write_text("as_of: \"2026-07-01\"\nproviders: 42\n")  # providers not a mapping
+    for path in (bad_yaml, non_mapping_root, bad_providers):
+        p = load_pricing(str(path))
+        assert p == {"as_of": None, "providers": {}}
+        assert "as_of" in p and isinstance(p["providers"], dict)
+
+
 # ---- weight drop + renormalize when cost absent/partial (§8) ----
 
 def test_cost_weight_dropped_and_renormalized_when_absent():
@@ -80,6 +95,19 @@ def test_cost_weight_kept_when_present():
     weights = {"cost": 0.2, "latency": 0.8}
     renorm = renormalize_weights(weights, ["cost", "latency"])
     assert "cost" in renorm and abs(sum(renorm.values()) - 1.0) < 1e-9
+
+
+def test_effective_weights_drops_cost_when_blank():
+    metrics = {"tavily": {"cost": {"usd_per_query": None}}}
+    ew = effective_weights({"cost": 0.2, "latency": 0.4, "coverage": 0.4}, metrics)
+    assert "cost" not in ew
+    assert abs(sum(ew.values()) - 1.0) < 1e-9 and abs(ew["latency"] - 0.5) < 1e-9
+
+
+def test_effective_weights_keeps_cost_when_present():
+    metrics = {"tavily": {"cost": {"usd_per_query": 0.016}}}
+    ew = effective_weights({"cost": 0.2, "latency": 0.8}, metrics)
+    assert "cost" in ew and abs(sum(ew.values()) - 1.0) < 1e-9
 
 
 # ---- pipeline: units → $/query normalization + attach ----
@@ -131,6 +159,35 @@ def test_pipeline_normalizes_units_to_cost_per_query(tmp_path):
     assert ct["usd_per_query"] == 0.016            # normalized to $/query, not summed over queries
     assert abs(cs["usd_per_query"] - 0.0003) < 1e-12
     assert ct["as_of"] == "2026-07-01"             # as_of surfaced with the cost column
+
+
+def test_pipeline_drops_cost_weight_when_no_units_reported(tmp_path):
+    # Current production reality: adapters hardcode cost_units=None (FakeAdapter reports none),
+    # so cost is blank for every provider → the pipeline must drop the cost weight from the
+    # effective weights and renormalize the remainder (the wired §8 renormalization path).
+    docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
+    cfg = ArenaConfig(evidence_budget_tokens=600, pricing_path=_write_pricing(tmp_path),
+                      weights={"cost": 0.2, "latency": 0.4, "coverage": 0.4})
+    queries = [Query(query="capital of France?")]
+    scope = _scope(["tavily", "serper"])
+    result = run_arena(cfg, queries, [FakeAdapter("tavily", docs), FakeAdapter("serper", docs)],
+                       scope, FakeLLM(), FakeLLM(), search_gatherer=sync_gather)
+    ew = result["weights_effective"]
+    assert "cost" not in ew                                  # dropped: no provider reported units
+    assert abs(sum(ew.values()) - 1.0) < 1e-9               # remainder renormalized
+    assert abs(ew["latency"] - 0.5) < 1e-9 and abs(ew["coverage"] - 0.5) < 1e-9
+
+
+def test_pipeline_keeps_cost_weight_when_units_reported(tmp_path):
+    doc = [{"url": "u", "title": "t", "content": "Paris is the capital of France."}]
+    cfg = ArenaConfig(evidence_budget_tokens=600, pricing_path=_write_pricing(tmp_path),
+                      weights={"cost": 0.2, "latency": 0.8})
+    queries = [Query(query="capital of France?")]
+    scope = _scope(["tavily"])
+    result = run_arena(cfg, queries, [_CostAdapter("tavily", doc, cost_units=2.0)],
+                       scope, FakeLLM(), FakeLLM(), search_gatherer=sync_gather)
+    ew = result["weights_effective"]
+    assert "cost" in ew and abs(sum(ew.values()) - 1.0) < 1e-9  # cost survives, weights sum to 1
 
 
 def test_pipeline_blank_cost_when_no_units(tmp_path):

@@ -23,7 +23,7 @@ from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
 from arena.judge import judge_pair
-from arena.cost import attach_cost, load_pricing
+from arena.cost import attach_cost, effective_weights, load_pricing
 from arena.metrics import evidence_coverage, latency_percentiles
 from arena.scope import Scope
 from arena.tokens import calculate_token_consumption
@@ -258,6 +258,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     units_per_query = {p: (cost_units[p] / cost_unit_cells[p]) if cost_unit_cells[p] else None
                        for p in provider_names}
     attach_cost(per_provider, pricing, units_per_query)
+    # Drop the cost weight and renormalize the rest when cost is blank for the run (§8).
+    weights_effective = effective_weights(config.weights, per_provider) if config.weights else {}
 
     swap_consistency = 1.0 - (swap_flips / swap_total) if swap_total else None
     n_ranked = sum(1 for s in agg.scores if s.status == "ranked")
@@ -289,6 +291,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "n_decided_comparisons": agg.n_decided,
         "n_excluded_comparisons": agg.n_excluded,
         "metrics": per_provider,
+        "weights_effective": weights_effective,
         "judge": {"swap_consistency": swap_consistency, "swap_total": swap_total,
                   "swap_flips": swap_flips, "judge_skipped": judge_skipped,
                   "injection_flags": injection_flags},
