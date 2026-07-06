@@ -15,7 +15,8 @@ from arena.llm import LLMClient, OpenAIClient, build_llm_client
 
 # ---- factory routing ----------------------------------------------------------------------
 
-def test_factory_routes_openai_prefix_to_openai_client():
+def test_factory_routes_openai_prefix_to_openai_client(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")  # construction now fails fast without one
     client = build_llm_client("openai:gpt-5.2")
     assert isinstance(client, OpenAIClient)
     assert client.model == "gpt-5.2"  # prefix stripped: the raw OpenAI model id
@@ -116,15 +117,50 @@ def test_retryable_exhausts_budget_then_skips(monkeypatch):
     assert runnable.calls == 3
 
 
-# ---- missing key: clear error, not a silent skip -------------------------------------------
+# ---- missing key: fails at CONSTRUCTION (before any spend), never mid-paid-run -------------
 
-def test_missing_openai_key_raises_clear_error(monkeypatch):
+def test_missing_openai_key_raises_at_construction(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
-    llm = OpenAIClient(model="gpt-5.2")  # no injected client -> real lazy init path
     with pytest.raises(RuntimeError, match="OPENAI_API_KEY"):
-        llm.structured("sys", "user", PairwiseVerdict)
-    with pytest.raises(RuntimeError, match="OPENAI_API_KEY"):
-        llm.complete("sys", "user")
+        OpenAIClient(model="gpt-5.2")  # no injected client -> real path -> fail fast
+
+
+def test_key_revoked_after_construction_degrades_not_dies(monkeypatch):
+    # A key that vanishes AFTER construction must surface as the judge's normal skip path
+    # (None), not an exception that aborts a paid run halfway through.
+    monkeypatch.setenv("OPENAI_API_KEY", "present-at-init")
+    llm = OpenAIClient(model="gpt-5.2", max_retries=1)
+    monkeypatch.delenv("OPENAI_API_KEY")
+    assert llm.structured("sys", "user", PairwiseVerdict) is None  # skip, not crash
+    assert llm.complete("sys", "user") is None
+
+
+# ---- max_tokens threads into the structured-output client ----------------------------------
+
+def test_structured_max_tokens_reaches_chat_openai(monkeypatch):
+    # with_structured_output lives on the chat model (not on bind()), so the cap must be a
+    # ChatOpenAI constructor kwarg — assert it actually arrives there.
+    import sys
+    import types
+    constructed = []
+
+    class _CapturingChatOpenAI:
+        def __init__(self, **kwargs):
+            constructed.append(kwargs)
+        def with_structured_output(self, schema):
+            return _FakeStructuredRunnable(PairwiseVerdict(winner="a", rationale="r"))
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setitem(sys.modules, "langchain_openai",
+                        types.SimpleNamespace(ChatOpenAI=_CapturingChatOpenAI))
+    llm = OpenAIClient(model="gpt-5.2")
+    assert llm.structured("sys", "user", PairwiseVerdict, max_tokens=512) is not None
+    assert constructed[0]["max_tokens"] == 512
+    # Same cap reuses the cached client; a different cap builds a second one.
+    llm.structured("sys", "user", PairwiseVerdict, max_tokens=512)
+    assert len(constructed) == 1
+    llm.complete("sys", "user", max_tokens=256)
+    assert constructed[1]["max_tokens"] == 256
 
 
 # ---- cost: honest zero, never fabricated ----------------------------------------------------

@@ -142,34 +142,58 @@ class OpenAIClient:
 
     Same interface (``complete`` / ``structured`` / ``cost_usd``) so judge and pipeline code
     cannot tell the families apart. Built on the base repo's existing ``langchain_openai``
-    dependency (lazy import, like the Anthropic SDK above); no new dependency. Requires
-    ``OPENAI_API_KEY`` at call time — a missing key raises immediately (config asked for a
-    cross-family judge; silently skipping would fake the §5 mitigation).
+    dependency (lazy import, like the Anthropic SDK above); no new dependency.
+
+    A missing ``OPENAI_API_KEY`` raises at CONSTRUCTION — before any spend — never at the
+    first routed pair mid-run (the config asked for a cross-family judge; silently skipping
+    would fake the §5 mitigation, and aborting a paid run halfway through is worse). A key
+    revoked AFTER construction surfaces as a non-retryable call failure -> ``None`` -> the
+    judge's normal skip path, so a live run degrades instead of dying.
     """
+
+    _MISSING_KEY_MSG = ("OPENAI_API_KEY is not set but the config requested an "
+                        "OpenAI-family judge (judge.secondary: 'openai:...'). Add the key "
+                        "to your .env, or use a Claude model id for the secondary judge.")
 
     def __init__(self, model: str, client: Any = None, max_retries: int = MAX_RETRIES):
         self.model = model
         self.max_retries = max_retries
-        self._client = client
+        self._injected = client
+        # Real (non-injected) clients need the key NOW: fail before the run spends anything.
+        if client is None and not os.environ.get("OPENAI_API_KEY"):
+            raise RuntimeError(self._MISSING_KEY_MSG)
+        # with_structured_output lives on the chat model, not on a bind() result, so
+        # max_tokens must be a constructor kwarg — cache one client per cap (one in practice).
+        self._clients: dict = {}
         self._lock = threading.Lock()
         self.usage = {"input": 0, "output": 0, "cache_write": 0, "cache_read": 0, "calls": 0}
 
-    def _get_client(self) -> Any:
+    def _get_client(self, max_tokens: int = 1024) -> Any:
         # Same locked lazy init as LLMClient (shared across pipelined worker threads). Own the
         # retry budget here too: max_retries=0 so langchain's built-in retries don't stack on
         # this class's bounded-retry loop.
-        if self._client is None:
+        if self._injected is not None:
+            return self._injected
+        if max_tokens not in self._clients:
             with self._lock:
-                if self._client is None:
-                    if not os.environ.get("OPENAI_API_KEY"):
-                        raise RuntimeError(
-                            "OPENAI_API_KEY is not set but the config requested an "
-                            "OpenAI-family judge (judge.secondary: 'openai:...'). Add the key "
-                            "to your .env, or use a Claude model id for the secondary judge.")
+                if max_tokens not in self._clients:
+                    if not os.environ.get("OPENAI_API_KEY"):  # defense: env mutated post-init
+                        raise RuntimeError(self._MISSING_KEY_MSG)
                     from langchain_openai import ChatOpenAI  # lazy: core path never needs OpenAI
-                    self._client = ChatOpenAI(model=self.model, temperature=0.0,
-                                              timeout=60.0, max_retries=0)
-        return self._client
+                    self._clients[max_tokens] = ChatOpenAI(model=self.model, temperature=0.0,
+                                                           timeout=60.0, max_retries=0,
+                                                           max_tokens=max_tokens)
+        return self._clients[max_tokens]
+
+    def _client_or_none(self, max_tokens: int) -> Optional[Any]:
+        """Runtime client acquisition NEVER aborts a run: construction already failed fast on a
+        missing key, so anything going wrong here (key revoked mid-run, import breakage) is
+        logged and degrades to the judge's normal skip path."""
+        try:
+            return self._get_client(max_tokens)
+        except Exception as e:
+            logger.error(f"Secondary judge unavailable, skipping: {e}")
+            return None
 
     def _invoke(self, runnable: Any, messages: list) -> Optional[Any]:
         """One call with bounded retry + backoff mirroring LLMClient._create. None => skip."""
@@ -194,7 +218,9 @@ class OpenAIClient:
     def complete(self, system: str, user: str, max_tokens: int = 1024) -> Optional[str]:
         """Free-text completion. None => skip. (Kept for interface parity; the secondary judge
         only calls structured().)"""
-        client = self._get_client().bind(max_tokens=max_tokens)  # key check raises, retries don't mask it
+        client = self._client_or_none(max_tokens)
+        if client is None:
+            return None
         resp = self._invoke(client, [("system", system), ("user", user)])
         if resp is None:
             return None
@@ -205,7 +231,10 @@ class OpenAIClient:
                    max_tokens: int = 1024) -> Optional[BaseModel]:
         """Structured output via langchain's tool-calling path, as a validated pydantic model
         instance — the SAME schema instances the Anthropic client returns. None => skip."""
-        runnable = self._get_client().with_structured_output(schema)
+        client = self._client_or_none(max_tokens)
+        if client is None:
+            return None
+        runnable = client.with_structured_output(schema)
         result = self._invoke(runnable, [("system", system), ("user", user)])
         if result is None:
             return None
