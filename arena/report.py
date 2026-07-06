@@ -102,16 +102,20 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
         w = csv.writer(f)
         w.writerow(["rank", "provider", "win_rate", "ci_low", "ci_high", "n_comparisons",
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
-                    "accuracy_rate", "accuracy_correct", "accuracy_total"])
+                    "accuracy_rate", "accuracy_correct", "accuracy_total",
+                    "freshness_score", "freshness_coverage", "freshness_low_confidence"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
+            fr = m.get("freshness", {}) or {}
             w.writerow([_csv_safe(x) for x in [
                 s["rank"], s["provider"], s["win_rate"], s["ci_low"], s["ci_high"],
                 s["n_comparisons"], s["tie_group"], s["status"],
                 m.get("coverage", {}).get("avg_tokens_per_result"),
                 m.get("latency", {}).get("p50"),
                 acc.get("rate"), acc.get("correct"), acc.get("total"),
+                fr.get("score"), fr.get("coverage"),
+                fr.get("low_confidence") if fr else None,
             ]])
 
     return {"json": json_path, "csv": csv_path}
@@ -156,15 +160,21 @@ def render_cli_summary(doc: dict) -> str:
 
     has_acc = any((doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {}).get("rate") is not None
                   for s in doc["ranking"])
+    has_fresh = any((doc["metrics"].get(s["provider"], {}).get("freshness", {}) or {}).get("score") is not None
+                    for s in doc["ranking"])
     acc_hdr = " · acc = judge-free accuracy vs gold" if has_acc else ""
+    fresh_hdr = " · fresh = dated-in-window share (cov = date coverage; ! = low-confidence)" if has_fresh else ""
     out.append("")
-    out.append("  RANKING   bar = win-rate · │ = 0.50 even line · [ ] = 95% CI · cov = avg tok/result" + acc_hdr)
+    out.append("  RANKING   bar = win-rate · │ = 0.50 even line · [ ] = 95% CI · cov = avg tok/result" + acc_hdr + fresh_hdr)
     out.append("  " + "─" * (W - 2))
     for s in doc["ranking"]:
         acc = (doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {})
         acc_s = f"  acc {acc['rate']:.0%} ({acc['correct']}/{acc['total']})" if acc.get("rate") is not None else ""
+        fr = (doc["metrics"].get(s["provider"], {}).get("freshness", {}) or {})
+        fresh_s = (f"  fresh {fr['score']:.0%} (cov {fr['coverage']:.0%}{' !' if fr.get('low_confidence') else ''})"
+                   if fr.get("score") is not None else "")
         if s["status"] == "unranked":
-            out.append(f"   --  {s['provider']:<18}  unranked — insufficient valid comparisons{acc_s}")
+            out.append(f"   --  {s['provider']:<18}  unranked — insufficient valid comparisons{acc_s}{fresh_s}")
             continue
         bar = _winrate_bar(s["win_rate"])
         ci = f"[{s['ci_low']:.2f}–{s['ci_high']:.2f}]"
@@ -176,7 +186,7 @@ def render_cli_summary(doc: dict) -> str:
             tag = "  · tied"
         else:
             tag = ""
-        out.append(f"  #{s['rank']} {s['provider']:<18} {bar} {s['win_rate']:.2f} {ci:<13} {cov_s}{acc_s}{tag}")
+        out.append(f"  #{s['rank']} {s['provider']:<18} {bar} {s['win_rate']:.2f} {ci:<13} {cov_s}{acc_s}{fresh_s}{tag}")
 
     out.append("")
     out.append("  SCOPE")

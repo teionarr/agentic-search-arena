@@ -23,7 +23,8 @@ from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
 from arena.judge import judge_pair
-from arena.metrics import evidence_coverage, latency_percentiles
+from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_score,
+                           latency_percentiles, parse_freshness_window_days)
 from arena.scope import Scope
 from arena.tokens import calculate_token_consumption
 
@@ -131,6 +132,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     acc_correct: Dict[str, int] = {p: 0 for p in provider_names}
     acc_total: Dict[str, int] = {p: 0 for p in provider_names}
 
+    # Per-provider per-query freshness tallies, gathered only on time-sensitive queries (§8.3).
+    freshness_tallies: Dict[str, List[dict]] = {p: [] for p in provider_names}
+    any_freshness_query = any(q.freshness_need for q in queries)
+
     # ---- The per-query LLM chain (reader -> grade -> judge). Pure: reads only its own
     #      search results + config/llms and returns a local delta to merge (no shared state). ----
     def _process_query(qi: int, results_for_q: Dict[str, UnifiedResult]) -> dict:
@@ -140,7 +145,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
                "prov": {p: {"latency": [], "coverage": [], "cells_att": 0, "cells_succ": 0,
                             "empty": 0, "reader_made": 0, "reader_degen": 0,
-                            "acc_correct": 0, "acc_total": 0} for p in provider_names}}
+                            "acc_correct": 0, "acc_total": 0, "freshness": []} for p in provider_names}}
+        fresh_window = parse_freshness_window_days(q.freshness_need) if q.freshness_need else None
         answers, correct = {}, {}
         for name in provider_names:
             pv = loc["prov"][name]
@@ -152,6 +158,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             pv["cells_succ"] += 1
             if res.latency_ms is not None:
                 pv["latency"].append(res.latency_ms)
+            if fresh_window is not None:  # freshness measures the returned evidence's dating
+                pv["freshness"].append(freshness_score(res.results, fresh_window))
             capped = cap_evidence(res.results, config.evidence_budget_tokens, token_model)
             for d in capped:
                 pv["coverage"].append(calculate_token_consumption(d.content, token_model))
@@ -223,6 +231,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             empty_evidence_count[p] += pv["empty"]; reader_answers_made[p] += pv["reader_made"]
             reader_degenerate_count[p] += pv["reader_degen"]
             acc_correct[p] += pv["acc_correct"]; acc_total[p] += pv["acc_total"]
+            freshness_tallies[p].extend(pv["freshness"])
 
     agg = aggregate(comparisons, provider_names, seed=0)
 
@@ -239,6 +248,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             "cells_succeeded": cells_succeeded[p],
             "cells_attempted": cells_attempted[p],
         }
+        # Freshness is present only when the run had time-sensitive queries AND this provider
+        # returned results on them (§8.3); absent -> its weight is dropped + renormalized (§8).
+        if any_freshness_query:
+            fresh = aggregate_freshness(freshness_tallies[p])
+            if fresh is not None:
+                per_provider[p]["freshness"] = fresh
 
     swap_consistency = 1.0 - (swap_flips / swap_total) if swap_total else None
     n_ranked = sum(1 for s in agg.scores if s.status == "ranked")
