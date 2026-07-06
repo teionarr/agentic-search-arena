@@ -244,8 +244,10 @@ for those rows.
 ### Providers (roster)
 
 Document-returning providers, each a one-line registry entry: `tavily`, `exa`, `brave`,
-`serper`, `perplexity_search`, `firecrawl`, `linkup`. Every key is optional — a provider with no
-key (or disabled in config) is skipped and reported, never an error.
+`serper`, `perplexity_search`, `firecrawl`, `linkup`. Plus `claude_search` (Anthropic web
+search), a **native-answer** provider that also returns its own synthesized answer (see the
+native-answer path below). Every key is optional — a provider with no key (or disabled in
+config) is skipped and reported, never an error.
 
 ### Reading the output
 
@@ -317,6 +319,15 @@ separate genuinely near-equal providers** at small sample sizes — there the to
 reports a tie. The escalation ladder (consensus anchors → human adjudication of pivotal ties →
 downstream task success) is the path for higher-stakes decisions and is future work (see below).
 
+**Native-answer path & self-preference (§5).** Most providers are ranked on the *web layer*: the
+fixed reader synthesizes an answer from each provider's evidence, so provider identity and style
+are invisible to the judge. **Claude web search** additionally returns its own synthesized answer
+(the native-answer path). Because the default judge is Claude, a Claude-family native answer could
+be favored by style — so the judge is always **blinded + order-swapped**, and in native-answer mode
+pairs involving a Claude-family provider are routed to a configured secondary judge or, if none is
+set, flagged `possible-self-preference`. The caveat is surfaced in the run summary and rationale
+log whenever native mode runs. Reader-synthesized (primary-path) pairs are never flagged.
+
 > **Data note:** `results.json` and the rationale log contain your full query text and the web
 > content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
 
@@ -329,9 +340,10 @@ plugin system.
 
 ### Roadmap (deferred)
 
-Native-answer providers (Perplexity Sonar, GPT-Researcher) + self-preference handling; cost-per-
-query from a provider pricing map; freshness scoring; Tier-1 consensus anchors; Tier-2 human
-adjudication; Tier-3 downstream success + Langfuse tracing.
+More native-answer providers (Perplexity Sonar, GPT-Researcher); Tier-1 consensus anchors;
+Tier-2 human adjudication; Tier-3 downstream success + Langfuse tracing.
+(Claude web-search native-answer path + self-preference handling, cost-per-query, freshness
+scoring, and benchmark-suite mode are now implemented — see the sections above.)
 
 **Prior art / design credit:** Arena mode extends this repo's provider-handler architecture, and
 draws on [`youdotcom-oss/web-search-api-evals`](https://github.com/youdotcom-oss/web-search-api-evals)
