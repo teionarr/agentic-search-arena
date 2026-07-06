@@ -50,17 +50,23 @@ def test_load_freshqa_fixture_jsonl_and_freshness_tag():
 
 
 def test_vendored_frames_file_exists_and_parses():
-    # Vendored full set (datasets/DATASETS.md): exists, parses, and is the real thing (824 rows).
+    # Vendored full set (datasets/DATASETS.md): the exact 824-row test split, no dupes —
+    # a truncated or doubled vendored file must fail here, not in a paid benchmark run.
     rows = load_frames(10_000)
-    assert len(rows) > 800
+    assert len(rows) == 824
+    assert len({q.query for q in rows}) == 824
     assert all(q.query and q.category == "frames" for q in rows[:5])
 
 
 def test_vendored_freshqa_file_exists_and_parses():
-    # Vendored TEST split (datasets/DATASETS.md): exists, parses, carries the freshness tag.
+    # Vendored TEST split (datasets/DATASETS.md): exactly 500 rows, and the freshness tag
+    # must come from the CSV's fact_type — the loader's "recent" fallback would collapse
+    # every row to one value, so real data shows several distinct tags.
     rows = load_freshqa(10_000)
-    assert len(rows) > 400
+    assert len(rows) == 500
+    assert len({q.query for q in rows}) == 500
     assert all(q.query and q.category == "freshqa" and q.freshness_need for q in rows[:5])
+    assert len({q.freshness_need for q in rows}) > 1  # not the fallback
 
 
 def test_load_benchmark_sample_sizing_honored():
