@@ -323,6 +323,22 @@ python run_arena.py --queries my_queries.csv --benchmark-suite   # or modes.benc
 
 Writes `benchmark_suite.json` alongside `results.json` in the run dir.
 
+### Definition of done: two test tiers (§14)
+
+- **Tier A** — deterministic, no AI, no keys (`python -m pytest tests/arena -q`). Runs in CI on
+  every push/PR (`.github/workflows/tests.yml`); 100% green is the merge gate.
+- **Tier B** — thresholded, AI-involved, costs money; gates a **release**, not a commit:
+
+  ```sh
+  python -m arena.tier_b --n 30    # needs ANTHROPIC_API_KEY + ≥2 provider keys, else SKIPs
+  ```
+
+  One live run over a SimpleQA gold sample checks all four bars — judge-vs-gold calibration
+  ≥ 0.80, swap-consistency ≥ 0.85, inter-judge κ ≥ 0.60 (when a secondary judge is
+  configured), and the e2e live smoke. Red/green with exit codes; every run writes
+  `tier_b.json` recording the thresholds, values, and sample size. A missing signal is a
+  FAIL, never a silent pass.
+
 ### Config (optional)
 
 Copy `configs/arena.example.yaml` to `configs/arena.yaml` (git-ignored) to override defaults —

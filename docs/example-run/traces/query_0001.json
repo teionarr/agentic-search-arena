@@ -1,0 +1,1293 @@
+{
+  "query": "what year was the transistor invented at bell labs?",
+  "category": "tech",
+  "repeat": 0,
+  "providers": {
+    "tavily": {
+      "raw": {
+        "answer": "",
+        "search_response": {
+          "query": "what year was the transistor invented at bell labs?",
+          "follow_up_questions": null,
+          "answer": null,
+          "images": [],
+          "results": [
+            {
+              "url": "https://en.wikipedia.org/wiki/Bell_Labs",
+              "title": "Bell Labs - Wikipedia",
+              "content": "In 1947, the transistor, arguably the most important invention developed by Bell Laboratories, was invented by John Bardeen, Walter Houser Brattain, and William Bradford Shockley (who subsequently shared the Nobel Prize in Physics in 1956). Also in 1947, Douglas H. Ring of Bell Labs introduced the idea of using hexagonal \"cells\" to reuse frequencies in mobile radiotelephony, laying the theoretical groundwork for modern cellular networks.( The same year, Richard Hamming invented Hamming codes for error detection and correction. For patent reasons, his result was not published until 1950. [...] ### 1940s\n\n[edit]\n\nImage 17\n\nA replica of the first transistor, a point-contactgermanium device, invented at Bell Laboratories in 1947\n\nIn the early 1940s, the photovoltaic cell was developed by Russell Ohl. In 1943, Bell developed SIGSALY, the first digital scrambled speech transmission system, used by the Allies in World War II. The British wartime codebreaker Alan Turing visited the labs at this time, working on speech encryption and meeting Claude Shannon.( [...] Following Frosch and Derick research, Mohamed Atalla and Dawon Kahng proposed a silicon MOS transistor in 1959( and successfully demonstrated a working MOS device with their Bell Labs team in 1960.( Their team included E. E. LaBate and E. I. Povilonis who fabricated the device; M. O. Thurston, L. A. D\u2019Asaro, and J. R. Ligenza who developed the diffusion processes, and H. K. Gummel and R. Lindner who characterized the device.(\n\nK. E. Daburlos and H. J. Patterson of Bell Laboratories continued on the work of C. Frosch and L. Derick, and developed a process similar to Hoerni's planar process about the same time.(\n\nJ.R. Ligenza and W.G. Spitzer studied the mechanism of thermally grown oxides, fabricated a high quality Si/SiO 2 stack and published their results in 1960.(\n\n### 1960s\n\n[edit]",
+              "score": 0.91988057,
+              "raw_content": null
+            },
+            {
+              "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+              "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+              "content": "Source: Bell Labs\n\nClick image above to enlarge\n\nThe shape of the transistor has changed dramatically since it was invented at Bell Labs in 1947 as a replacement for the vacuum tube. Clockwise from the top: 1941 vacuum tube used for telephone communications; the point-contact transistor as it was introduced June 30,1948 to the world, six months after its invention; 1955 transistor which replaced vacuum tubes in network communications equipment; 1957 diffused base high frequency broadband amplifier; 1967 microchip, used to produce the tones in a touch-tone telephone set, contained two transistors; and (center) a Lucent Technologies digital signal processor chip, which can contain as many as 5 million transistors, used in modems and cellular communications. [...] Source: Bell Labs\n\nClick image above to enlarge\n\n\" A picture of the first transistor ever assembled, invented in Bell Labs in 1947. It was called a point contact transistor because amplification or transistor action occurred when two pointed metal contacts were pressed onto the surface of the semiconductor material. The contacts, which are supported by a wedge shaped piece of insulating material, are placed extremely close together so that they are separated by only a few thousandths of an inch. The contacts are made of gold and the semiconductor is germanium. The semiconductor rests on a metal base.\n\nSource: Bell Labs\n\nClick image above to enlarge [...] # Bell Labs History of The Transistor (the Crystal Triode)\n\n\u201cNature abhors the vacuum tube.\u201d- J.R. Pierce, Bell Labs engineer who coined the term \u2019transistor'\n\n\\\\\\\\\n\nClick to enlarge\n\nFrom the Bell Labs website:\n\nBell Labs is the birthplace of the Transistor, inventing the device that led to a communications revolution.\n\nJohn Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in December 1947, while the three were members of the technical staff at Bell Laboratories in Murray Hill, NJ. To view the patent, see [US Patent #02569347 which was issued on September 25, 1951] They were awarded the Nobel Prize in physics in 1956.",
+              "score": 0.91023487,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.nokia.com/blog/the-transistor-75-years-since-the-famed-nokia-bell-labs-invention-changed-the-world",
+              "title": "The transistor: 75 years since the famed Nokia Bell Labs invention ...",
+              "content": "Close-up of the first point-contact transistor invented at Bell Labs in 1947. The device is mounted on a clear plastic stand, showing its small size and intricate wire structure. It sits on a white pedestal against a blue background, highlighting its historical significance in electronics.\n\nAs with most revolutionary inventions, John Bardeen and Walter Brattain weren\u2019t seeking to rewrite history. The pair of American physicists were merely aiming to improve telephone calls by developing a smaller electrical device that consumed less power than vacuum tubes. [...] A newspaper clipping celebrating 75 years of the transistor. Timeline shows invention in 1947 at Bell Labs, Nobel Prize win, and evolution from vacuum tubes to modern microchips. Highlights transistor's impact on communications, computing, and consumer electronics.\n\nWhat a transistor essentially allowed was to take a light bulb, for example, and turn it into a tiny spec that fit on a chip. The \u201ctransistorizing\u201d effect made computers mobile, turning them from massive contraptions the size of rooms into something that could fit into an aircraft and fly a spacecraft to the Moon. Further miniaturization led to personal computers that could fit first on our desks, then on our laps and finally in our pockets. [...] \u201cIt evolved a primitive device to one that can be made super small,\u201d explained Ed Eckert, Nokia Bell Labs\u2019 corporate archivist. \u201cThe vacuum tube had its limitations: its size, it used lots of power, it was fragile, it created lots of heat. So, the transistor was the answer to all these problems.\u201d\n\n## Smaller is better\n\nA newspaper clipping celebrating 75 years of the transistor. Timeline shows invention in 1947 at Bell Labs, Nobel Prize win, and evolution from vacuum tubes to modern microchips. Highlights transistor's impact on communications, computing, and consumer electronics.",
+              "score": 0.9073207,
+              "raw_content": null
+            },
+            {
+              "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+              "title": "History of the transistor - Wikipedia",
+              "content": "Brattain and H. R. Moore made a demonstration to several of their colleagues and managers at Bell Labs on the afternoon of December 23, 1947, often given as the birth date of the transistor. The \"PNP point-contact germanium transistor\" operated as a speech amplifier with a power gain of 18 in that trial. In 1956 John Bardeen, Walter Houser Brattain, and William Bradford Shockley were honored with the Nobel Prize in Physics \"for their researches on semiconductors and their discovery of the transistor effect\".\n\nTwelve people are mentioned as directly involved in the invention of the transistor in the Bell Laboratory. [...] A transistor is a semiconductor device with at least three terminals for connection to an electric circuit. In the common case, the third terminal controls the flow of current between the other two terminals. This can be used for amplification, as in the case of a radio receiver, or for rapid switching, as in the case of digital circuits. The transistor replaced the vacuum-tube triode, also called a (thermionic) valve, which was much larger in size and used significantly more power to operate. The first transistor was successfully demonstrated on December 23, 1947, at Bell Laboratories in Murray Hill, New Jersey. Bell Labs was the research arm of American Telephone and Telegraph (AT&T). The three individuals credited with the invention of the transistor were William Shockley, John Bardeen [...] Transistors are broadly classified into two categories: bipolar junction transistor (BJT) and field-effect transistor (FET).\n\nThe principle of a field-effect transistor was proposed by Julius Edgar Lilienfeld in 1925. John Bardeen, Walter Brattain and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor in 1947. Shockley introduced the improved bipolar junction transistor in 1948, which entered production in the early 1950s and led to the first widespread use of transistors.",
+              "score": 0.9016528,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.pbs.org/transistor/album1",
+              "title": "An Outline of the History of the Transistor",
+              "content": "Bell Labs decided to unveil the invention on June 30,\n1948. With the help of engineer John Pierce,\nwho wrote science fiction in his spare time, Bell Labs settled on the\nname \"transistor\"-- combining the ideas\nof \"trans-resistance\" with the names of other devices like thermistors. [...] Bell Labs decided to unveil the invention on June 30,\n1948. With the help of engineer John Pierce,\nwho wrote science fiction in his spare time, Bell Labs settled on the\nname \"transistor\"-- combining the ideas\nof \"trans-resistance\" with the names of other devices like thermistors. [...] Bell Labs decided to unveil the invention on June 30,\n1948. With the help of engineer John Pierce,\nwho wrote science fiction in his spare time, Bell Labs settled on the\nname \"transistor\"-- combining the ideas\nof \"trans-resistance\" with the names of other devices like thermistors.",
+              "score": 0.8993429,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs",
+              "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+              "content": "The name transistor, a combination of transfer and resistor, was coined for these devices in May 1948 by Bell Labs electrical engineer John Robinson Pierce, who was also a science-fiction author in his spare time. A month later Bell Labs announced the revolutionary invention in a press conference held at its New York City headquarters, heralding Bardeen, Brattain, and Shockley as the three coinventors of the transistor. The three were eventually awarded the Nobel Prize for Physics for their invention. [...] Bardeen\u2019s conjecture spurred a basic research program at Bell Labs into the behaviour of these \u201csurface-state\u201d electrons. While studying this phenomenon in November 1947, Brattain stumbled upon a way to neutralize their blocking effect and permit the applied field to penetrate deep into the semiconductor material. Working closely together over the next month, Bardeen and Brattain invented the first successful semiconductor amplifier, called the point-contact transistor, on December 16, 1947. Similar to the World War II crystal rectifiers, this weird-looking device had not one but two closely spaced metal wires jabbing into the surface of a semiconductor\u2014in this case, germanium. The input signal on one of these wires (the emitter) boosted the conductivity of the germanium beneath both of [...] Shockley had foreseen these difficulties in the process of conceiving the junction transistor, which he figured would be much easier to manufacture. But it still required more than three years, until mid-1951, to resolve its own development problems. Bell Labs scientists, engineers, and technicians first had to find ways to make ultrapure germanium and silicon, form large crystals of these elements, dope them with narrow layers of the required impurities, and attach delicate wires to these layers to serve as electrodes. In July 1951 Bell Labs announced the successful invention and development of the junction transistor, this time with only Shockley in the spotlight.\n\n## Commercialization",
+              "score": 0.8943568,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor",
+              "title": "1947: Invention of the Point-Contact Transistor | The Silicon Engine",
+              "content": "Named the \"transistor\" by electrical engineer John Pierce, Bell Labs publicly announced the revolutionary solid-state device at a press conference in New York on June 30, 1948. A spokesman claimed that \"it may have far-reaching significance in electronics and electrical communication.\" Despite its delicate mechanical construction, many thousands of units were produced in a metal cartridge package as the Bell Labs \"Type A\" transistor.\n\nPrevious Milestone   Next Milestone\n\n## Contemporary Documents [...] ## Contemporary Documents\n\n Brattain, Walter. Bell Labs logbook (December 1947) pp. 7-8, 24.\n John Bardeen and Walter Brattain, \"The Transistor, a Semi-Conductor Triode,\" Physical Review 74 (15 July 1948) pp. 230-231.\n Bardeen, J. and Brattain, W. \"Three-Electrode Circuit Element Utilizing Semiconductor Materials,\" U. S. Patent 2,524,035 (Filed June 17, 1948, issued Oct. 3, 1950).\n Becker J. A., and Shive, J. N. \"The Transistor - A New Semiconductor Amplifier,\" Electrical Engineering Vol 68 (March 1949) pp. 215-221.\n\n## More Information [...] The Silicone Engine | Computer History Museum\n\n# 1947: Invention of the Point-Contact Transistor\n\n## John Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947.\n\nBardeen, Brattain, and Shockley (seated) on the cover of Electronics magazine September 1948 'Crystal Triode' issue\n\nBardeen and Brattain's first point-contact transistor\n\nFigures from Bardeen and Brattain's 1948 transistor patent\n\nBell Laboratories 'Type A' transistor",
+              "score": 0.84707206,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time",
+              "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+              "content": "Three persons, Walter Brattain, John Bardeen and William Shockley, shared the Nobel Prize in Physics for the breakthrough that they achieved on December 23, 1947. In certain respects, a fourth person was responsible for the transistor being discovered at that time. Marvin Kelley, who was then head of Bell Laboratories, had brought the trio together. Kelley believed that working with such an unknown group of materials as semiconductors demanded a combination of different specialties: the brilliant theorist Brattain, the skilled materials expert Bardeen and the very accomplished experimentalist Shockley, who was also strong on theory. The objectives for the project were very general. [...] The transistor, however, is an invention that was conceived long before the time was right. It was invented in 1947, and even several years later, it was considered by a scientific conference to be such an odd accomplishment that it was not included in the documentation. The inventors themselves believed that the transistor might be used in some special instruments and possible in military radio equipment. Yet the transistor is fundamental for all modern technology, including telecommunications, data communications, aviation and audio and video recording equipment.",
+              "score": 0.8215175,
+              "raw_content": null
+            },
+            {
+              "url": "https://ethw.org/Bell_Labs",
+              "title": "Bell Labs - Engineering and Technology History Wiki",
+              "content": "Transistor inventors William Shockley (seated), John Bardeen (in glasses), and Walter Brattain in a 1948 Bell Labs publicity photo. Courtesy: AT&T. [...] At the end of the war Bell Labs was at the peak of its power. From the late 1940s through the late 1970s, it reigned unchallenged as the largest and perhaps most inventive industrial laboratory in the world. Its engineers and scientists invented or brought to fruition numerous technologies, including the first transistor and many of its important variations. Although the integrated circuit was invented elsewhere, construction techniques invented at Bell Labs established many of the necessary precursors to it. The same could be said for fiber optic transmission, electronic switching systems, cellular telephony, satellite communication, solar power, and other technologies we use today. Although not all of their elements were invented at Bell Labs, it was there that the long and incredibly [...] at Bell Labs, it was there that the long and incredibly expensive development process brought them to maturity. And while there were notable failures, such as the  \u201cPicturephone\u201d system, there were numerous inventions, some little-known at the time, which later became very important. The Charge-Coupled Device or CCD, now universally used in digital cameras, video cameras, the Hubble telescope, and elsewhere, was one such development. Bell Labs engineers Willard Boyle and George Smith invented it in the 1970s.",
+              "score": 0.8190992,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.marketplace.org/story/2022/12/13/bell-labs-the-research-center-behind-the-transistor-and-so-much-more",
+              "title": "How Bell Labs became the epicenter of 20th-century innovation",
+              "content": "Nokia USA Inc. and AT&T Archives\n\nThe future began 75 years ago this week with the invention of a device that\u2019s seen as the most manufactured item in human history. The transistor was born in New Jersey on Dec. 16, 1947. This week, we\u2019re looking at the ecosystems of innovation that turned that invention into \u2026 nearly everything.\n\nThe first transistor was a sort of crude metal spring pushing what looks like an arrowhead wrapped in gold foil down into a shard of germanium, the semiconductor, with all of that on top of a metal base. [...] # Marketplace\u00ae\n\nEvery story is an economic story\n\nDec 13, 2022\n\n# Bell Labs: The research center behind the transistor, and so much more\n\nBell Labs was the research arm of AT&T, a monopoly at the time the transistor was invented.\n\nThe Transistor at 75by David Brancaccio and Alex Schroeder\n\nDownload\n\nPhysicists John Bardeen (left), William Shockley (center) and Walter Brattain won the Nobel Prize for their work on the transistor. It's one of nine Nobel Prizes that Bell Labs researchers have received.\n\nNokia USA Inc. and AT&T Archives [...] Ed Eckert, the archivist at today\u2019s Bell Labs, can name a whole host of the world-changing discoveries and inventions through the years: \u201cThe cellular concept made cell phones practical, commercial fax machine, satellite pioneer with Telstar 1, solar cells, the science of radio astronomy and we discovered the leftover radiation that was considered proof of the Big Bang Theory.\u201d\n\nEd Eckert, the Nokia Bell Labs archivist, stands behind the first transistor.\n\nAlex Schroeder/Marketplace\n\nBell Labs survived the court-ordered breakup of the AT&T monopoly in 1984 and some of its culture lives on. These days, this is one of the research centers owned since 2016 by Nokia of Finland. Peter Vetter is president of Nokia Bell Labs Core Research, where even today, there\u2019s room for raw exploration.",
+              "score": 0.8156003,
+              "raw_content": null
+            }
+          ],
+          "response_time": 0.0,
+          "request_id": "fa594505-8e7f-4467-ae70-2c149dd413af"
+        },
+        "provider_latency": 0.7250058650970459
+      },
+      "latency_ms": 725.0058650970459,
+      "n_results": 10,
+      "evidence": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Bell_Labs",
+          "title": "Bell Labs - Wikipedia",
+          "content": "In 1947, the transistor, arguably the most important invention developed by Bell Laboratories, was invented by John Bardeen, Walter Houser Brattain, and William Bradford Shockley (who subsequently shared the Nobel Prize in Physics in 1956). Also in 1947, Douglas H. Ring of Bell Labs introduced the idea of using hexagonal \"cells\" to reuse frequencies in mobile radiotelephony, laying the theoretical groundwork for modern cellular networks.( The same year, Richard Hamming invented Hamming codes for error detection and correction. For patent reasons, his result was not published until 1950. [...] ### 1940s\n\n[edit]\n\nImage 17\n\nA replica of the first transistor, a point-contactgermanium device, invented at Bell Laboratories in 1947\n\nIn the early 1940s, the photovoltaic cell was developed by Russell Ohl. In 1943, Bell developed SIGSALY, the first digital scrambled speech transmission system, used by the Allies in World War II. The British wartime codebreaker Alan Turing visited the labs at this time, working on speech encryption and meeting Claude Shannon.( [...] Following Frosch and Derick research, Mohamed Atalla and Dawon Kahng proposed a silicon MOS transistor in 1959( and successfully demonstrated a working MOS device with their Bell Labs team in 1960.( Their team included E. E. LaBate and E. I. Povilonis who fabricated the device; M. O. Thurston, L. A. D\u2019Asaro, and J. R. Ligenza who developed the diffusion processes, and H. K. Gummel and R. Lindner who characterized the device.(\n\nK. E. Daburlos and H. J. Patterson of Bell Laboratories continued on the work of C. Frosch and L. Derick, and developed a process similar to Hoerni's planar process about the same time.(\n\nJ.R. Ligenza and W.G. Spitzer studied the mechanism of thermally grown oxides, fabricated a high quality Si/SiO 2 stack and published their results in 1960.(\n\n### 1960s\n\n[edit]"
+        },
+        {
+          "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+          "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+          "content": "Source: Bell Labs\n\nClick image above to enlarge\n\nThe shape of the transistor has changed dramatically since it was invented at Bell Labs in 1947 as a replacement for the vacuum tube. Clockwise from the top: 1941 vacuum tube used for telephone communications; the point-contact transistor as it was introduced June 30,1948 to the world, six months after its invention; 1955 transistor which replaced vacuum tubes in network communications equipment; 1957 diffused base high frequency broadband amplifier; 1967 microchip, used to produce the tones in a touch-tone telephone set, contained two transistors; and (center) a Lucent Technologies digital signal processor chip, which can contain as many as 5 million transistors, u"
+        }
+      ],
+      "reader_answer": "Based on the evidence provided, the transistor was invented at Bell Labs in **1947**.\n\nAccording to the sources, the transistor was invented by John Bardeen, Walter Houser Brattain, and William Bradford Shockley. It was a point-contact germanium device, and the invention was publicly introduced to the world on June 30, 1948, approximately six months after its invention."
+    },
+    "exa": {
+      "raw": {
+        "answer": "",
+        "search_response": {
+          "requestId": "421d68a8e3a5cf676f5f559d377e3b77",
+          "resolvedSearchType": "",
+          "results": [
+            {
+              "id": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+              "title": "1947: Invention of the Point-Contact Transistor |  The Silicon Engine | Computer History Museum",
+              "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+              "highlights": [
+                "John Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947."
+              ],
+              "image": "https://www.computerhistory.org/_wrapper/exhibit/img/chm-logo-text.svg",
+              "favicon": "https://www.computerhistory.org/favicon.ico"
+            },
+            {
+              "id": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+              "title": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki",
+              "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+              "publishedDate": "2026-02-19T20:56:35.000Z",
+              "highlights": [
+                "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki\n...\n# Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947\n...\nInvention of the First Transistor at Bell Telephone Laboratories, Inc., 1947\n...\nAt this site, in Building 1, Room 1E455, from 17 November to 23 December 1947, Walter H. Brattain and John A. Bardeen -- under the direction of William B. Shockley -- discovered the transistor effect, and developed and demonstrated a point-contact germanium transistor. This led directly to developments in solid-state devices that revolutionized the electronics industry and changed the way people around the world lived, learned, worked, and played.\n...\nThe invention of the first working transistor set the stage for all subsequent solid-state device developments. Although Julius Edgar Lilienfeld[1] successfully patented a number of field-effect transistor configurations starting in 1925 and into the 1930\u2019s, there is no indication that he ever produced any working models. If he did, they would not have worked very well due to the state of germanium and silicon crystal growth at that time. By 1947,[2] advances in germanium semiconductors made it possible for Bardeen and Brattain to make the first working point contact transistor.\n...\n3. The following from: http://www.sscs.org/AdCom/transistorhistory.pdf, p 1858, IEEE JOURNAL OF SOLID-STATE CIRCUITS, VOL. 32, NO. 12, DECEMBER 1997 p. 1860. \u201cBy late November 1947, Bardeen and Brattain managed to make a working transistor. It must be said that it was very crude, but they improved it from late November through the first part of December. By December 16, 1947, they had a working point-contact transistor.\u201d\n...\n3. The Miracle Month, The Invention of the First Transistor, November 17-December 23, 1947, ScienCentral, Inc, and The American Institute of Physics, from http://www.pbs.org/transistor/background1/events/miraclemo.html.\n...\n9. The Transistor, 1947: Bell Labs\u2019 John Bardeen, Walter Brattain, and William Shockley invent the transistor, replacing vacuum tubes and mechanical relays and revolutionizing the entire electronics world. The team was awarded a Nobel Prize in 1956. http://www.alcatel-lucent.com/wps/portal/!ut/p/kcxml/04_Sj9SPykssy0xPLMnMz0vM0Y_QjzKLd4w3MfQFSYGYRq6m-pEoYgbxjgiRIH1vfV-P_NxU_QD9gtzQiHJHR0UAAD_zXg!!/delta/base64xml/L0lJayEvUUd3QndJQSEvNElVRkNBISEvNl9BX0FLTC9lbl93dw!!?LMSG_CABINET=Bell_Labs&LMSG_CONTENT_FILE=History/Timeline/Timeline_Innovation_000060&UNIQUE_NAME=lu.gen.prt.pg.rendition&lu_lang_code=en_WW"
+              ],
+              "image": "https://ethw.org/w/logo.png",
+              "favicon": "https://ethw.org/favicon.ico"
+            },
+            {
+              "id": "https://www.aps.org/funding-recognition/historic-sites/bell-telephone-laboratories",
+              "title": "Bell Telephone Laboratories | American Physical Society",
+              "url": "https://www.aps.org/funding-recognition/historic-sites/bell-telephone-laboratories",
+              "highlights": [
+                "Brattain (1902-1987) for their invention of the transistor, which has been called \u201cthe most important invention of the 20th Century.\u201d11 Developed from ..."
+              ],
+              "image": "https://res.cloudinary.com/apsphysics/image/upload/v1715633411/aps-125-social-share_2x_il84vj.png",
+              "favicon": "https://www.aps.org/favicon.ico"
+            },
+            {
+              "id": "https://www.electronics-notes.com/articles/history/semiconductors/when-was-transistor-invented-history-invention.php",
+              "title": "Transistor Invention & History \u00bb Electronics Notes",
+              "url": "https://www.electronics-notes.com/articles/history/semiconductors/when-was-transistor-invented-history-invention.php",
+              "author": "electronics notes",
+              "highlights": [
+                "It was just before Christmas, on the 23rd December 1947 when the team of Shockley, Bardeen and Brattain demonstrated their new invention of a point contact transistor to senior management at Bell Laboratories in the USA.\n...\nNobody could have envisaged the major impact that the invention of the transistor would have on the electronics industry and in fact the whole world. It had been just a week since the team had first successfully managed to get the device to work. Thus the date for the invention of the transistor could be said to be 16th December 1947.\n...\nVideo: The Invention of the Transistor: Bell Labs\n...\n1947\n...\nThe idea was tried on 16th December 1947 and to their surprise it worked first time. The first point contact transistor had been made and the first transistor had been invented.\n...\nDiagram of the set up for the first transistor Exactly a week later Shockley, Bardeen and Brattain found themselves demonstrating the new transistor invention to laboratory officials and senior management at Bell. Schockley referred to this as a \"magnificent Christmas present.\"\n...\n| Key Facts About Transistor Invention |\n| --- |\n| Attribute | Details |\n| Date of transistor invention | 16 December 1947(date when the point contact transistor first worked) |\n| Date demonstrated to senior management | 23 December 1947 |\n| Type of transistor | Point contact transistor (dual point contacts) |\n| Material used | Germanium |\n| Main members of team | William Shockley, John Bardeen, Walter Brattain |\n| Location of transistor invention | Bell Laboratories, USA |"
+              ],
+              "image": "https://www.electronics-notes.com/parts/images/electronics-notes-3.png",
+              "favicon": "https://www.electronics-notes.com/favicon.ico"
+            },
+            {
+              "id": "https://journals.aps.org/pr/pdf/10.1103/PhysRev.74.230",
+              "title": "The Transistor, A Semi-Conductor Triode",
+              "url": "https://journals.aps.org/pr/pdf/10.1103/PhysRev.74.230",
+              "author": "J. Bardeen and W. H. Brattain",
+              "highlights": [
+                "The Transistor,\n...\nA Semi-Conductor Triode\n...\nJ. BARDEEN AND W. H. BRATTAIN\nBell Telephone I.aboralories, Murray HiLl, \u00b9wJersey\nJune 25, 1948\n...\nelectronic device which util\u0002izes a newly discovered principle involving a semi\u0002\n...\nas the basic element is described. It may\n...\n3 This surface treatment is due to R. B. Gibney, formerly of Bell\n...\n, now at Los Alamos Scientific"
+              ]
+            },
+            {
+              "id": "https://memorial.bellsystem.com/belllabs_transistor.html",
+              "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+              "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+              "author": "false",
+              "highlights": [
+                "John Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in December 1947."
+              ],
+              "image": "https://memorial.bellsystem.com/images/bell_stripe_header.png",
+              "favicon": "https://memorial.bellsystem.com/img/icon-32x32.png"
+            },
+            {
+              "id": "https://memorial.bellsystem.com/pdf/bell_labs_journals/bell_labs_technical_journal_autumn_1997_1.pdf",
+              "title": "The Foundation of the Silicon Age",
+              "url": "https://memorial.bellsystem.com/pdf/bell_labs_journals/bell_labs_technical_journal_autumn_1997_1.pdf",
+              "author": "Mark",
+              "highlights": [
+                "The invention of the transistor almost fifty years ago was one of the most important technical developments of this century. It has had profound impact on the way we live and the way we work. This paper describes the events that led to the invention of the point-contact transistor in December of 1947. It continues with the develop ment of the theory of the junction transistor in early 1948 and the fabrication of the first grown-junction transistor in 1950. The paper next covers the major hurdles that had to be overcome and the major breakthroughs that had to be made to turn an exciting invention into a far-reaching technical innovation. The final part of the paper suggests some of the reasons why such an important technological progress could occur in a relatively short period of time.\n...\nand an opportunity\n...\nintervene. In the course of their work, they tried to modify\n...\nsurrounding the metal contacts to the germanium\n...\n. Following a suggestion by Gibney,3 they found that applying voltage to the elec trolyte created major changes in the current flow through a reverse biased contact. Brattain later replaced the electrolyte with an evaporated gold spot adjacent to the point contact. Finally, he replaced both contacts by an ingenious arrangement of two strips of gold foil separated by just a few mils and pressed onto the germanium surface. With one gold contact for ward biased and the other reverse biased he observed power gain (see Figure 1). The transistor effect had been discovered.4 This was on December\n...\n16,\n...\n47, a mere two and a half years after the formation of the Shockley group. On Christmas Eve of 1947, the transistor action was demonstrated by Brattain and Moore for the top management of Bell Labs. This time the device was operated as an oscillator, an acid test of the existence of power gain. The announcement of the transistor discovery was delayed, however, until June 1948. This six-month period was used to gain more understand ing of the device and its possible applications and to obtain an adequate patent position. Shockley, Bradeen, and Brattain were awarded the 1956 Nobel Prize in physics for the invention of the transistor (see Figure 2). The above is an abbreviated account of the events that led to the invention of the transistor. I believe it to be essentially correct. It is consistent with a memoran dum written in December 1949 by W. S. Gorton, an assistant to the Director of Research of Bell Labs.5\n...\nThe pace of\n...\nthe invention of the\n...\nIn a period of only\n...\ngroup, the invention of"
+              ]
+            },
+            {
+              "id": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+              "title": "History of the transistor",
+              "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+              "highlights": [
+                "John Bardeen, Walter Brattain and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor in 1947. highlights: [1947]"
+              ],
+              "image": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Ambox_important.svg/40px-Ambox_important.svg.png"
+            },
+            {
+              "id": "https://events.vtools.ieee.org/event_media/download/56756",
+              "title": "A history of the invention of the transistor and where it will lead us",
+              "url": "https://events.vtools.ieee.org/event_media/download/56756",
+              "author": "W.F. Brinkman, D.E. Haggan and W.W. Troutman",
+              "highlights": [
+                "IFTY years ago this November, John Bardeen and Walter Brattain discovered the transistor on the fourth floor of Building 1 at Bell Labs in Murray Hill, NJ. Fifty years later, we are still working with silicon but it is a very different silicon effort. Currently with the silicon optical bench we are trying to integrate optical components the way we did transistors over the last 50 years. So, silicon technology is still on the move. When one reads about the invention of the transistor one cannot help but note that the work of Bardeen and Brattain was truly a discovery not an invention. When they discovered transistor action, they were investigating the nature of surface states and ways to reduce their presence\n...\nIt was only later that things really became clear as to what was going on\n...\nFifty years later we celebrate that discovery, and this paper presents a brief history of the major events and the key people\n...\ntoday is very different from what\n...\na very large complex\n...\nresearch and development effort is much bigger and broader today than it was back\n...\nWe would like to do\n...\ncouple of things\n...\nWe will lay out\n...\nfollowing issue in mind when thinking\n...\ni.e., where people were in science and technology at the time of\n...\n; what they knew and did not know\n...\nBy looking at the context one will have a much better appreciation for what was actually accomplished\n...\nSo let us take a look back in history and examine the events that occurred\n...\nLet us try to understand what was understood and what was not understood at the time of\n...\n; we will then appreciate it even more\n...\nBy late November 1947, Bardeen and Brattain managed to make a working transistor. It must be said that it was very crude, but they improved it from late November through the first part of December. By December 16, 1947, they had a working point-contact transistor. They were able to gradually improve it and actually make a circuit to demonstrate to Bell Labs management on Christmas Eve. Of course, this was a very big event. During the next six months at Bell Labs, Bardeen and Brattain spent a lot of time making sure they had patents filed and then clearing it for release to the public with the military. It was interesting that at one stage, the military was threatening to classify this discovery as top secret. Fortunately, Bell Labs management worked around that. By June 30, 1948, Bell Labs had a press conference in New York City which was quite elaborate. They had done a lot of work on a prototype circuit that had actual voices being amplified by the transistors\n...\nthat the impact of this discovery went on\n...\nsomething like this"
+              ]
+            },
+            {
+              "id": "https://web.archive.org/web/20151221060126/http:/www.computerhistory.org/semiconductor/timeline/1947-invention.html",
+              "title": "1947 - Invention of the Point-Contact Transistor | Computer History Museum",
+              "url": "https://web.archive.org/web/20151221060126/http:/www.computerhistory.org/semiconductor/timeline/1947-invention.html",
+              "highlights": [
+                "## 1947 - Invention of the Point-Contact Transistor\n...\n##### John Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947.\n...\nEncouraged by Executive Vice President Mervin Kelly, William Shockley returned from wartime assignments in early 1945 to begin organizing a solid-state physics group at Bell Labs. Among other things, this group pursued research on semiconductor replacements for unreliable vacuum tubes and electromechanical switches then used in the Bell Telephone System. That April he conceived a \"field-effect\" amplifier and switch based on the germanium and silicon technology developed during the war, but it failed to work as intended. A year later theoretical physicist John Bardeen suggested that electrons on the semiconductor surface might be blocking penetration of electric fields into the material, negating any effects. With experimental physicist Walter Brattain, Bardeen began researching the behavior of these \"surface states.\"\n...\nOn December 16, 1947, their research culminated in the first successful semiconductor amplifier. Bardeen and Brattain applied two closely-spaced gold contacts held in place by a plastic wedge to the surface of a small slab of high-purity germanium. The voltage on one contact modulated the current flowing through the other, amplifying the input signal up to 100 times. On December 23 they demonstrated their device to lab officials - in what Shockley deemed \"a magnificent Christmas present.\"\n...\nNamed the \"transistor\" by electrical engineer John Pierce, Bell Labs publicly announced the revolutionary solid-state device at a press conference in New York on June 30, 1948. A spokesman claimed that \"it may have far-reaching significance in electronics and electrical communication.\" Despite its delicate mechanical construction, many thousands of units were produced in a metal cartridge package as the Bell Labs \"Type A\" transistor."
+              ],
+              "image": "https://web-static.archive.org/_static/images/toolbar/wayback-toolbar-logo-200.png"
+            }
+          ],
+          "searchTime": 7.7,
+          "costDollars": {
+            "total": 0.007,
+            "search": {
+              "neural": 0.007
+            }
+          }
+        },
+        "provider_latency": 0.23674297332763672
+      },
+      "latency_ms": 236.74297332763672,
+      "n_results": 10,
+      "evidence": [
+        {
+          "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+          "title": "1947: Invention of the Point-Contact Transistor |  The Silicon Engine | Computer History Museum",
+          "content": "John Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947."
+        },
+        {
+          "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+          "title": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki",
+          "content": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki\n...\n# Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947\n...\nInvention of the First Transistor at Bell Telephone Laboratories, Inc., 1947\n...\nAt this site, in Building 1, Room 1E455, from 17 November to 23 December 1947, Walter H. Brattain and John A. Bardeen -- under the direction of William B. Shockley -- discovered the transistor effect, and developed and demonstrated a point-contact germanium transistor. This led directly to developments in solid-state devices that revolutionized the electronics industry and changed the way people around the world lived, learned, worked, and played.\n...\nThe invention of the first working transistor set the stage for all subsequent solid-state device developments. Although Julius Edgar Lilienfeld[1] successfully patented a number of field-effect transistor configurations starting in 1925 and into the 1930\u2019s, there is no indication that he ever produced any working models. If he did, they would not have worked very well due to the state of germanium and silicon crystal growth at that time. By 1947,[2] advances in germanium semiconductors made it possible for Bardeen and Brattain to make the first working point contact transistor.\n...\n3. The following from: http://www.sscs.org/AdCom/transistorhistory.pdf, p 1858, IEEE JOURNAL OF SOLID-STATE CIRCUITS, VOL. 32, NO. 12, DECEMBER 1997 p. 1860. \u201cBy late November 1947, Bardeen and Brattain managed to make a working transistor. It must be said that it was very crude, but they improved it from late November through the first part of December. By December 16, 1947, they had a working point-contact transistor.\u201d\n...\n3. The Miracle Month, The Invention of the First Transistor, November 17-December 23, 1947, ScienCentral, Inc, and The American Institute of Physics, from http://www.pbs.org/transistor/background1/events/miraclemo.html.\n...\n9. The Transistor, 1947: Bell Labs\u2019 John Bardeen, Walter Brattain, and William Shockley invent the transistor, replacing vacuum "
+        }
+      ],
+      "reader_answer": "The transistor was invented at Bell Labs in **1947**. Specifically, John Bardeen and Walter Brattain, under the direction of William B. Shockley, achieved transistor action in a germanium point-contact device in December 1947, with the breakthrough occurring between November 17 and December 23, 1947."
+    },
+    "brave": {
+      "raw": {
+        "answer": "",
+        "search_response": {
+          "type": "search",
+          "query": {
+            "original": "what year was the transistor invented at bell labs?",
+            "show_strict_warning": false,
+            "is_navigational": false,
+            "is_news_breaking": false,
+            "spellcheck_off": false,
+            "country": "us",
+            "bad_results": false,
+            "should_fallback": false,
+            "postal_code": "",
+            "city": "",
+            "header_country": "",
+            "more_results_available": true,
+            "state": ""
+          },
+          "mixed": {
+            "type": "mixed",
+            "main": [
+              {
+                "type": "web",
+                "index": 0,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 1,
+                "all": false
+              },
+              {
+                "type": "videos",
+                "all": true
+              },
+              {
+                "type": "web",
+                "index": 2,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 3,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 4,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 5,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 6,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 7,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 8,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 9,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 10,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 11,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 12,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 13,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 14,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 15,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 16,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 17,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 18,
+                "all": false
+              },
+              {
+                "type": "web",
+                "index": 19,
+                "all": false
+              }
+            ],
+            "top": [],
+            "side": []
+          },
+          "videos": {
+            "type": "videos",
+            "results": [
+              {
+                "type": "video_result",
+                "url": "https://www.instagram.com/reel/DTqDnu8gaSm/",
+                "title": "Before smartphones, before laptops, before the internet as we ...",
+                "description": "",
+                "video": {},
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "instagram.com",
+                  "hostname": "www.instagram.com",
+                  "favicon": "https://imgs.search.brave.com/kgdtgqUZQdNYzMKhbVXC5vthlFLPMJ0IOJAdFjEIRuk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvN2RiYmJiZDA4/NTBkNWQ0ZmQ3NDE5/OGUxOGI4NzE5ZDI0/Zjk0M2ExMDkzZmJm/ODA0MmJiMzkwZjMy/ZDM4YWVkOS93d3cu/aW5zdGFncmFtLmNv/bS8",
+                  "path": "\u203a reel  \u203a DTqDnu8gaSm"
+                }
+              },
+              {
+                "type": "video_result",
+                "url": "https://www.youtube.com/shorts/qKP4OfL41yo",
+                "title": "The World's Most Important Thing - YouTube",
+                "description": "Click here for more: https://youtu.be/OuFlISa73Sw?si=4Wh4AAZnBp2zmsO_Check out The History Guy for more History That Deserves to be Remembered.",
+                "age": "October 3, 2025",
+                "page_age": "2025-10-03T00:01:09",
+                "fetched_content_timestamp": 1782610725,
+                "video": {
+                  "duration": "02:16",
+                  "creator": "The History Guy: History Deserves to Be Remembered",
+                  "publisher": "YouTube"
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "youtube.com",
+                  "hostname": "www.youtube.com",
+                  "favicon": "https://imgs.search.brave.com/Wg4wjE5SHAargkzePU3eSLmWgVz84BEZk1SjSglJK_U/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvOTkyZTZiMWU3/YzU3Nzc5YjExYzUy/N2VhZTIxOWNlYjM5/ZGVjN2MyZDY4Nzdh/ZDYzMTYxNmI5N2Rk/Y2Q3N2FkNy93d3cu/eW91dHViZS5jb20v",
+                  "path": "\u203a shorts  \u203a qKP4OfL41yo"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/dION72qRE4RCd8LZSmohbWgyvtkAsxZTYKk_mGdzcV8/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9x/S1A0T2ZMNDF5by9v/YXJkZWZhdWx0Lmpw/Zz9zcXA9LW9heW13/RW9DSlVERU5BRlNG/cVFBZ0h5cTRxcEF4/Y0lBUlVBQUloQzJB/RUI0Z0VLQ0JnUUFo/Z0dPQUZBQVE9PSZh/bXA7cnM9QU9uNENM/Qmd1a3JEZEtwcnot/eXJyS3BXbEN1MFhH/X2Z0QSZhbXA7dXNx/cD1DQ2s",
+                  "original": "https://i.ytimg.com/vi/qKP4OfL41yo/oardefault.jpg?sqp=-oaymwEoCJUDENAFSFqQAgHyq4qpAxcIARUAAIhC2AEB4gEKCBgQAhgGOAFAAQ==&amp;rs=AOn4CLBgukrDdKprz-yrrKpWlCu0XG_ftA&amp;usqp=CCk"
+                }
+              },
+              {
+                "type": "video_result",
+                "url": "https://www.youtube.com/watch?v=nBOQU_GZz00",
+                "title": "The History of the Transistor: The Start of the Digital Revolution ...",
+                "description": "Hey, you, if it weren't for the transistor... you wouldn't be here! Did you know? We explain the history of the transistor and how this small electronic devi...",
+                "age": "October 2, 2024",
+                "page_age": "2024-10-02T10:41:43",
+                "fetched_content_timestamp": 1783157546,
+                "video": {
+                  "duration": "04:06",
+                  "creator": "Institute of Microelectronics of Barcelona (CSIC)",
+                  "publisher": "YouTube"
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "youtube.com",
+                  "hostname": "www.youtube.com",
+                  "favicon": "https://imgs.search.brave.com/Wg4wjE5SHAargkzePU3eSLmWgVz84BEZk1SjSglJK_U/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvOTkyZTZiMWU3/YzU3Nzc5YjExYzUy/N2VhZTIxOWNlYjM5/ZGVjN2MyZDY4Nzdh/ZDYzMTYxNmI5N2Rk/Y2Q3N2FkNy93d3cu/eW91dHViZS5jb20v",
+                  "path": "\u203a watch"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/FrYgxzlSRWlaYwOZ-9CThbyXNqgx6n51hYJ5tt_WvB4/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9u/Qk9RVV9HWnowMC9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                  "original": "https://i.ytimg.com/vi/nBOQU_GZz00/maxresdefault.jpg"
+                }
+              },
+              {
+                "type": "video_result",
+                "url": "https://www.youtube.com/watch?v=5x6Ob3EYkcg",
+                "title": "Transistor Structure: Bell Labs (1965) - YouTube",
+                "description": "This FULL-ON Bell Labs 16mm film was produced with MIT and is presented in luxurious Kodachrome! Absolutely the definition of Bell Labs Films in the heart o...",
+                "age": "November 5, 2021",
+                "page_age": "2021-11-05T14:01:30",
+                "fetched_content_timestamp": 1753963732,
+                "video": {
+                  "duration": "38:25",
+                  "creator": "Fran Blanche",
+                  "publisher": "YouTube"
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "youtube.com",
+                  "hostname": "www.youtube.com",
+                  "favicon": "https://imgs.search.brave.com/Wg4wjE5SHAargkzePU3eSLmWgVz84BEZk1SjSglJK_U/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvOTkyZTZiMWU3/YzU3Nzc5YjExYzUy/N2VhZTIxOWNlYjM5/ZGVjN2MyZDY4Nzdh/ZDYzMTYxNmI5N2Rk/Y2Q3N2FkNy93d3cu/eW91dHViZS5jb20v",
+                  "path": "\u203a watch"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/SqGtDeulF-Y_RVUG1z8W5cPUq3FZpE0XZSqWv-_XdvY/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS81/eDZPYjNFWWtjZy9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                  "original": "https://i.ytimg.com/vi/5x6Ob3EYkcg/maxresdefault.jpg"
+                }
+              },
+              {
+                "type": "video_result",
+                "url": "https://www.youtube.com/watch?v=PAe-14LEsUY",
+                "title": "Who Stole The Invention Of The Transistor - YouTube",
+                "description": "The transistor was successfully demonstrated on December 23, 1947 at Bell Laboratories in Murray Hill, New Jersey. Bell Labs is the research arm of American ...",
+                "age": "April 16, 2020",
+                "page_age": "2020-04-16T01:50:36",
+                "fetched_content_timestamp": 1782731642,
+                "video": {
+                  "duration": "01:52",
+                  "creator": "tvecourse",
+                  "publisher": "YouTube"
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "youtube.com",
+                  "hostname": "www.youtube.com",
+                  "favicon": "https://imgs.search.brave.com/Wg4wjE5SHAargkzePU3eSLmWgVz84BEZk1SjSglJK_U/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvOTkyZTZiMWU3/YzU3Nzc5YjExYzUy/N2VhZTIxOWNlYjM5/ZGVjN2MyZDY4Nzdh/ZDYzMTYxNmI5N2Rk/Y2Q3N2FkNy93d3cu/eW91dHViZS5jb20v",
+                  "path": "\u203a watch"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/ae6kWBZvR7PbpPX3ejDRqulamxmnekYeb7tHV5-NuJA/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9Q/QWUtMTRMRXNVWS9t/YXhyZXNkZWZhdWx0/LmpwZw",
+                  "original": "https://i.ytimg.com/vi/PAe-14LEsUY/maxresdefault.jpg"
+                }
+              },
+              {
+                "type": "video_result",
+                "url": "https://www.youtube.com/watch?v=RdYHljZi7ys",
+                "title": "How the first transistor worked - YouTube",
+                "description": "Bill uses a replica of the point contact transistor built by Walter Brattain and John Bardeen at Bell Labs. On December 23, 1947 they used this device to amp...",
+                "age": "December 7, 2010",
+                "page_age": "2010-12-07T12:28:57",
+                "fetched_content_timestamp": 1783067257,
+                "video": {
+                  "duration": "04:46",
+                  "creator": "engineerguy",
+                  "publisher": "YouTube"
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "youtube.com",
+                  "hostname": "www.youtube.com",
+                  "favicon": "https://imgs.search.brave.com/Wg4wjE5SHAargkzePU3eSLmWgVz84BEZk1SjSglJK_U/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvOTkyZTZiMWU3/YzU3Nzc5YjExYzUy/N2VhZTIxOWNlYjM5/ZGVjN2MyZDY4Nzdh/ZDYzMTYxNmI5N2Rk/Y2Q3N2FkNy93d3cu/eW91dHViZS5jb20v",
+                  "path": "\u203a watch"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/vk3Qik75kEPkifK8hAfYUNd1wOXs2uNexm9IsXyHWdw/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9pLnl0/aW1nLmNvbS92aS9S/ZFlIbGpaaTd5cy9t/YXhyZXNkZWZhdWx0/LmpwZz9zcXA9LW9h/eW13RW1DSUFLRU5B/RjhxdUtxUU1hOEFF/Qi1BSC1DWUFDMEFX/S0Fnd0lBQkFCR0hJ/Z1RpZ3lNQTg9JmFt/cDtycz1BT240Q0xB/QUcyV3VXR2IyTER3/bXR4dzlTXzBMOFgy/Mmx3",
+                  "original": "https://i.ytimg.com/vi/RdYHljZi7ys/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AH-CYAC0AWKAgwIABABGHIgTigyMA8=&amp;rs=AOn4CLAAG2WuWGb2LDwmtxw9S_0L8X22lw"
+                }
+              }
+            ],
+            "mutated_by_goggles": false
+          },
+          "web": {
+            "type": "search",
+            "results": [
+              {
+                "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+                "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "The name transistor, a combination of transfer and resistor, was coined for these devices in <strong>May 1948</strong> by Bell Labs electrical engineer John Robinson Pierce, who was also a science-fiction author in his spare time.",
+                "page_age": "2026-06-10T00:00:00",
+                "profile": {
+                  "name": "Britannica",
+                  "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs",
+                  "long_name": "britannica.com",
+                  "img": "https://imgs.search.brave.com/jMDHLEzOKBVbwQ7-d4wBSobNay75CY4fiZkxDsHYBkA/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzJmYzgxOWRk/Y2FhNWI2MzQzMjQ4/MWVhZDZhNGY3ZjY0/MDgxZTM3YWU5MzYz/NGU2MzM3Y2Y2YTYz/M2IyM2Y0NC93d3cu/YnJpdGFubmljYS5j/b20v"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "article",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "britannica.com",
+                  "hostname": "www.britannica.com",
+                  "favicon": "https://imgs.search.brave.com/jMDHLEzOKBVbwQ7-d4wBSobNay75CY4fiZkxDsHYBkA/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNzJmYzgxOWRk/Y2FhNWI2MzQzMjQ4/MWVhZDZhNGY3ZjY0/MDgxZTM3YWU5MzYz/NGU2MzM3Y2Y2YTYz/M2IyM2Y0NC93d3cu/YnJpdGFubmljYS5j/b20v",
+                  "path": "  \u203a technology  \u203a engineering  \u203a mechanical engineering"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/ZgYsb7JV2k0Tc8NxLLPjgbDDemRgko0BTeQoL9IJQcw/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9jZG4u/YnJpdGFubmljYS5j/b20vNDMvNzY0NDMt/MDA0LUU1QzBFRkJC/L21ldGFsLW94aWRl/LXNlbWljb25kdWN0/b3JzLU5NT1MtdHJh/bnNpc3Rvci12b2x0/YWdlLW4tLXR5cGUu/anBn",
+                  "original": "https://cdn.britannica.com/43/76443-004-E5C0EFBB/metal-oxide-semiconductors-NMOS-transistor-voltage-n--type.jpg",
+                  "logo": true
+                },
+                "age": "1 month ago"
+              },
+              {
+                "title": "History of the transistor - Wikipedia",
+                "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "The first <strong>transistor</strong> <strong>was</strong> successfully demonstrated on December 23, 1947, <strong>at</strong> <strong>Bell</strong> Laboratories in Murray Hill, New Jersey. <strong>Bell</strong> <strong>Labs</strong> <strong>was</strong> <strong>the</strong> research arm of American Telephone and Telegraph (AT&amp;T). The three individuals credited with <strong>the</strong> <strong>invention</strong> of <strong>the</strong> <strong>transistor</strong> were William Shockley, John ...",
+                "page_age": "2026-05-15T18:35:03",
+                "profile": {
+                  "name": "Wikipedia",
+                  "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+                  "long_name": "en.wikipedia.org",
+                  "img": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "deep_results": {
+                  "buttons": [
+                    {
+                      "type": "button_result",
+                      "title": "Origins of transistor concept",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Origins_of_transistor_concept"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "First working transistor",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#First_working_transistor"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Etymology",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Etymology"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Early conflict",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Early_conflict"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Improvements in Transistor Design",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Improvements_in_Transistor_Design"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Silicon surface passivation",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Silicon_surface_passivation"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Early commercialization",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Early_commercialization"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "MOSFET (MOS transistor)",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#MOSFET_(MOS_transistor)"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "MOSFET commercialization",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#MOSFET_commercialization"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Patents",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Patents"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Books and literature",
+                      "url": "https://en.wikipedia.org/wiki/History_of_the_transistor#Books_and_literature"
+                    }
+                  ]
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "en.wikipedia.org",
+                  "hostname": "en.wikipedia.org",
+                  "favicon": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw",
+                  "path": "\u203a wiki  \u203a History_of_the_transistor"
+                },
+                "age": "May 15, 2026"
+              },
+              {
+                "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+                "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "Bell Labs is the birthplace of the Transistor, inventing the device that led to a communications revolution. John Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in <strong>December 1947</strong>, while the three were members of the technical staff ...",
+                "profile": {
+                  "name": "Bellsystem",
+                  "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+                  "long_name": "memorial.bellsystem.com",
+                  "img": "https://imgs.search.brave.com/nq2QF1doJEXD4mGDEmsOSfdwf80TBdFgMXFI4Q5uJQQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvYzNhYTg1Nzkw/NzZkMGY5ZGYzMWRh/NGE4NDJmNjYxZDM0/MTQwYjhjNWRkZWM2/NTYyYTc3YjU4OTQy/NmQ1MjFhYi9tZW1v/cmlhbC5iZWxsc3lz/dGVtLmNvbS8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "memorial.bellsystem.com",
+                  "hostname": "memorial.bellsystem.com",
+                  "favicon": "https://imgs.search.brave.com/nq2QF1doJEXD4mGDEmsOSfdwf80TBdFgMXFI4Q5uJQQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvYzNhYTg1Nzkw/NzZkMGY5ZGYzMWRh/NGE4NDJmNjYxZDM0/MTQwYjhjNWRkZWM2/NTYyYTc3YjU4OTQy/NmQ1MjFhYi9tZW1v/cmlhbC5iZWxsc3lz/dGVtLmNvbS8",
+                  "path": "\u203a belllabs_transistor.html"
+                }
+              },
+              {
+                "title": "Bell Demonstrates Transistor - Engineering and Technology History Wiki",
+                "url": "https://ethw.org/Bell_Demonstrates_Transistor",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "On <strong>30 June 1948</strong>, Bell Labs held a press conference in New York to introduce the transistor. The revolutionary importance of the invention was not apparent to all attending. The New York Times covered the story in a few paragraphs on page 46 ...",
+                "page_age": "2019-01-10T20:03:52",
+                "profile": {
+                  "name": "Engineering and Technology History Wiki",
+                  "url": "https://ethw.org/Bell_Demonstrates_Transistor",
+                  "long_name": "ethw.org",
+                  "img": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "article",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "ethw.org",
+                  "hostname": "ethw.org",
+                  "favicon": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8",
+                  "path": "\u203a Bell_Demonstrates_Transistor"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/F71f7NwaBk1UazqokRViz4uIVPqsXcXq6fvweqIcuBU/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9ldGh3/Lm9yZy93L2xvZ28u/cG5n",
+                  "original": "https://ethw.org/w/logo.png",
+                  "logo": true
+                },
+                "age": "January 10, 2019"
+              },
+              {
+                "title": "1947: Invention of the Point-Contact Transistor | The Silicon Engine | Computer History Museum",
+                "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "Named the &quot;transistor&quot; by electrical engineer John Pierce, Bell Labs publicly announced the revolutionary solid-state device at a press conference in New York on <strong>June 30, 1948</strong>.",
+                "profile": {
+                  "name": "Computer History Museum",
+                  "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+                  "long_name": "computerhistory.org",
+                  "img": "https://imgs.search.brave.com/gebMjJHFiz4k6O3be70densBdDlaE4hxNzYNNdlP2jo/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjU2MTE1Yzgy/YWMwYTNjNzEwYmE2/MTRhMjFjMjhkYWM1/MGM5YThiZmZlOTMy/YjJhMjk5NmZiYTYw/YjFhMjRiZC93d3cu/Y29tcHV0ZXJoaXN0/b3J5Lm9yZy8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "computerhistory.org",
+                  "hostname": "www.computerhistory.org",
+                  "favicon": "https://imgs.search.brave.com/gebMjJHFiz4k6O3be70densBdDlaE4hxNzYNNdlP2jo/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjU2MTE1Yzgy/YWMwYTNjNzEwYmE2/MTRhMjFjMjhkYWM1/MGM5YThiZmZlOTMy/YjJhMjk5NmZiYTYw/YjFhMjRiZC93d3cu/Y29tcHV0ZXJoaXN0/b3J5Lm9yZy8",
+                  "path": "\u203a siliconengine  \u203a invention-of-the-point-contact-transistor"
+                }
+              },
+              {
+                "title": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki",
+                "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "The Transistor, <strong>1947</strong>: Bell Labs\u2019 John Bardeen, Walter Brattain, and William Shockley invent the transistor, replacing vacuum tubes and mechanical relays and revolutionizing the entire electronics world. The team was awarded a Nobel Prize in 1956.",
+                "page_age": "2026-02-19T20:56:35",
+                "profile": {
+                  "name": "Engineering and Technology History Wiki",
+                  "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+                  "long_name": "ethw.org",
+                  "img": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "article",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "ethw.org",
+                  "hostname": "ethw.org",
+                  "favicon": "https://imgs.search.brave.com/3rSq4X6SpC5PORsesB4ZY9TbR3jgGBrwizPDwc9aEI0/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjM0OWFhNTAy/MmMzNDEwNzY0YWU2/MDE2ZmM0YTE2Nzk4/ZmM3ODU4YTIzMjlk/MGExZjMxODliOWY4/MWFlMzc3My9ldGh3/Lm9yZy8",
+                  "path": "\u203a Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/F71f7NwaBk1UazqokRViz4uIVPqsXcXq6fvweqIcuBU/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9ldGh3/Lm9yZy93L2xvZ28u/cG5n",
+                  "original": "https://ethw.org/w/logo.png",
+                  "logo": true
+                },
+                "age": "February 19, 2026"
+              },
+              {
+                "title": "Inventing the Transistor - CHM Revolution",
+                "url": "https://www.computerhistory.org/revolution/digital-logic/12/273",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "Inventing the TransistorScientists in <strong>the 1920s</strong> proposed building amplifiers from semiconductors. But they didn\u2019t understand the materials well enough to actually do it. In 1939, William Shockley at AT&amp;T\u2019s Bell Labs revived the idea as a way to replace vacuum tubes.Under Shockley\u2019s direction, ...",
+                "profile": {
+                  "name": "Computer History Museum",
+                  "url": "https://www.computerhistory.org/revolution/digital-logic/12/273",
+                  "long_name": "computerhistory.org",
+                  "img": "https://imgs.search.brave.com/gebMjJHFiz4k6O3be70densBdDlaE4hxNzYNNdlP2jo/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjU2MTE1Yzgy/YWMwYTNjNzEwYmE2/MTRhMjFjMjhkYWM1/MGM5YThiZmZlOTMy/YjJhMjk5NmZiYTYw/YjFhMjRiZC93d3cu/Y29tcHV0ZXJoaXN0/b3J5Lm9yZy8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "computerhistory.org",
+                  "hostname": "www.computerhistory.org",
+                  "favicon": "https://imgs.search.brave.com/gebMjJHFiz4k6O3be70densBdDlaE4hxNzYNNdlP2jo/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvZjU2MTE1Yzgy/YWMwYTNjNzEwYmE2/MTRhMjFjMjhkYWM1/MGM5YThiZmZlOTMy/YjJhMjk5NmZiYTYw/YjFhMjRiZC93d3cu/Y29tcHV0ZXJoaXN0/b3J5Lm9yZy8",
+                  "path": "\u203a revolution  \u203a digital-logic  \u203a 12  \u203a 273"
+                }
+              },
+              {
+                "title": "The Transistor - The Linda Hall",
+                "url": "https://www.lindahall.org/about/news/scientist-of-the-day/the-transistor/",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "Ralph Bown describing the structure of a point-contact transistor using a 100X scale model at Bell Labs\u2019 <strong>June 30, 1948</strong> press conference, in Bell Laboratories Record vol. XXVI, no.",
+                "page_age": "2022-12-16T13:45:01",
+                "profile": {
+                  "name": "Linda Hall Library",
+                  "url": "https://www.lindahall.org/about/news/scientist-of-the-day/the-transistor/",
+                  "long_name": "lindahall.org",
+                  "img": "https://imgs.search.brave.com/s6oUCv3MBRRjfTUyEHaEuDmTMD_r3JNP_U9EJ99rdUs/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMWNhNjY0OTZm/OTM3YzVjMmEzMTJi/Yjk0MWQzODQ5MGM5/ODk3MDFlMjY2NDU5/ZjViMWRjYjc1YTc1/ODJhZTM3My93d3cu/bGluZGFoYWxsLm9y/Zy8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "lindahall.org",
+                  "hostname": "www.lindahall.org",
+                  "favicon": "https://imgs.search.brave.com/s6oUCv3MBRRjfTUyEHaEuDmTMD_r3JNP_U9EJ99rdUs/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvMWNhNjY0OTZm/OTM3YzVjMmEzMTJi/Yjk0MWQzODQ5MGM5/ODk3MDFlMjY2NDU5/ZjViMWRjYjc1YTc1/ODJhZTM3My93d3cu/bGluZGFoYWxsLm9y/Zy8",
+                  "path": "\u203a about  \u203a news  \u203a scientist-of-the-day  \u203a the-transistor"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/XayYhyAJ-3dBtM7ssj7cNJ5ysjllZZdlY4gOdikVlbs/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9hc3Nl/dHMtdXMtMDEua2Mt/dXNlcmNvbnRlbnQu/Y29tOjQ0My85ZGQy/NTUyNC03NjFhLTAw/MGQtZDc5Zi04NmE1/MDg2ZDQ3NzQvYzI4/YWU4ZjItOTM4NC00/YWRmLWE5NjYtOGZh/NzZjN2NmOWMzL3Ry/YW5zaXN0b3IxLmpw/Zw",
+                  "original": "https://assets-us-01.kc-usercontent.com:443/9dd25524-761a-000d-d79f-86a5086d4774/c28ae8f2-9384-4adf-a966-8fa76c7cf9c3/transistor1.jpg",
+                  "logo": false
+                },
+                "age": "December 16, 2022"
+              },
+              {
+                "title": "r/electronics on Reddit: The first transistor. Bell Labs New Jersey",
+                "url": "https://www.reddit.com/r/electronics/comments/9z9h92/the_first_transistor_bell_labs_new_jersey/",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "That&#x27;s <strong>75 years ago</strong>. ... A Kentucky family turns down a 26 million USD buyout offer, roughly 10x the market rate, for a data center project to preserve their farmland heritage. ... In 1947, physicists at Bell Laboratories in New Jersey created ...",
+                "page_age": "2018-11-22T01:28:18",
+                "profile": {
+                  "name": "Reddit",
+                  "url": "https://www.reddit.com/r/electronics/comments/9z9h92/the_first_transistor_bell_labs_new_jersey/",
+                  "long_name": "reddit.com",
+                  "img": "https://imgs.search.brave.com/U-eHNCapRHVNWWCVPPMTIvOofZULh0_A_FQKe8xTE4I/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvN2ZiNTU0M2Nj/MTFhZjRiYWViZDlk/MjJiMjBjMzFjMDRk/Y2IzYWI0MGI0MjVk/OGY5NzQzOGQ5NzQ5/NWJhMWI0NC93d3cu/cmVkZGl0LmNvbS8"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "article",
+                "is_live": false,
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "reddit.com",
+                  "hostname": "www.reddit.com",
+                  "favicon": "https://imgs.search.brave.com/U-eHNCapRHVNWWCVPPMTIvOofZULh0_A_FQKe8xTE4I/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvN2ZiNTU0M2Nj/MTFhZjRiYWViZDlk/MjJiMjBjMzFjMDRk/Y2IzYWI0MGI0MjVk/OGY5NzQzOGQ5NzQ5/NWJhMWI0NC93d3cu/cmVkZGl0LmNvbS8",
+                  "path": "  \u203a r/electronics  \u203a the first transistor. bell labs new jersey"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/cjxPqYlx8PcII2zkMhR4F8UuAW5bhMCssFyTWAgqSbM/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly9wcmV2/aWV3LnJlZGQuaXQv/dGhlLWZpcnN0LXRy/YW5zaXN0b3ItYmVs/bC1sYWJzLW5ldy1q/ZXJzZXktdjAtdHkw/cG04N3lic3oxMS5q/cGc_YXV0bz13ZWJw/JnM9MGQ0OTNkNTFh/MGVkMTkyMmYxZGEz/YzVjNTU2MjM3NWU0/NjU1NWE3Nw",
+                  "original": "https://preview.redd.it/the-first-transistor-bell-labs-new-jersey-v0-ty0pm87ybsz11.jpg?auto=webp&s=0d493d51a0ed1922f1da3c5c5562375e46555a77",
+                  "logo": false
+                },
+                "age": "November 22, 2018"
+              },
+              {
+                "title": "Transistor - Wikipedia",
+                "url": "https://en.wikipedia.org/wiki/Transistor",
+                "is_source_local": false,
+                "is_source_both": false,
+                "description": "According to Lillian Hoddeson and Vicki Daitch, Shockley proposed that <strong>Bell</strong> <strong>Labs</strong>&#x27; first patent for a <strong>transistor</strong> should be based on the field-effect and that he be named as the inventor. Having unearthed Lilienfeld&#x27;s patents that went into obscurity <strong>years</strong> earlier, lawyers <strong>at</strong> <strong>Bell</strong> <strong>Labs</strong> advised ...",
+                "page_age": "2026-07-04T16:13:33",
+                "profile": {
+                  "name": "Wikipedia",
+                  "url": "https://en.wikipedia.org/wiki/Transistor",
+                  "long_name": "en.wikipedia.org",
+                  "img": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw"
+                },
+                "language": "en",
+                "family_friendly": true,
+                "type": "search_result",
+                "subtype": "generic",
+                "is_live": false,
+                "deep_results": {
+                  "buttons": [
+                    {
+                      "type": "button_result",
+                      "title": "History",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#History"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Importance",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Importance"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Simplified operation",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Simplified_operation"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Comparison with vacuum tubes",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Comparison_with_vacuum_tubes"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Types",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Types"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Device identification",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Device_identification"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Construction",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Construction"
+                    },
+                    {
+                      "type": "button_result",
+                      "title": "Further reading",
+                      "url": "https://en.wikipedia.org/wiki/Transistor#Further_reading"
+                    }
+                  ]
+                },
+                "meta_url": {
+                  "scheme": "https",
+                  "netloc": "en.wikipedia.org",
+                  "hostname": "en.wikipedia.org",
+                  "favicon": "https://imgs.search.brave.com/m6XxME4ek8DGIUcEPCqjRoDjf2e54EwL9pQzyzogLYk/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmlj/b25zLnNlYXJjaC5i/cmF2ZS5jb20vaWNv/bnMvNjQwNGZhZWY0/ZTQ1YWUzYzQ3MDUw/MmMzMGY3NTQ0ZjNj/NDUwMDk5ZTI3MWRk/NWYyNTM4N2UwOTE0/NTI3ZDQzNy9lbi53/aWtpcGVkaWEub3Jn/Lw",
+                  "path": "\u203a wiki  \u203a Transistor"
+                },
+                "thumbnail": {
+                  "src": "https://imgs.search.brave.com/FE3YLUyhYnIQiYusKvc0Bnd79ZBgVHgqEKEMLaRqFmA/rs:fit:200:200:1:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy9l/L2UxL1RyYW5zYmF1/Zm9ybWVuLmpwZw",
+                  "original": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Transbauformen.jpg",
+                  "logo": false
+                },
+                "age": "2 days ago"
+              }
+            ],
+            "family_friendly": true
+          }
+        },
+        "provider_latency": 0.7950789928436279
+      },
+      "latency_ms": 795.0789928436279,
+      "n_results": 10,
+      "evidence": [
+        {
+          "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs",
+          "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+          "content": "Transistor - Innovation, Bell Labs, Electronics | Britannica\nThe name transistor, a combination of transfer and resistor, was coined for these devices in <strong>May 1948</strong> by Bell Labs electrical engineer John Robinson Pierce, who was also a science-fiction author in his spare time."
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+          "title": "History of the transistor - Wikipedia",
+          "content": "History of the transistor - Wikipedia\nThe first <strong>transistor</strong> <strong>was</strong> successfully demonstrated on December 23, 1947, <strong>at</strong> <strong>Bell</strong> Laboratories in Murray Hill, New Jersey. <strong>Bell</strong> <strong>Labs</strong> <strong>was</strong> <strong>the</strong> research arm of American Telephone and Telegraph (AT&amp;T). The three individuals credited with <strong>the</strong> <strong>invention</strong> of <strong>the</strong> <strong>transistor</strong> were William Shockley, John ..."
+        },
+        {
+          "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+          "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+          "content": "Bell Labs History of The Transistor (the Crystal Triode)\nBell Labs is the birthplace of the Transistor, inventing the device that led to a communications revolution. John Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in <strong>December 1947</strong>, while the three were members of the technical staff ..."
+        },
+        {
+          "url": "https://ethw.org/Bell_Demonstrates_Transistor",
+          "title": "Bell Demonstrates Transistor - Engineering and Technology History Wiki",
+          "content": "Bell Demonstrates Transistor - Engineering and Technology History Wiki\nOn <strong>30 June 1948</strong>, Bell Labs held a press conference in New York to introduce the transistor. The revolutionary importance of the invention was not apparent to all attending. The New York Times covered the story in a few paragraphs on page 46 ..."
+        },
+        {
+          "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+          "title": "1947: Invention of the Point-Contact Transistor | The Silicon Engine | Computer History Museum",
+          "content": "1947: Invention of the Point-Contact Transistor | The Silicon Engine | Computer History Museum\nNamed the &quot;transistor&quot; by electrical engineer John Pierce, Bell Labs publicly announced the revolutionary solid-state device at a press conference in New York on <strong>June 30, 1948</strong>."
+        },
+        {
+          "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947",
+          "title": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki",
+          "content": "Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947 - Engineering and Technology History Wiki\nThe Transistor, <strong>1947</strong>: Bell Labs\u2019 John Bardeen, Walter Brattain, and William Shockley invent the transistor, replacing vacuum tubes and mechanical relays and revolutionizing the entire electronics world. The team was awarded a Nobel Prize in 1956."
+        },
+        {
+          "url": "https://www.computerhistory.org/revolution/digital-logic/12/273",
+          "title": "Inventing the Transistor - CHM Revolution",
+          "content": "Inventing the Transistor - CHM Revolution\nInventing the TransistorScientists in <strong>the 1920s</strong> proposed building amplifiers from semiconductors. But they didn\u2019t understand the materials well enough to actually do it. In 1939, William Shockley at AT&amp;T\u2019s Bell Labs revived the idea as a way to replace vacuum tubes.Under Shockley\u2019s direction, ..."
+        },
+        {
+          "url": "https://www.lindahall.org/about/news/scientist-of-the-day/the-transistor/",
+          "title": "The Transistor - The Linda Hall",
+          "content": "The Transistor - The Linda Hall\nRalph Bown describing the structur"
+        }
+      ],
+      "reader_answer": "# Answer\n\nThe transistor was invented at Bell Labs in **1947**.\n\nSpecifically, the first transistor was successfully demonstrated on **December 23, 1947**, at Bell Laboratories in Murray Hill, New Jersey. The invention was credited to three Bell Labs scientists: John Bardeen, Walter Brattain, and William Shockley.\n\nThe device was later publicly announced at a press conference on June 30, 1948, and the name \"transistor\" was coined in May 1948 by Bell Labs electrical engineer John Robinson Pierce."
+    },
+    "serper": {
+      "raw": {
+        "answer": "",
+        "search_response": {
+          "searchParameters": {
+            "q": "what year was the transistor invented at bell labs?",
+            "type": "search",
+            "num": 10,
+            "engine": "google"
+          },
+          "answerBox": {
+            "snippet": "John Bardeen, Walter Brattain and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor in 1947.",
+            "snippetHighlighted": [
+              "1947"
+            ],
+            "title": "History of the transistor - Wikipedia",
+            "link": "https://en.wikipedia.org/wiki/History_of_the_transistor"
+          },
+          "organic": [
+            {
+              "title": "The transistor: 75 years since the famed Nokia Bell Labs invention ...",
+              "link": "https://www.nokia.com/blog/the-transistor-75-years-since-the-famed-nokia-bell-labs-invention-changed-the-world/",
+              "snippet": "75 years ago, on Dec. 16, 1947, they made a breakthrough that ushered in a new era, one that revolutionized electronics by placing it into the hands of the ...",
+              "date": "Dec 15, 2022",
+              "position": 1
+            },
+            {
+              "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+              "link": "https://memorial.bellsystem.com/belllabs_transistor.html",
+              "snippet": "John Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in December 1947.",
+              "position": 2
+            },
+            {
+              "title": "The first transistor. Bell Labs New Jersey : r/electronics - Reddit",
+              "link": "https://www.reddit.com/r/electronics/comments/9z9h92/the_first_transistor_bell_labs_new_jersey/",
+              "snippet": "December 23, 1947 \u2013 The transistor was first demonstrated at Bell Laboratories. Pictured is the Bell Labs' junction transistor, of germanium, ...",
+              "date": "Nov 22, 2018",
+              "sitelinks": [
+                {
+                  "title": "On 15 December 1947, the first transistor became operational ...",
+                  "link": "https://www.reddit.com/r/electronics/comments/zkafw5/on_15_december_1947_the_first_transistor_became/"
+                },
+                {
+                  "title": "In 1947, physicists at Bell Laboratories in New Jersey ... - Reddit",
+                  "link": "https://www.reddit.com/r/newjersey/comments/98sz7u/in_1947_physicists_at_bell_laboratories_in_new/"
+                }
+              ],
+              "position": 3
+            },
+            {
+              "title": "First transistor demonstrated in 1947 - Facebook",
+              "link": "https://www.facebook.com/groups/ElectronicParts/posts/2966933590162623/",
+              "snippet": "In 1947 John Bardeen, Walter Brattain, and William Shockley developed the first practical transistor device at Bell Laboratories. Their ...",
+              "date": "Dec 23, 2025",
+              "sitelinks": [
+                {
+                  "title": "Bell Labs and the Invention of the Transistor",
+                  "link": "https://www.facebook.com/groups/ElectronicParts/posts/2665349570321028/"
+                },
+                {
+                  "title": "First transistor demonstrated at Bell Labs 75 years ago",
+                  "link": "https://www.facebook.com/groups/panindiapostal/posts/3856505197912184/"
+                }
+              ],
+              "position": 4
+            },
+            {
+              "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+              "link": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time",
+              "snippet": "It was invented in 1947, and even several years later, achieved on December 23, 1947. Marvin Kelley, who was then head of Bell Laboratories, had brought the ...",
+              "position": 5
+            },
+            {
+              "title": "1947: Invention of the Point-Contact Transistor | The Silicon Engine",
+              "link": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+              "snippet": "John Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947.",
+              "position": 6
+            },
+            {
+              "title": "Moment 71: Bell Laboratories Demonstrates the First Transistor",
+              "link": "https://wearebroadcasters.com/radio100/moments/71.asp",
+              "snippet": "Bell publicly announced the new invention on June 30, 1948, and the first commercial transistor radio was released in 1954.",
+              "position": 7
+            },
+            {
+              "title": "Bell Telephone Laboratories | American Physical Society",
+              "link": "https://www.aps.org/funding-recognition/historic-sites/bell-telephone-laboratories",
+              "snippet": "Brattain (1902-1987) for their invention of the transistor, which has been called \u201cthe most important invention of the 20th Century.\u201d11 Developed from ...",
+              "position": 8
+            },
+            {
+              "title": "The Transistor's 75th Birthday! - ASU Core Research Facilities",
+              "link": "https://cores.research.asu.edu/transistors-75th-birthday",
+              "snippet": "75 years ago on December 16, 1947, Walter Brattain and John Bardeen managed to build and test the first working transistor.",
+              "date": "Dec 9, 2022",
+              "position": 9
+            }
+          ],
+          "peopleAlsoAsk": [
+            {
+              "question": "Did Bell Labs invent the transistor?",
+              "snippet": "A month later Bell Labs announced the revolutionary invention in a press conference held at its New York City headquarters, heralding Bardeen, Brattain, and Shockley as the three coinventors of the transistor. The three were eventually awarded the Nobel Prize for Physics for their invention.",
+              "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+              "link": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs"
+            },
+            {
+              "question": "What did Bell Labs invent in 1947?",
+              "snippet": "In 1947, Bell Labs researchers invented the transistor to replace vacuum tubes in the telephone network. That invention, however, would transform the world, ushering in modern computing and electronics as well as the digital age.",
+              "title": "History | Nokia.com",
+              "link": "https://www.nokia.com/bell-labs/about/history/"
+            },
+            {
+              "question": "When did the first transistor be invented?",
+              "snippet": "The transistor, however, is an invention that was conceived long before the time was right. It was invented in 1947, and even several years later, it was considered by a scientific conference to be such an odd accomplishment that it was not included in the documentation.",
+              "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+              "link": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time"
+            },
+            {
+              "question": "What did Bell Labs invent in 1958?",
+              "snippet": "In 1958, a technical paper by Arthur Schawlow and Charles Hard Townes first described the laser. Following Frosch and Derick research, Mohamed Atalla and Dawon Kahng proposed a silicon MOS transistor in 1959 and successfully demonstrated a working MOS device with their Bell Labs team in 1960.",
+              "title": "Bell Labs - Wikipedia",
+              "link": "https://en.wikipedia.org/wiki/Bell_Labs"
+            }
+          ],
+          "relatedSearches": [
+            {
+              "query": "Who invented the transistor in 1947"
+            },
+            {
+              "query": "Transistor invented by bell labs"
+            },
+            {
+              "query": "Where was the transistor invented"
+            },
+            {
+              "query": "Bell Labs transistor"
+            },
+            {
+              "query": "Who invented the transistor radio"
+            },
+            {
+              "query": "First transistor bell labs"
+            },
+            {
+              "query": "Transistor invention controversy"
+            },
+            {
+              "query": "How did the first transistor work"
+            }
+          ],
+          "credits": 1
+        },
+        "provider_latency": 1.087264060974121
+      },
+      "latency_ms": 1087.264060974121,
+      "n_results": 9,
+      "evidence": [
+        {
+          "url": "https://www.nokia.com/blog/the-transistor-75-years-since-the-famed-nokia-bell-labs-invention-changed-the-world/",
+          "title": "The transistor: 75 years since the famed Nokia Bell Labs invention ...",
+          "content": "The transistor: 75 years since the famed Nokia Bell Labs invention ...\n75 years ago, on Dec. 16, 1947, they made a breakthrough that ushered in a new era, one that revolutionized electronics by placing it into the hands of the ..."
+        },
+        {
+          "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+          "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+          "content": "Bell Labs History of The Transistor (the Crystal Triode)\nJohn Bardeen, Walter Brattain and William Shockley discovered the transistor effect and developed the first device in December 1947."
+        },
+        {
+          "url": "https://www.reddit.com/r/electronics/comments/9z9h92/the_first_transistor_bell_labs_new_jersey/",
+          "title": "The first transistor. Bell Labs New Jersey : r/electronics - Reddit",
+          "content": "The first transistor. Bell Labs New Jersey : r/electronics - Reddit\nDecember 23, 1947 \u2013 The transistor was first demonstrated at Bell Laboratories. Pictured is the Bell Labs' junction transistor, of germanium, ..."
+        },
+        {
+          "url": "https://www.facebook.com/groups/ElectronicParts/posts/2966933590162623/",
+          "title": "First transistor demonstrated in 1947 - Facebook",
+          "content": "First transistor demonstrated in 1947 - Facebook\nIn 1947 John Bardeen, Walter Brattain, and William Shockley developed the first practical transistor device at Bell Laboratories. Their ..."
+        },
+        {
+          "url": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time",
+          "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+          "content": "The transistor \u2013 an invention ahead of its time - Ericsson\nIt was invented in 1947, and even several years later, achieved on December 23, 1947. Marvin Kelley, who was then head of Bell Laboratories, had brought the ..."
+        },
+        {
+          "url": "https://www.computerhistory.org/siliconengine/invention-of-the-point-contact-transistor/",
+          "title": "1947: Invention of the Point-Contact Transistor | The Silicon Engine",
+          "content": "1947: Invention of the Point-Contact Transistor | The Silicon Engine\nJohn Bardeen & Walter Brattain achieve transistor action in a germanium point-contact device in December 1947."
+        },
+        {
+          "url": "https://wearebroadcasters.com/radio100/moments/71.asp",
+          "title": "Moment 71: Bell Laboratories Demonstrates the First Transistor",
+          "content": "Moment 71: Bell Laboratories Demonstrates the First Transistor\nBell publicly announced the new invention on June 30, 1948, and the first commercial transistor radio was released in 1954."
+        },
+        {
+          "url": "https://www.aps.org/funding-recognition/historic-sites/bell-telephone-laboratories",
+          "title": "Bell Telephone Laboratories | American Physical Society",
+          "content": "Bell Telephone Laboratories | American Physical Society\nBrattain (1902-1987) for their invention of the transistor, which has been called \u201cthe most important invention of the 20th Century.\u201d11 Developed from ..."
+        },
+        {
+          "url": "https://cores.research.asu.edu/transistors-75th-birthday",
+          "title": "The Transistor's 75th Birthday! - ASU Core Research Facilities",
+          "content": "The Transistor's 75th Birthday! - ASU Core Research Facilities\n75 years ago on December 16, 1947, Walter Brattain and John Bardeen managed to build and test the first working transistor."
+        }
+      ],
+      "reader_answer": "The transistor was invented at Bell Labs in **1947**. \n\nMore specifically, the breakthrough occurred in **December 1947**, with the key date being **December 16, 1947**, when Walter Brattain and John Bardeen built and tested the first working transistor. William Shockley also contributed to the invention. The transistor was publicly announced by Bell Labs on June 30, 1948."
+    },
+    "perplexity_search": {
+      "raw": {
+        "search_response": {
+          "id": "da157283-d76d-48eb-9629-2f812c55d288",
+          "results": [
+            {
+              "date": "2007-07-17",
+              "last_updated": "2026-07-05",
+              "snippet": "|1947|Point contact|Bell Labs|\n...\nThe first transistor was successfully demonstrated on December 23, 1947, at Bell Laboratories in Murray Hill, New Jersey.\n...\nJohn Bardeen, Walter Brattain and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor in 1947.\n...\nBrattain and H. R. Moore made a demonstration to several of their colleagues and managers at Bell Labs on the afternoon of December 23, 1947, often given as the birth date of the transistor.\nThe \"PNP point-contact germanium transistor\" operated as a speech amplifier with a power gain of 18 in that trial.",
+              "title": "History of the transistor - Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/History_of_the_transistor"
+            },
+            {
+              "last_updated": "2026-03-04",
+              "snippet": "John Bardeen, Walter Brattain and William Shockley discovered the\ntransistor effect and developed the first device in December 1947, while\nthe three were members of the technical staff at Bell Laboratories in\nMurray Hill, NJ.\n...\n**Here are a few pages** from Walter Brattain\u2019s lab notebooks on December 24th 1947, the day the world\u2019s first transistor was successfully tested.\n...\n\" **A picture of the first transistor ever assembled**, invented in Bell Labs in 1947.\n...\nThe shape of the transistor has changed\ndramatically since it was invented at Bell Labs in 1947 as a replacement for the\nvacuum tube.\nClockwise from the top: 1941 vacuum tube used for telephone\ncommunications; the point-contact transistor as it was introduced June 30,1948\nto the world, six months after its invention; 1955 transistor which replaced\n...\n**Bell Laboratories\u2019 germanium junction transistor was fabricated in 1950**",
+              "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+              "url": "https://memorial.bellsystem.com/belllabs_transistor.html"
+            },
+            {
+              "last_updated": "2026-03-28",
+              "snippet": "Working closely together over the next month, Bardeen and Brattain invented the first successful semiconductor amplifier, called the point-contact transistor, on December 16, 1947.\n...\nNot to be outdone by members of his own group, Shockley conceived yet another way to fabricate a semiconductor amplifier the very next month, on January 23, 1948.\n...\nA month later Bell Labs announced the revolutionary invention in a press conference held at its New York City headquarters, heralding Bardeen, Brattain, and Shockley as the three coinventors of the transistor.\n...\nIn July 1951 Bell Labs announced the successful invention and development of the junction transistor, this time with only Shockley in the spotlight.",
+              "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+              "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs"
+            },
+            {
+              "date": "2016-08-29",
+              "last_updated": "2026-07-05",
+              "snippet": "The transistor, however, is an invention that was conceived long before the time was right.\nIt was invented in 1947, and even several years later, it was considered by a scientific conference to be such an odd accomplishment that it was not included in the documentation.\n...\nThree persons, Walter Brattain, John Bardeen and William Shockley, shared the Nobel Prize in Physics for the breakthrough that they achieved on December 23, 1947.",
+              "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+              "url": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time"
+            },
+            {
+              "date": "2001-05-10",
+              "last_updated": "2026-07-04",
+              "snippet": "The first working device was a point-contact transistor invented in 1947 by physicists John Bardeen, Walter Brattain, and William Shockley at Bell Labs who shared the 1956 Nobel Prize in Physics for their achievement.\nThe most widely used type of transistor, the metal\u2013oxide\u2013semiconductor field-effect transistor (MOSFET), was invented at Bell Labs between 1955 and 1960.\n...\nFrom November 17 to December 23, 1947, John Bardeen and Walter Brattain at AT&T's Bell Labs in Murray Hill, New Jersey, performed experiments and observed that when two gold point contacts were applied to a crystal of germanium, a signal was produced with the output power greater than the input.\n...\nInstead, what Bardeen, Brattain, and Shockley invented in 1947 was the first point-contact transistor.\n...\nThe first bipolar junction transistors were invented by Bell Labs' William Shockley, who applied for patent (2,569,347) on June 26, 1948.\n...\nThe first working silicon transistor was developed at Bell Labs on January 26, 1954, by Morris Tanenbaum.\n...\nThe 1947 invention of the first transistor at Bell Labs was named an IEEE Milestone in 2009.",
+              "title": "Transistor - Wikipedia",
+              "url": "https://en.wikipedia.org/wiki/Transistor"
+            },
+            {
+              "date": "2025-01-02",
+              "last_updated": "2025-08-31",
+              "snippet": "# Milestones:Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947\n- Date Dedicated\n...\n- Achievement date range\n- 1947\n...\n*Invention of the First Transistor at Bell Telephone Laboratories, Inc., 1947*\n*At this site, in Building 1, Room 1E455, from 17 November to 23 December 1947, Walter H. Brattain and John A. Bardeen -- under the direction of William B. Shockley -- discovered the transistor effect, and developed and demonstrated a point-contact germanium transistor.\n...\nBy 1947, advances in germanium semiconductors made it possible for Bardeen and Brattain to make the first working point contact transistor.\n...\nThe Transistor, 1947: Bell Labs\u2019 John Bardeen, Walter Brattain, and William Shockley invent the transistor, replacing vacuum tubes and mechanical relays and revolutionizing the entire electronics world.\nThe team was awarded a Nobel Prize in 1956.",
+              "title": "Milestones:Invention of the First Transistor at Bell ...",
+              "url": "https://ethw.org/Milestones:Invention_of_the_First_Transistor_at_Bell_Telephone_Laboratories,_Inc.,_1947"
+            },
+            {
+              "date": "2005-01-01",
+              "last_updated": "2026-02-04",
+              "snippet": "#OTD June 30, 1948: Bell Labs introduced the point-contact transistor in the New York Times on p.46 to replace the vacuum tube.\n...\nJohn Bardeen, Walter Brattain, and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor, in 1947.",
+              "title": "Bell Labs introduced the point-contact transistor in the New York ...",
+              "url": "https://www.facebook.com/SACMuseum426/posts/otd-june-30-1948-bell-labs-introduced-the-point-contact-transistor-in-the-new-yo/10158676808796811/"
+            },
+            {
+              "last_updated": "2026-05-23",
+              "snippet": "John Bardeen and Walter Brattain, working with group leader William Shockley, developed a device they called a transistor, which was successfully demonstrated on December 23, 1947 at Bell Laboratories in Murray Hill, New Jersey.\nBell publicly announced the new invention on June 30, 1948, and the first commercial transistor radio was released in 1954.",
+              "title": "Moment 71: Bell Laboratories Demonstrates the First Transistor",
+              "url": "https://wearebroadcasters.com/radio100/moments/71.asp"
+            },
+            {
+              "last_updated": "2025-11-03",
+              "snippet": "On December 16, 1947, they built the point-contact transistor, made from strips of gold foil on a plastic triangle, pushed down into contact with a slab of germanium.\n...\nBell Labs decided to unveil the invention on June 30, 1948.",
+              "title": "Transistorized!",
+              "url": "https://www.pbs.org/transistor/album1/"
+            },
+            {
+              "date": "2026-06-26",
+              "last_updated": "2026-06-28",
+              "snippet": "The first transistor, assembled by Walter Brattain and successfully tested for the first time on December 16, 1947 (Computer History Museum)\n...\nSeventy-five years ago, on December 16, 1947, John Bardeen and Walter Brattain successfully tested the world\u2019s first transistor in Murray Hill, New Jersey.\nThe two physicists were...Seventy-five years ago, on December 16, 1947, John Bardeen and Walter Brattain successfully tested the world\u2019s first transistor in Murray Hill, New Jersey.",
+              "title": "The Transistor - The Linda Hall",
+              "url": "https://www.lindahall.org/about/news/scientist-of-the-day/the-transistor/"
+            }
+          ]
+        },
+        "provider_latency": 0.43408989906311035
+      },
+      "latency_ms": 434.08989906311035,
+      "n_results": 10,
+      "evidence": [
+        {
+          "url": "https://en.wikipedia.org/wiki/History_of_the_transistor",
+          "title": "History of the transistor - Wikipedia",
+          "content": "|1947|Point contact|Bell Labs|\n...\nThe first transistor was successfully demonstrated on December 23, 1947, at Bell Laboratories in Murray Hill, New Jersey.\n...\nJohn Bardeen, Walter Brattain and William Shockley invented the first working transistors at Bell Labs, the point-contact transistor in 1947.\n...\nBrattain and H. R. Moore made a demonstration to several of their colleagues and managers at Bell Labs on the afternoon of December 23, 1947, often given as the birth date of the transistor.\nThe \"PNP point-contact germanium transistor\" operated as a speech amplifier with a power gain of 18 in that trial."
+        },
+        {
+          "url": "https://memorial.bellsystem.com/belllabs_transistor.html",
+          "title": "Bell Labs History of The Transistor (the Crystal Triode)",
+          "content": "John Bardeen, Walter Brattain and William Shockley discovered the\ntransistor effect and developed the first device in December 1947, while\nthe three were members of the technical staff at Bell Laboratories in\nMurray Hill, NJ.\n...\n**Here are a few pages** from Walter Brattain\u2019s lab notebooks on December 24th 1947, the day the world\u2019s first transistor was successfully tested.\n...\n\" **A picture of the first transistor ever assembled**, invented in Bell Labs in 1947.\n...\nThe shape of the transistor has changed\ndramatically since it was invented at Bell Labs in 1947 as a replacement for the\nvacuum tube.\nClockwise from the top: 1941 vacuum tube used for telephone\ncommunications; the point-contact transistor as it was introduced June 30,1948\nto the world, six months after its invention; 1955 transistor which replaced\n...\n**Bell Laboratories\u2019 germanium junction transistor was fabricated in 1950**"
+        },
+        {
+          "url": "https://www.britannica.com/technology/transistor/Innovation-at-Bell-Labs",
+          "title": "Transistor - Innovation, Bell Labs, Electronics | Britannica",
+          "content": "Working closely together over the next month, Bardeen and Brattain invented the first successful semiconductor amplifier, called the point-contact transistor, on December 16, 1947.\n...\nNot to be outdone by members of his own group, Shockley conceived yet another way to fabricate a semiconductor amplifier the very next month, on January 23, 1948.\n...\nA month later Bell Labs announced the revolutionary invention in a press conference held at its New York City headquarters, heralding Bardeen, Brattain, and Shockley as the three coinventors of the transistor.\n...\nIn July 1951 Bell Labs announced the successful invention and development of the junction transistor, this time with only Shockley in the spotlight."
+        },
+        {
+          "url": "https://www.ericsson.com/en/about-us/history/products/other-products/the-transistor--an-invention-ahead-of-its-time",
+          "title": "The transistor \u2013 an invention ahead of its time - Ericsson",
+          "content": "The transistor, however, is an invention that was conceived long before the time was right.\nIt was invented in 1947, and even several years later, it was considered by a scientific conference to be such an odd accomplishment that it was not included in the documentation.\n...\nThree persons, Walter Brattain, John Bardeen and William Shockley, shared the Nobel Prize in Physics for the breakthrough that they achieved on December 23, 1947."
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Transistor",
+          "title": "Transistor - Wikipedia",
+          "content": "The first working device was a point-contact transisto"
+        }
+      ],
+      "reader_answer": "The transistor was invented at Bell Labs in **1947**.\n\nMore specifically, the first working transistor was successfully demonstrated on **December 23, 1947**, at Bell Laboratories in Murray Hill, New Jersey. John Bardeen, Walter Brattain, and William Shockley developed the point-contact transistor, which they later shared a Nobel Prize for this breakthrough invention."
+    },
+    "claude_search": {
+      "raw": {
+        "answer": "The transistor was invented at Bell Labs in **1947**. Specifically, it was demonstrated on December 23, 1947, by physicists John Bardeen, Walter Brattain, and William Shockley. The three scientists were later awarded the **Nobel Prize in Physics in 1956** for this groundbreaking invention.",
+        "search_response": {
+          "answer": "The transistor was invented at Bell Labs in **1947**. Specifically, it was demonstrated on December 23, 1947, by physicists John Bardeen, Walter Brattain, and William Shockley. The three scientists were later awarded the **Nobel Prize in Physics in 1956** for this groundbreaking invention.",
+          "results": []
+        },
+        "provider_latency": 3.703042984008789
+      },
+      "latency_ms": 3703.042984008789,
+      "n_results": 0,
+      "evidence": null,
+      "reader_answer": null
+    }
+  }
+}

@@ -1,0 +1,27 @@
+name: Tier A tests
+
+# §14 definition of done: Tier A (deterministic, no AI, no keys) must be 100% green on
+# every commit. Real logic under test; external dependencies are test doubles (mocked
+# providers/LLMs + canned fixtures), so no network and no secrets are needed here. The
+# live, real-API checks are Tier B: python -m arena.tier_b (gates a release, not a commit).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tier-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pytest
+      - name: Run Tier A suite
+        run: python -m pytest tests/arena -q
