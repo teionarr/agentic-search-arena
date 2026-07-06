@@ -162,7 +162,8 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                     "cost_usd_per_query", "cost_usd_per_correct", "cost_as_of",
                     "freshness_score", "freshness_coverage", "freshness_low_confidence",
                     "success_rate", "error_rate",
-                    "auto_verify_rate", "auto_verify_correct", "auto_verify_total"])
+                    "auto_verify_rate", "auto_verify_correct", "auto_verify_total",
+                    "downstream_success_rate", "downstream_n"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
@@ -181,6 +182,8 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                 (m.get("reliability", {}) or {}).get("success_rate"),
                 (m.get("reliability", {}) or {}).get("error_rate"),
                 av.get("rate"), av.get("correct"), av.get("total"),
+                (m.get("downstream", {}) or {}).get("success_rate"),
+                (m.get("downstream", {}) or {}).get("n"),
             ]])
 
     return {"json": json_path, "csv": csv_path}
@@ -283,6 +286,10 @@ def render_cli_summary(doc: dict) -> str:
         rel_s = (f"  ok {rel['success_rate']:.0%}"
                  if rel.get("success_rate") is not None and rel["success_rate"] < 1.0 else "")
         fresh_s += rel_s
+        ds = (doc["metrics"].get(s["provider"], {}).get("downstream", {}) or {})
+        # Tier-3 (§3): end-task success in the user's own loop — the judge-free cross-signal.
+        if ds.get("success_rate") is not None:
+            fresh_s += f"  ds {ds['success_rate']:.0%} ({ds['successes']}/{ds['n']})"
         if s["status"] == "unranked":
             out.append(f"   --  {s['provider']:<18}  unranked — insufficient valid comparisons{acc_s}{fresh_s}")
             continue
