@@ -114,6 +114,15 @@ def test_interactive_loop_records_blinded_verdicts():
     assert any("enter 1, 2, t, s or q" in str(line) for line in out)
 
 
+def test_on_verdict_fires_per_item_as_recorded():
+    items = [{"query": "q1", "a": "p1", "b": "p2"}, {"query": "q2", "a": "p1", "b": "p2"}]
+    persisted = []
+    script = iter(["1", "q"])                                    # one verdict, then quit
+    arbitrate_interactively(items, {}, ask=lambda _: next(script),
+                            echo=lambda *_: None, on_verdict=persisted.append)
+    assert len(persisted) == 1                                   # written before the quit
+
+
 def test_interactive_quit_stops_early():
     items = [{"query": "q1", "a": "p1", "b": "p2"}, {"query": "q2", "a": "p1", "b": "p2"}]
     adjs = arbitrate_interactively(items, {}, ask=lambda _: "q", echo=lambda *_: None)

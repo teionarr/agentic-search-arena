@@ -123,9 +123,11 @@ def load_run(run_dir: str) -> Tuple[dict, Dict[str, Dict[str, Optional[str]]]]:
 
 
 def arbitrate_interactively(items: List[dict], answers: Dict[str, Dict[str, Optional[str]]],
-                            ask=input, echo=print) -> List[dict]:
+                            ask=input, echo=print, on_verdict=None) -> List[dict]:
     """The prompt loop. ``ask``/``echo`` injectable for tests. Verdicts: 1 / 2 / t(ie) /
-    s(kip) / q(uit)."""
+    s(kip) / q(uit). ``on_verdict`` fires per recorded verdict so the session can persist
+    incrementally — a §16 session is up to an hour of human effort; a Ctrl-C must not
+    discard it."""
     adjudications = []
     for i, item in enumerate(items, 1):
         q, a, b = item["query"], item["a"], item["b"]
@@ -142,8 +144,10 @@ def arbitrate_interactively(items: List[dict], answers: Dict[str, Dict[str, Opti
         if v == "q":
             break
         winner = {"1": first, "2": second, "t": "tie", "s": None}[v]
-        adjudications.append({"query": q, "a": a, "b": b, "winner": winner,
-                              "shown_first": first})
+        adj = {"query": q, "a": a, "b": b, "winner": winner, "shown_first": first}
+        adjudications.append(adj)
+        if on_verdict:
+            on_verdict(adj)
     return adjudications
 
 
@@ -169,15 +173,16 @@ def main() -> int:
           + (f"; {meta['n_left_out']} left out by --max {args.max}" if meta["n_left_out"] else "")
           + ")")
 
-    adjudications = arbitrate_interactively(items, answers)
+    # Verdicts append to disk AS they are recorded — an interrupted session keeps its progress.
+    adj_path = os.path.join(args.run_dir, "adjudications.jsonl")
+    with open(adj_path, "a") as f:
+        def _persist(adj):
+            f.write(json.dumps(adj) + "\n")
+            f.flush()
+        adjudications = arbitrate_interactively(items, answers, on_verdict=_persist)
     if not adjudications:
         print("No verdicts recorded.")
         return 0
-
-    adj_path = os.path.join(args.run_dir, "adjudications.jsonl")
-    with open(adj_path, "a") as f:
-        for adj in adjudications:
-            f.write(json.dumps(adj) + "\n")
     print(f"Wrote {len(adjudications)} verdict(s) to {adj_path}")
 
     providers = [s["provider"] for s in doc["ranking"]]
