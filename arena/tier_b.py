@@ -111,7 +111,7 @@ def main() -> int:
 
     from arena.adapters.registry import REGISTRY
     from arena.config import load_config, resolve_config_path
-    from arena.llm import DEFAULT_MODEL, LLMClient
+    from arena.llm import DEFAULT_MODEL, LLMClient, build_llm_client
     from arena.pipeline import run_arena
     from arena.scope import resolve_scope
     from arena.spike import load_simpleqa
@@ -136,7 +136,7 @@ def main() -> int:
 
     model_id = args.model or DEFAULT_MODEL
     judge_llm = LLMClient(model=model_id)
-    secondary = LLMClient(model=config.judge_secondary) if config.judge_secondary else None
+    secondary = build_llm_client(config.judge_secondary) if config.judge_secondary else None  # §5 cross-family via "openai:" prefix
     queries = load_simpleqa(args.n)
     logger.info(f"Tier B: {len(queries)} gold queries × {len(adapters)} providers, judge={model_id}")
 

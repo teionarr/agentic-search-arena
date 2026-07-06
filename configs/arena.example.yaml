@@ -16,7 +16,7 @@ reader:
 
 judge:
   primary: claude
-  secondary: null               # optional 2nd judge (a Claude model id) => ensemble + κ + weighting
+  secondary: null               # optional 2nd judge => ensemble + κ + weighting; Claude id, or "openai:<model>" for cross-family (§5)
   order_swap: true
   exclude_on_flip: true
 

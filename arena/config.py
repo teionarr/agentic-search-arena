@@ -47,7 +47,7 @@ class ArenaConfig:
     providers: Dict[str, Dict[str, Any]] = field(default_factory=dict)  # name -> {enabled, config}
     reader_model: Optional[str] = None          # None -> judge model (llm.py default)
     judge_primary: str = "claude"
-    judge_secondary: Optional[str] = None       # optional 2nd judge model id -> ensemble κ (§6.4)
+    judge_secondary: Optional[str] = None       # optional 2nd judge model id ("openai:<m>" => cross-family, §5) -> ensemble κ (§6.4)
     order_swap: bool = True
     exclude_on_flip: bool = True
     aggregation_method: str = "bradley_terry"   # §6.3 default; "winrate" keeps the M0 estimator
