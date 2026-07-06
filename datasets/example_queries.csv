@@ -1,0 +1,21 @@
+query,expected_answer,category,freshness_need
+who won the 2022 fifa world cup final?,Argentina,sports,
+what year was the transistor invented at bell labs?,1947,tech,
+what is the capital of australia?,Canberra,factual,
+who wrote the novel one hundred years of solitude?,Gabriel García Márquez,factual,
+what is the tallest mountain in africa?,Mount Kilimanjaro,factual,
+what company acquired github in 2018?,Microsoft,tech,
+what is the chemical symbol for tungsten?,W,factual,
+who was the first person to win two nobel prizes?,Marie Curie,factual,
+what is the latest stable python version?,,tech,30d
+what were the biggest AI model releases this month?,,tech,30d
+what is the current federal funds rate?,,finance,30d
+which team leads the current premier league season?,,sports,7d
+what major tech earnings were reported this week?,,finance,7d
+how do rate limits work for the openai api?,,tech,
+what are the tradeoffs between rag and long-context llms?,,research,
+what is the difference between bradley-terry and elo rating models?,,research,
+how does the eu ai act classify high-risk systems?,,research,
+what are common causes of kubernetes pod eviction?,,tech,
+what evidence supports intermittent fasting for weight loss?,,research,
+what are the main criticisms of the big five personality model?,,research,
