@@ -199,6 +199,119 @@ Remember to implement appropriate error handling and respect any rate limits or 
 
 ---
 
+## **Arena Mode (reference-free provider ranking)**
+
+Arena mode answers a different question than the benchmarks above: **"which search API wins on
+*my* workload?"** — with **zero golden answers required.** You bring your own queries and
+whichever provider keys you have; the arena runs each query through every enabled provider, a
+**fixed reader** synthesizes an answer from each provider's returned evidence, and a **blind,
+order-swapped pairwise judge** decides which answer is better supported. Verdicts that flip on
+order-swap are excluded as low-confidence; the survivors aggregate into a **win-rate ranking
+with confidence intervals**. Judge reliability is **measured, not assumed**, and every decision
+is logged.
+
+It is **additive** to this repo — a separate `run_arena.py` entrypoint that reuses the existing
+provider handlers. It does not change `run_evaluation.py`, the handlers, or any existing behavior.
+
+### Quickstart
+
+```sh
+pip install -r requirements.txt          # adds anthropic + pyyaml (needs Python ≥3.11)
+
+# Put keys in a .env file (or Doppler — auto-detected). All provider keys are optional;
+# ANTHROPIC_API_KEY is required (judge + reader). OPENAI_API_KEY is optional (accuracy anchor).
+#   ANTHROPIC_API_KEY=...        TAVILY_API_KEY=...   EXA_API_KEY=...   BRAVE_API_KEY=...
+#   SERPER_API_KEY=...           PERPLEXITY_API_KEY=...
+
+python run_arena.py --queries my_queries.csv     # CSV or JSONL; required column: query
+```
+
+Zero-config: with no config file, the arena runs across every provider whose key is present.
+Aim for **≥3 providers and ~30–50 queries** for a statistically meaningful ranking (fewer → the
+tool honestly reports `tied` / `unranked` rather than inventing precision).
+
+**Queries file** (`query` required; the rest optional):
+
+```csv
+query,expected_answer,category
+who won the 2022 world cup final?,Argentina,sports
+what is the latest stable python version?,,tech
+```
+
+`expected_answer` turns on a judge-free **accuracy** column (and judge-vs-gold **calibration**)
+for those rows.
+
+### Providers (roster)
+
+Document-returning providers, each a one-line registry entry: `tavily`, `exa`, `brave`,
+`serper`, `perplexity_search`, `firecrawl`, `linkup`. Every key is optional — a provider with no
+key (or disabled in config) is skipped and reported, never an error.
+
+### Reading the output
+
+A run prints a CLI dashboard and writes `results.json` + `ranking.csv` under
+`results/arena/<timestamp>/`:
+
+- **Ranking** — win-rate bar + 95% CI per provider. Providers whose CIs overlap are shown as a
+  **statistical tie** (grouped, not falsely ordered); too few comparisons → `unranked`.
+- **acc** — judge-free accuracy vs `expected_answer` (blank where no gold). A sharper signal
+  that can separate providers the pairwise judge calls tied.
+- **judge-vs-gold agreement** — on gold-decidable pairs, how often the judge picked the
+  provably-correct answer. This is the judge's **validity** number (bar: ≥0.80).
+- **judge reliability (swap-consistency)** — fraction of pairs where the verdict survived the
+  A/B order-swap. Measures position-bias **noise** (bar: ≥0.85); low here does not mean the
+  judge is *wrong* (see calibration).
+- **cov** — avg tokens/result, surfaced next to rank so the evidence-granularity difference
+  between providers is visible, not hidden.
+- **scope** + **stage status** — exactly what ran/was skipped and why, and a green/red health
+  line per pipeline stage.
+
+Other commands:
+
+```sh
+python -m arena.spike --n 30       # quick run on vendored SimpleQA (gold) — prints calibration too
+python -m arena.calibrate --n 50   # judge-vs-gold calibration on a larger gold sample
+```
+
+### Config (optional)
+
+Copy `configs/arena.example.yaml` to `configs/arena.yaml` (git-ignored) to override defaults —
+disable providers, set the evidence budget, pick models. It is honored automatically by every
+command. Use `--reader-model <cheap-model>` to run the reader/grader on a cheaper model than the
+judge and cut cost.
+
+### Honest limits (by design)
+
+Reference-free pairwise judging is a **proxy**, not a truth oracle. It is strong where evidence
+quality visibly differs and rank + accuracy + calibration triangulate; it **cannot rigorously
+separate genuinely near-equal providers** at small sample sizes — there the tool correctly
+reports a tie. The escalation ladder (consensus anchors → human adjudication of pivotal ties →
+downstream task success) is the path for higher-stakes decisions and is future work (see below).
+
+> **Data note:** `results.json` and the rationale log contain your full query text and the web
+> content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
+
+### Extending
+
+Adding a provider is **one adapter + one registry line** (the only documented extension point):
+a normalizer in `arena/adapters/normalize.py` mapping the raw response to
+`{url, title, content}`, and an entry in `arena/adapters/registry.py`. No auto-discovery, no
+plugin system.
+
+### Roadmap (deferred)
+
+Native-answer providers (Perplexity Sonar, GPT-Researcher) + self-preference handling; cost-per-
+query from a provider pricing map; freshness scoring; benchmark-suite mode (marketing-claims
+ledger); Tier-1 consensus anchors; Tier-2 human adjudication; Tier-3 downstream success +
+Langfuse tracing.
+
+**Prior art / design credit:** Arena mode extends this repo's provider-handler architecture, and
+draws on [`youdotcom-oss/web-search-api-evals`](https://github.com/youdotcom-oss/web-search-api-evals)
+(sampler / synthesize / grade design), reference-free LLM-as-judge and Chatbot-Arena-style
+pairwise aggregation, and the SimpleQA / FRAMES / FreshQA benchmark datasets.
+
+---
+
 ## **License**
 
 This project is made available under the [MIT License](https://github.com/tavily-ai/tavily-mcp/blob/main/LICENCE).
