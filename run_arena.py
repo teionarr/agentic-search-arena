@@ -115,8 +115,9 @@ def main() -> int:
     # the judge-free success-rate column. Off unless downstream.command is configured.
     if config.downstream_command:
         from arena.downstream import attach_downstream, run_downstream
-        logger.info(f"Running downstream loop ({config.downstream_runs}× per provider): "
-                    f"{config.downstream_command}")
+        # The command string itself is never logged — quick eval scripts often embed tokens.
+        logger.info(f"Running downstream loop ({config.downstream_runs}× per provider, "
+                    f"timeout {config.downstream_timeout_s}s)")
         outcomes = run_downstream(config.downstream_command, [a.name for a in adapters],
                                   runs=config.downstream_runs,
                                   timeout_s=config.downstream_timeout_s)

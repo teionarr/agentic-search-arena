@@ -70,6 +70,19 @@ def test_config_rejects_bad_runs():
         ArenaConfig(downstream_runs=0)
 
 
+def test_config_rejects_bad_timeout_and_command_type():
+    with pytest.raises(ValueError):
+        ArenaConfig(downstream_timeout_s=0)
+    with pytest.raises(ValueError):
+        ArenaConfig(downstream_command=["not", "a", "string"])
+
+
+def test_unparseable_command_returns_empty_not_crash():
+    # Config error, not provider signal: column stays absent (§8), run doesn't crash.
+    out = run_downstream('bad "unclosed quote {provider}', ["tavily"], runs=2, timeout_s=5)
+    assert out == {}
+
+
 def test_csv_and_cli_render_downstream(tmp_path):
     import csv as csvmod
     from arena.report import render_cli_summary, write_results

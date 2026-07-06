@@ -29,10 +29,18 @@ def run_downstream(command: str, providers: List[str], runs: int = DEFAULT_RUNS,
     """Run the user's command ``runs`` times per provider; exit 0 = success.
 
     A timeout or spawn failure counts as a failure (an agent loop that hangs on a provider is
-    a real downstream signal, not missing data). ``runner`` is injectable for tests."""
+    a real downstream signal, not missing data). A command that doesn't PARSE is a config
+    error, not provider signal — it returns ``{}`` (column stays absent, §8 absent-not-zero)
+    with a loud error. ``runner`` is injectable for tests."""
+    try:
+        argv_template = shlex.split(command)
+    except ValueError as e:
+        logger.error(f"downstream.command does not parse ({e}); skipping Tier-3 — "
+                     "no downstream column will be produced")
+        return {}
     outcomes: Dict[str, dict] = {}
     for provider in providers:
-        argv = [a.replace("{provider}", provider) for a in shlex.split(command)]
+        argv = [a.replace("{provider}", provider) for a in argv_template]
         env = {**os.environ, "ARENA_PROVIDER": provider}
         successes = 0
         for i in range(runs):

@@ -92,6 +92,12 @@ class ArenaConfig:
             raise ValueError("repeats must be >= 1")
         if self.downstream_runs < 1:
             raise ValueError("downstream_runs must be >= 1")
+        # A non-positive timeout would silently fail every downstream run (confusing 0%
+        # success with no error); a non-string command would only blow up inside shlex.
+        if self.downstream_timeout_s < 1:
+            raise ValueError("downstream_timeout_s must be >= 1")
+        if self.downstream_command is not None and not isinstance(self.downstream_command, str):
+            raise ValueError("downstream.command must be a string")
 
 
 DEFAULT_CONFIG_PATH = "configs/arena.yaml"
