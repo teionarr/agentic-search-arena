@@ -55,6 +55,7 @@ class ArenaConfig:
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
     config_path: Optional[str] = None
+    pricing_path: Optional[str] = None          # cost pricing map (§8.2); None -> configs/pricing.yaml
     # Benchmark-suite mode (M2, §7). Off by default; a sample per set unless overridden.
     benchmark_suite: bool = False
     benchmark_datasets: List[str] = field(default_factory=lambda: ["simpleqa"])
@@ -124,6 +125,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,
+        pricing_path=(raw.get("pricing", {}) or {}).get("path"),
         benchmark_suite=bool(bench.get("enabled", False)),
         benchmark_datasets=list(datasets) or ["simpleqa"],
         benchmark_sample_size=int(bench.get("sample_size", DEFAULT_BENCHMARK_SAMPLE_SIZE)),

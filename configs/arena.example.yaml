@@ -35,5 +35,11 @@ modes:
 # Metric weights (absent/partial metrics are dropped and the rest renormalized).
 weights: { accuracy: 0.0, latency: 0.5, coverage: 0.5 }
 
+# Cost pricing map for the cost-per-query column (§8.2). Defaults to configs/pricing.yaml;
+# override `path` to point at your own dated prices. The pricing `as_of` date is printed
+# alongside the cost column so staleness is visible.
+pricing:
+  path: null                    # null => configs/pricing.yaml
+
 output:
   dir: results
