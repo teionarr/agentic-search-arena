@@ -10,7 +10,7 @@ pyyaml==6.0.2
 numpy==1.26.4
 tiktoken==0.11.0
 aiohttp==3.14.1
-python-dotenv==1.1.0
+python-dotenv==1.2.2
 pydantic==2.11.5
 langfuse==4.13.0            # optional Langfuse tracing; imported lazily, only if enabled
 
