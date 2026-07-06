@@ -8,6 +8,7 @@ result. This is a separate entrypoint and never touches run_evaluation.py.
 """
 
 import argparse
+import json
 import logging
 import os
 import sys
@@ -31,9 +32,45 @@ if not logger.handlers:
     logger.addHandler(console_handler)
 
 
+# The committed example run (docs/example-run/) — resolved relative to this file so --demo
+# works from any cwd.
+DEMO_RESULTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "docs", "example-run", "results.json")
+
+
+def run_demo() -> int:
+    """Render the committed example run through the real CLI renderer — no keys, no network."""
+    with open(DEMO_RESULTS_PATH) as f:
+        doc = json.load(f)
+    print("\nDEMO — a real committed run: 20 queries × 2 repeats × 6 providers, "
+          "judge claude-sonnet-4-6, total cost $15.47. "
+          "Your run will look like this on YOUR queries.")
+    print(render_cli_summary(doc))
+    print("Next: copy .env.example to .env, add ANTHROPIC_API_KEY plus any provider keys, then\n"
+          "run  python run_arena.py --queries your_queries.csv  — see the README quickstart\n"
+          "for a cheap (~$1-2) first run.")
+    return 0
+
+
+FIRST_RUN_EPILOG = (
+    "first run?\n"
+    "  1. python run_arena.py --demo — a real committed result, zero keys, zero cost.\n"
+    "  2. Cheap first run (~$1-2): 10 queries + --reader-model claude-haiku-4-5-20251001.\n"
+    "  3. Full runs cost roughly $8-15 for ~20 queries × 6 providers × 2 repeats\n"
+    "     (the committed example run in docs/example-run/ cost a measured $15.47)."
+)
+
+
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run the search-arena reference-free ranking")
-    parser.add_argument("--queries", required=True, help="Queries file (CSV or JSONL); required column 'query'")
+    parser = argparse.ArgumentParser(description="Run the search-arena reference-free ranking",
+                                     epilog=FIRST_RUN_EPILOG,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--queries", default=None,
+                        help="Queries file (CSV or JSONL); required column 'query'. "
+                             "Required unless --demo is set.")
+    parser.add_argument("--demo", action="store_true",
+                        help="Render the committed example run (docs/example-run/) through the "
+                             "real CLI renderer and exit — zero keys, zero network.")
     parser.add_argument("--config", default=None, help="Optional arena config (YAML/JSON)")
     parser.add_argument("--output_dir", default="results", help="Base output directory")
     parser.add_argument("--model", default=None, help=f"Judge model (default {DEFAULT_MODEL})")
@@ -55,10 +92,28 @@ def main() -> int:
                              "sample per set; opt into full runs via config.")
     args = parser.parse_args()
 
+    if args.demo:  # before load_secrets(): the demo needs no keys, no .env, no network
+        return run_demo()
+    if not args.queries:
+        parser.error("--queries is required (or use --demo to see an example run)")
+
     secrets.load_secrets()
 
+    # The judge/reader/grader run on the Anthropic API — this key is required for EVERY run,
+    # regardless of which provider keys are present. Fail here, before any provider work.
+    if not secrets.has("ANTHROPIC_API_KEY"):
+        logger.error("ANTHROPIC_API_KEY is not set — the judge and reader run on the Anthropic "
+                     "API, so this key is required for every arena run (provider keys alone are "
+                     "not enough). Add ANTHROPIC_API_KEY to your .env (see .env.example) and retry.")
+        return 1
+
     config_path = resolve_config_path(args.config)  # honors configs/arena.yaml by default
-    config = load_config(config_path)
+    try:
+        config = load_config(config_path)
+    except (FileNotFoundError, ValueError) as e:
+        # CLI boundary: bad config is a user error — print the message, not a traceback.
+        logger.error(str(e))
+        return 1
     config.output_dir = args.output_dir
     if args.repeats is not None:
         if args.repeats < 1:
@@ -67,13 +122,19 @@ def main() -> int:
         config.repeats = args.repeats
     if args.save_traces:
         config.save_traces = True
-    queries = load_queries(args.queries)
+    try:
+        queries = load_queries(args.queries)
+    except (FileNotFoundError, ValueError) as e:
+        # CLI boundary: a missing/malformed queries file is a user error — no traceback.
+        logger.error(str(e))
+        return 1
 
     scope = resolve_scope(config.providers)
     included = scope.included
     if not included:
         logger.error("No providers are enabled with a key present. Add provider keys to your "
-                     ".env (e.g. TAVILY_API_KEY) and retry.")
+                     ".env (e.g. TAVILY_API_KEY) and retry. (ANTHROPIC_API_KEY is additionally "
+                     "required for every run — it powers the judge and reader.)")
         for prov, info in scope.as_dict().items():
             logger.error(f"  {prov}: {info['status']} {info['detail']}")
         return 1
