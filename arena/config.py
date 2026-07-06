@@ -51,6 +51,11 @@ class ArenaConfig:
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
     config_path: Optional[str] = None
+    # Benchmark-suite mode (M2, §7). Off by default; a sample per set unless overridden.
+    benchmark_suite: bool = False
+    benchmark_datasets: List[str] = field(default_factory=lambda: ["simpleqa"])
+    benchmark_sample_size: int = 300
+    published_claims_path: Optional[str] = None
 
     def __post_init__(self):
         # Fail fast on nonsensical values: a non-positive budget would silently disable the
@@ -97,6 +102,9 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         )
 
     judge = raw.get("judge", {}) or {}
+    bench = ((raw.get("modes", {}) or {}).get("benchmark_suite", {})) or {}
+    if not isinstance(bench, dict):  # allow `benchmark_suite: true` shorthand
+        bench = {"enabled": bool(bench)}
     return ArenaConfig(
         providers=providers,
         reader_model=(raw.get("reader", {}) or {}).get("model"),
@@ -109,6 +117,10 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,
+        benchmark_suite=bool(bench.get("enabled", False)),
+        benchmark_datasets=list(bench.get("datasets", ["simpleqa"])) or ["simpleqa"],
+        benchmark_sample_size=int(bench.get("sample_size", 300)),
+        published_claims_path=bench.get("published_claims_path"),
     )
 
 
