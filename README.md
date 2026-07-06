@@ -54,7 +54,9 @@ cp .env.example .env                       # then fill in your keys
 ```
 
 `ANTHROPIC_API_KEY` is required (judge + reader). Every provider key is optional — providers
-without a key are skipped gracefully and reported, never an error. One install note: five
+without a key are skipped per provider and reported in the scope report (you need at least one
+provider key for a real run; with none, the tool tells you exactly what's missing and exits
+cleanly). One install note: five
 providers (`tavily`, `exa`, `brave`, `serper`, `perplexity_search`) reuse the handlers inherited
 from the upstream project, which need the full legacy dependency set — if you want those in your
 ranking (you probably do), `pip install -r requirements.txt` instead (a superset; the legacy

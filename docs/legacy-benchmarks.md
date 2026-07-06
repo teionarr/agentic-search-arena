@@ -103,7 +103,7 @@ python run_evaluation.py
 
 Evaluation results are saved in the `results/` directory with the following structure:
 
-```
+```text
 results/
 └── {evaluation_type}/                      # Evaluation type folder (simpleqa or document_relevance)
     └── YYYY-MM-DD_HH-MM-SS/
@@ -142,7 +142,7 @@ Configuration file `config.json` might look like:
   "tavily": {
     "search_depth": "advanced",
     "include_raw_content": false,
-    "max_results": 10,
+    "max_results": 10
   },
   "perplexity_search": {
     "max_results": 10,
@@ -191,7 +191,7 @@ You can extend the system to evaluate additional search providers by following t
 - Update the `get_search_handlers` function in `run_evaluation.py` to include your new provider.
 
 3. Update environment variables, add your provider's API key to the `.env` file:
-```
+```env
 NEW_PROVIDER_API_KEY=your_api_key_here
 ```
 
