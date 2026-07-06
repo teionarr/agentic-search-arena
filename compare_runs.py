@@ -24,10 +24,19 @@ def main() -> int:
     parser.add_argument("--json", default=None, help="Also write the structured diff to this path")
     args = parser.parse_args()
 
-    with open(args.before) as f:
-        before = json.load(f)
-    with open(args.after) as f:
-        after = json.load(f)
+    # CLI boundary: a missing or unparseable results file is a user error — print the
+    # message, not a traceback.
+    try:
+        with open(args.before) as f:
+            before = json.load(f)
+        with open(args.after) as f:
+            after = json.load(f)
+    except FileNotFoundError as e:
+        print(f"Results file not found: {e.filename}", file=sys.stderr)
+        return 1
+    except json.JSONDecodeError as e:
+        print(f"Not a valid results.json ({e})", file=sys.stderr)
+        return 1
 
     diff = diff_runs(before, after)
     print(render_drift(diff))
