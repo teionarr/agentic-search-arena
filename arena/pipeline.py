@@ -19,6 +19,7 @@ from typing import Callable, Dict, List, Optional
 from arena import reader as reader_mod
 from arena.adapters.base import UnifiedResult
 from arena.aggregate import aggregate
+from arena.anchors import compute_anchors, machine_verify
 from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
@@ -157,11 +158,14 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     freshness_tallies: Dict[str, List[dict]] = {p: [] for p in provider_names}
     any_freshness_query = any(q.freshness_need for q in queries)
 
+    mv_correct: Dict[str, int] = {p: 0 for p in provider_names}  # Tier-1 machine-verify anchors
+    mv_total: Dict[str, int] = {p: 0 for p in provider_names}
+
     # ---- The per-query LLM chain (reader -> grade -> judge). Pure: reads only its own
     #      search results + config/llms and returns a local delta to merge (no shared state). ----
     def _process_query(qi: int, results_for_q: Dict[str, UnifiedResult]) -> dict:
         q = queries[qi]
-        loc = {"qi": qi, "comparisons": [], "rationale": [],
+        loc = {"qi": qi, "comparisons": [], "rationale": [], "reader_answers": {},
                "swap_total": 0, "swap_flips": 0, "judge_skipped": 0, "injection_flags": 0,
                "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
@@ -169,7 +173,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                             "empty": 0, "reader_made": 0, "reader_degen": 0,
                             "acc_correct": 0, "acc_total": 0,
                             "units": None, "units_cells": 0,
-                            "freshness": []} for p in provider_names}}
+                            "freshness": [],
+                            "mv_correct": 0, "mv_total": 0} for p in provider_names}}
         fresh_window = parse_freshness_window_days(q.freshness_need) if q.freshness_need else None
         answers, correct = {}, {}
         for name in provider_names:
@@ -196,8 +201,16 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 pv["reader_degen"] += 1
                 continue
             answers[name] = {"answer": ans, "docs": capped}
-            if q.expected_answer:
-                c = grade_answer(q.query, ans, q.expected_answer, llm=grader_llm)
+            loc["reader_answers"][name] = ans  # Tier-1 consensus (§3): raw reader answer
+            if q.expected_answer is not None and str(q.expected_answer).strip() != "":
+                # Tier-1 FREE anchor: a deterministic machine check needs no model. Only fall
+                # back to the LLM grader when the expected answer isn't mechanically checkable.
+                c = machine_verify(ans, q.expected_answer)
+                if c is not None:
+                    pv["mv_total"] += 1
+                    pv["mv_correct"] += int(c)
+                else:
+                    c = grade_answer(q.query, ans, q.expected_answer, llm=grader_llm)
                 if c is not None:
                     pv["acc_total"] += 1
                     pv["acc_correct"] += int(c)
@@ -250,11 +263,15 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     # ---- Merge per-query deltas ----
     comparisons: List[dict] = []
     rationale_log: List[dict] = []
+    per_query_answers: List[Dict[str, Optional[str]]] = []   # Tier-1 consensus, ordered by qi
+    per_query_comparisons: List[List[dict]] = []
     swap_flips = swap_total = judge_skipped = injection_flags = self_pref_flags = 0
     cal_agree = cal_decidable = cal_abstained = 0
     for loc in sorted(locals_out, key=lambda l: l["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
+        per_query_answers.append(loc["reader_answers"])
+        per_query_comparisons.append(loc["comparisons"])
         swap_total += loc["swap_total"]; swap_flips += loc["swap_flips"]
         judge_skipped += loc["judge_skipped"]; injection_flags += loc["injection_flags"]
         self_pref_flags += loc["self_pref_flags"]
@@ -270,8 +287,13 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 cost_units[p] = (cost_units[p] or 0.0) + pv["units"]
                 cost_unit_cells[p] += pv["units_cells"]
             freshness_tallies[p].extend(pv["freshness"])
+            mv_correct[p] += pv["mv_correct"]; mv_total[p] += pv["mv_total"]
 
     agg = aggregate(comparisons, provider_names, seed=0)
+    anchors = compute_anchors(per_query_answers, per_query_comparisons, provider_names,
+                              min_providers=config.consensus_min_providers)
+    for p in provider_names:
+        anchors.auto_verify[p] = {"correct": mv_correct[p], "total": mv_total[p]}
 
     # ---- Metrics + stage_status ----
     per_provider = {}
@@ -344,6 +366,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "calibration": {"agreement": (cal_agree / cal_decidable) if cal_decidable else None,
                         "n_decidable": cal_decidable, "n_abstained": cal_abstained},
         "cost_usd": round(cost, 4),
+        "anchors": anchors.as_dict(),
         "stage_status": stage_status,
         "degenerate_run": len(scope.included) < 3,
         "rationale_log": rationale_log,
