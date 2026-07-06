@@ -1,0 +1,45 @@
+{
+  "answer": "",
+  "search_response": {
+    "candidates": [
+      {
+        "content": {
+          "parts": [
+            {
+              "text": "The 2010 IEEE Frank Rosenblatt Award was awarded to Michio Sugeno for contributions to the theory and applications of fuzzy sets."
+            }
+          ],
+          "role": "model"
+        },
+        "groundingMetadata": {
+          "webSearchQueries": [
+            "IEEE Frank Rosenblatt Award 2010 recipient"
+          ],
+          "searchEntryPoint": {
+            "renderedContent": "<!-- HTML and CSS for the search widget -->"
+          },
+          "groundingChunks": [
+            {"web": {"uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/abc1", "title": "en.wikipedia.org"}},
+            {"web": {"uri": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/abc2", "title": "ethw.org"}}
+          ],
+          "groundingSupports": [
+            {
+              "segment": {"startIndex": 0, "endIndex": 74, "text": "The 2010 IEEE Frank Rosenblatt Award was awarded to Michio Sugeno."},
+              "groundingChunkIndices": [0]
+            },
+            {
+              "segment": {"startIndex": 75, "endIndex": 130, "text": "for contributions to the theory and applications of fuzzy sets."},
+              "groundingChunkIndices": [0, 1]
+            }
+          ]
+        }
+      }
+    ],
+    "usageMetadata": {
+      "promptTokenCount": 12,
+      "candidatesTokenCount": 28,
+      "totalTokenCount": 40
+    }
+  },
+  "provider_latency": 2.031204938888550
+}

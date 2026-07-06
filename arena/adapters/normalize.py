@@ -155,6 +155,81 @@ def normalize_claude_search(raw: Any) -> List[EvidenceDoc]:
     return docs
 
 
+def normalize_youcom(raw: Any) -> List[EvidenceDoc]:
+    data = _response_data(raw)
+    if not isinstance(data, dict):
+        return []
+    results = data.get("results")
+    # v1: {"results": {"web": [...], "news": [...]}}; tolerate a flat {"results": [...]} too.
+    if isinstance(results, dict):
+        rows = (results.get("web") or []) + (results.get("news") or [])
+    elif isinstance(results, list):
+        rows = results
+    else:
+        rows = []
+    docs = []
+    for res in rows or []:
+        url = res.get("url", "")
+        title = res.get("title", "")
+        snippets = res.get("snippets")
+        if isinstance(snippets, list):
+            snippets = " ".join(s for s in snippets if s)
+        content = snippets or res.get("description") or ""
+        if url and content:
+            docs.append(EvidenceDoc(url=url, title=title, content=content,
+                                    published_date=res.get("page_age")))
+    return docs
+
+
+def normalize_parallel(raw: Any) -> List[EvidenceDoc]:
+    data = _response_data(raw)
+    if not isinstance(data, dict):
+        return []
+    docs = []
+    for res in data.get("results", []) or []:
+        url = res.get("url", "")
+        title = res.get("title", "")
+        excerpts = res.get("excerpts")
+        if isinstance(excerpts, list):
+            excerpts = " ".join(e for e in excerpts if e)
+        content = excerpts or res.get("content") or ""
+        if url and content:
+            docs.append(EvidenceDoc(url=url, title=title, content=content,
+                                    published_date=res.get("publish_date")))
+    return docs
+
+
+def normalize_gemini(raw: Any) -> List[EvidenceDoc]:
+    data = _response_data(raw)
+    if not isinstance(data, dict):
+        return []
+    candidates = data.get("candidates") or []
+    if not candidates:
+        return []
+    metadata = candidates[0].get("groundingMetadata") or {}
+    chunks = metadata.get("groundingChunks") or []
+    # Grounding chunks carry {web:{uri,title}} but no per-chunk content. Content lives in
+    # groundingSupports segments that reference chunk indices — map each chunk to the answer
+    # text it supports, falling back to the chunk title when no segment references it.
+    chunk_texts: dict = {}
+    for support in metadata.get("groundingSupports") or []:
+        segment = support.get("segment") or {}
+        text = segment.get("text", "")
+        if not text:
+            continue
+        for idx in support.get("groundingChunkIndices") or []:
+            chunk_texts.setdefault(idx, []).append(text)
+    docs = []
+    for i, chunk in enumerate(chunks or []):
+        web = chunk.get("web") or {}
+        url = web.get("uri", "")
+        title = web.get("title", "")
+        content = " ".join(chunk_texts.get(i, [])) or title
+        if url and content:
+            docs.append(EvidenceDoc(url=url, title=title, content=content))
+    return docs
+
+
 NORMALIZERS = {
     "tavily": normalize_tavily,
     "exa": normalize_exa,
@@ -164,4 +239,7 @@ NORMALIZERS = {
     "firecrawl": normalize_firecrawl,
     "linkup": normalize_linkup,
     "claude_search": normalize_claude_search,
+    "youcom": normalize_youcom,
+    "parallel": normalize_parallel,
+    "gemini": normalize_gemini,
 }
