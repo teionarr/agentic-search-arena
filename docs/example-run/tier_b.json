@@ -1,0 +1,40 @@
+{
+  "thresholds": {
+    "calibration": 0.8,
+    "swap_consistency": 0.85,
+    "kappa": 0.6
+  },
+  "n_queries": 30,
+  "n_providers": 6,
+  "model_id": "claude-sonnet-4-6",
+  "checks": [
+    {
+      "check": "judge-vs-gold calibration",
+      "status": "pass",
+      "value": 0.9072,
+      "bar": 0.8,
+      "note": "97 decidable pairs"
+    },
+    {
+      "check": "judge swap-consistency",
+      "status": "fail",
+      "value": 0.8295,
+      "bar": 0.85,
+      "note": "440 double-judged pairs"
+    },
+    {
+      "check": "inter-judge agreement \u03ba",
+      "status": "skip",
+      "value": null,
+      "bar": 0.6,
+      "note": "no secondary judge configured (reported when one is)"
+    },
+    {
+      "check": "e2e live smoke",
+      "status": "pass",
+      "value": null,
+      "bar": null,
+      "note": "6 providers; ranking+scope+rationale present"
+    }
+  ]
+}
