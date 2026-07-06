@@ -148,6 +148,11 @@ def render_cli_summary(doc: dict) -> str:
     out.append(f"  {doc['n_queries']} queries · judge {doc['model_id']}{cost_s}")
     out.append(f"  {n_dec}/{n_tot} comparisons used" +
                (f" · judge reliability {sc:.2f}" if sc is not None else ""))
+    judge = doc.get("judge") or {}
+    if judge.get("self_preference_caveat"):
+        n = judge.get("self_preference_flags", 0)
+        out.append(f"  ⚠  native-answer mode: {n} pair(s) flagged possible-self-preference "
+                   "(Claude judge, no secondary judge) — see rationale log")
     cal = doc.get("calibration") or {}
     if cal.get("agreement") is not None:
         bar = "≥0.80 ok" if cal["agreement"] >= 0.80 else "below 0.80 bar"

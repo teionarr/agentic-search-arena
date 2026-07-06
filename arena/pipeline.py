@@ -25,6 +25,7 @@ from arena.grade import grade_answer
 from arena.judge import judge_pair
 from arena.metrics import evidence_coverage, latency_percentiles
 from arena.scope import Scope
+from arena.self_preference import self_preference_label
 from arena.tokens import calculate_token_consumption
 
 logger = logging.getLogger(__name__)
@@ -119,6 +120,15 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     provider_names = [a.name for a in adapters]
     conc = max(1, config.max_concurrency)
 
+    # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
+    # a Claude judge with no secondary judge may favour a Claude-family native answer by style.
+    from arena.adapters.registry import claude_family_providers
+    native_providers = {a.name for a in adapters if getattr(a, "native_answer", False)}
+    claude_family = set(claude_family_providers())
+    judge_is_claude = (config.judge_primary or "").lower() == "claude"
+    has_secondary_judge = bool(config.judge_secondary)
+    native_mode = bool(native_providers)  # true whenever a native-answer provider is in scope
+
     # Per-provider accumulators.
     latencies: Dict[str, List] = {p: [] for p in provider_names}
     coverage_tokens: Dict[str, List[int]] = {p: [] for p in provider_names}
@@ -137,6 +147,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         q = queries[qi]
         loc = {"qi": qi, "comparisons": [], "rationale": [],
                "swap_total": 0, "swap_flips": 0, "judge_skipped": 0, "injection_flags": 0,
+               "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
                "prov": {p: {"latency": [], "coverage": [], "cells_att": 0, "cells_succ": 0,
                             "empty": 0, "reader_made": 0, "reader_degen": 0,
@@ -169,8 +180,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     correct[name] = bool(c)
 
         for x, y in itertools.combinations([p for p in provider_names if p in answers], 2):
+            sp_label = self_preference_label(
+                x, y, x in native_providers, y in native_providers, claude_family,
+                judge_is_claude, has_secondary_judge)
             verdict = judge_pair(judge_llm, q.query, answers[x], answers[y], run_nonce,
-                                 order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip)
+                                 order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip,
+                                 self_preference=sp_label)
             if verdict.get("skipped"):
                 loc["judge_skipped"] += 1
             else:
@@ -179,6 +194,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["swap_flips"] += 1
             if verdict["injection_flag"]:
                 loc["injection_flags"] += 1
+            if verdict.get("self_preference"):
+                loc["self_pref_flags"] += 1
             outcome = verdict["outcome"]
             winner = x if outcome == "x" else y if outcome == "y" else ("tie" if outcome == "tie" else None)
             cx, cy = correct.get(x), correct.get(y)
@@ -193,6 +210,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 "query": q.query, "a": x, "b": y, "winner": winner,
                 "flipped": verdict["flipped"], "low_confidence": verdict["low_confidence"],
                 "injection_flag": verdict["injection_flag"], "rationales": verdict["rationales"],
+                "self_preference": verdict.get("self_preference"),
             })
         return loc
 
@@ -208,13 +226,14 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     # ---- Merge per-query deltas ----
     comparisons: List[dict] = []
     rationale_log: List[dict] = []
-    swap_flips = swap_total = judge_skipped = injection_flags = 0
+    swap_flips = swap_total = judge_skipped = injection_flags = self_pref_flags = 0
     cal_agree = cal_decidable = cal_abstained = 0
     for loc in sorted(locals_out, key=lambda l: l["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
         swap_total += loc["swap_total"]; swap_flips += loc["swap_flips"]
         judge_skipped += loc["judge_skipped"]; injection_flags += loc["injection_flags"]
+        self_pref_flags += loc["self_pref_flags"]
         cal_agree += loc["cal_agree"]; cal_decidable += loc["cal_decidable"]; cal_abstained += loc["cal_abstained"]
         for p in provider_names:
             pv = loc["prov"][p]
@@ -272,7 +291,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "metrics": per_provider,
         "judge": {"swap_consistency": swap_consistency, "swap_total": swap_total,
                   "swap_flips": swap_flips, "judge_skipped": judge_skipped,
-                  "injection_flags": injection_flags},
+                  "injection_flags": injection_flags,
+                  # Self-preference caveat (§5/§6): surfaced whenever native mode runs.
+                  "native_mode": native_mode,
+                  "self_preference_flags": self_pref_flags,
+                  "self_preference_caveat": (native_mode and judge_is_claude
+                                             and not has_secondary_judge)},
         "calibration": {"agreement": (cal_agree / cal_decidable) if cal_decidable else None,
                         "n_decidable": cal_decidable, "n_abstained": cal_abstained},
         "cost_usd": round(cost, 4),

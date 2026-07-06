@@ -1,0 +1,11 @@
+{
+  "answer": "The capital of France is Paris.",
+  "search_response": {
+    "answer": "The capital of France is Paris.",
+    "results": [
+      {"url": "https://en.wikipedia.org/wiki/Paris", "title": "Paris - Wikipedia", "page_age": "2026-01-01"},
+      {"url": "https://example.com/france", "title": "France facts", "page_age": null}
+    ]
+  },
+  "provider_latency": 1.234
+}
