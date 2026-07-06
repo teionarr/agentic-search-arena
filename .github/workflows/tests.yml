@@ -1,7 +1,9 @@
 name: Tier A tests
 
-# §14 definition of done: Tier A (deterministic, no AI, no keys) must be 100% green
-# on every commit. These tests use fakes/fixtures only — no secrets are configured here.
+# §14 definition of done: Tier A (deterministic, no AI, no keys) must be 100% green on
+# every commit. Real logic under test; external dependencies are test doubles (mocked
+# providers/LLMs + canned fixtures), so no network and no secrets are needed here. The
+# live, real-API checks are Tier B: python -m arena.tier_b (gates a release, not a commit).
 on:
   push:
     branches: [main]
