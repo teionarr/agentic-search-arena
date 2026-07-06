@@ -121,7 +121,7 @@ def test_adapters_map_to_unified_shape_and_strip_answer():
         assert res.results and all(isinstance(d, EvidenceDoc) for d in res.results)
         assert all(d.url and d.content for d in res.results)
         assert res.latency_ms == 500.0                   # 0.5s -> 500ms
-        assert res.cost_units is None                    # cost mapping is downstream (M1 metrics)
+        assert res.cost_units is None                    # bare adapter: units come from the spec (§8.2)
         assert res.raw is payload                         # native payload preserved
         assert res.answer is None                         # native answer stripped (forced synthesis)
         assert res.empty_evidence is False
