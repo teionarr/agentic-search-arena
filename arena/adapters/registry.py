@@ -69,6 +69,13 @@ def _perplexity_search_factory(config, token_model):
     return PerplexitySearchHandler(config, token_model=token_model)
 
 
+def _perplexity_factory(config, token_model):
+    # Arena-native Sonar handler (the base's perplexity_handler appends a "Sources:" list to
+    # the answer and reports no latency — see its module docstring); light import (aiohttp only).
+    from arena.adapters.perplexity_sonar_handler import PerplexitySonarHandler
+    return PerplexitySonarHandler(config, token_model=token_model)
+
+
 def _firecrawl_factory(config, token_model):
     # Arena-native handler (not in the base repo); light import (aiohttp only).
     from arena.adapters.firecrawl_handler import FirecrawlHandler
@@ -101,8 +108,9 @@ def _gemini_factory(config, token_model):
     return GeminiHandler(config, token_model=token_model)
 
 
-# In-scope (document-returning) providers only. Finished-answer providers (perplexity Sonar,
-# gptr) are M1. max_results / top-k held constant at 10 across providers (§15).
+# In-scope providers: document-returning plus the native-answer pair (claude_search,
+# perplexity Sonar, §5). The remaining finished-answer provider (gptr) is M1. max_results /
+# top-k held constant at 10 across providers (§15).
 REGISTRY: Dict[str, ProviderSpec] = {
     "tavily": ProviderSpec(
         required_env_keys=["TAVILY_API_KEY"],
@@ -130,6 +138,14 @@ REGISTRY: Dict[str, ProviderSpec] = {
         required_env_keys=["PERPLEXITY_API_KEY"],
         default_config={"max_results": 10, "max_tokens_per_page": 512},
         _factory=_perplexity_search_factory,
+    ),
+    "perplexity": ProviderSpec(
+        required_env_keys=["PERPLEXITY_API_KEY"],
+        default_config={"model": "sonar"},
+        _factory=_perplexity_factory,
+        native_answer=True,   # returns its own synthesized answer (native-answer path, §5)
+        # family stays None: family exists only for the Claude self-preference caveat (§5/§6);
+        # a non-Claude native provider shares the native path but not the caveat.
     ),
     "firecrawl": ProviderSpec(
         required_env_keys=["FIRECRAWL_API_KEY"],
