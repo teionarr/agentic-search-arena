@@ -102,19 +102,31 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
         w = csv.writer(f)
         w.writerow(["rank", "provider", "win_rate", "ci_low", "ci_high", "n_comparisons",
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
-                    "accuracy_rate", "accuracy_correct", "accuracy_total"])
+                    "accuracy_rate", "accuracy_correct", "accuracy_total",
+                    "cost_usd_per_query", "cost_as_of"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
+            cost = m.get("cost", {}) or {}
             w.writerow([_csv_safe(x) for x in [
                 s["rank"], s["provider"], s["win_rate"], s["ci_low"], s["ci_high"],
                 s["n_comparisons"], s["tie_group"], s["status"],
                 m.get("coverage", {}).get("avg_tokens_per_result"),
                 m.get("latency", {}).get("p50"),
                 acc.get("rate"), acc.get("correct"), acc.get("total"),
+                cost.get("usd_per_query"), cost.get("as_of"),
             ]])
 
     return {"json": json_path, "csv": csv_path}
+
+
+def _cost_as_of(doc: dict):
+    """The pricing ``as_of`` date carried on the cost cells (surfaced alongside the cost column)."""
+    for m in (doc.get("metrics") or {}).values():
+        as_of = (m.get("cost") or {}).get("as_of")
+        if as_of:
+            return as_of
+    return None
 
 
 def _winrate_bar(win_rate, width: int = 22) -> str:
@@ -157,8 +169,10 @@ def render_cli_summary(doc: dict) -> str:
     has_acc = any((doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {}).get("rate") is not None
                   for s in doc["ranking"])
     acc_hdr = " · acc = judge-free accuracy vs gold" if has_acc else ""
+    cost_as_of = _cost_as_of(doc)
+    cost_hdr = f" · cost/q $/query (pricing as of {cost_as_of})" if cost_as_of else ""
     out.append("")
-    out.append("  RANKING   bar = win-rate · │ = 0.50 even line · [ ] = 95% CI · cov = avg tok/result" + acc_hdr)
+    out.append("  RANKING   bar = win-rate · │ = 0.50 even line · [ ] = 95% CI · cov = avg tok/result" + acc_hdr + cost_hdr)
     out.append("  " + "─" * (W - 2))
     for s in doc["ranking"]:
         acc = (doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {})
@@ -170,6 +184,8 @@ def render_cli_summary(doc: dict) -> str:
         ci = f"[{s['ci_low']:.2f}–{s['ci_high']:.2f}]"
         cov = (doc["metrics"].get(s["provider"], {}).get("coverage", {}) or {}).get("avg_tokens_per_result")
         cov_s = f"cov {cov:.0f}" if cov is not None else "cov n/a"
+        cpq = (doc["metrics"].get(s["provider"], {}).get("cost", {}) or {}).get("usd_per_query")
+        cov_s += f"  cost ${cpq:.4f}/q" if cpq is not None else ("  cost n/a" if cost_as_of else "")
         if group_sizes.get(s["tie_group"], 0) == 1:
             tag = "  ← clear leader"
         elif group_sizes.get(s["tie_group"], 0) > 1:

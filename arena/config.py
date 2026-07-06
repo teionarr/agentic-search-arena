@@ -51,6 +51,7 @@ class ArenaConfig:
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
     config_path: Optional[str] = None
+    pricing_path: Optional[str] = None          # cost pricing map (§8.2); None -> configs/pricing.yaml
 
     def __post_init__(self):
         # Fail fast on nonsensical values: a non-positive budget would silently disable the
@@ -109,6 +110,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,
+        pricing_path=(raw.get("pricing", {}) or {}).get("path"),
     )
 
 

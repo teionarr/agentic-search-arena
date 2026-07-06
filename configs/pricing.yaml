@@ -1,0 +1,22 @@
+# search-arena — cost pricing map (§8.2).
+#
+# Dated, user-editable per-provider unit prices for the cost-per-query column. Cost is
+# computed as `usd_per_unit × units_consumed`, normalized to $/query. Prices go stale, so the
+# `as_of` date below is recorded in the run snapshot and printed alongside the cost column —
+# never silently wrong. These are each vendor's PUBLIC published prices (§15); override to
+# update. A provider that reports no units gets a BLANK cost (never fabricated).
+#
+# `unit` documents the billable unit each `usd_per_unit` is priced in (credit / request /
+# page). It is descriptive only — the arena multiplies whatever `cost_units` the adapter
+# reports for that provider by `usd_per_unit`.
+
+as_of: "2026-07-01"
+
+providers:
+  tavily:            { unit: credit,  usd_per_unit: 0.008 }    # $8 / 1,000 API credits (advanced search = 2 credits)
+  exa:               { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 neural searches
+  brave:             { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 requests (Base plan)
+  serper:            { unit: request, usd_per_unit: 0.0003 }   # $0.30 / 1,000 queries (2.5M-credit tier)
+  perplexity_search: { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 Search API requests
+  firecrawl:         { unit: page,    usd_per_unit: 0.0009 }   # ~$0.89 / 1,000 pages (Standard plan credits)
+  linkup:            { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 standard searches
