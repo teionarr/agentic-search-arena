@@ -76,6 +76,8 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "config": config_snapshot,
         "scope": result["scope"],
         "degenerate_run": result["degenerate_run"],
+        "aggregation_method": result.get("aggregation_method"),
+        "reliability_weighted": result.get("reliability_weighted", False),
         "calibration": result.get("calibration"),
         "anchors": result.get("anchors"),
         "ranking": result["ranking"],
@@ -168,9 +170,15 @@ def render_cli_summary(doc: dict) -> str:
     n_dec = doc.get("n_decided_comparisons", 0)
     n_tot = n_dec + doc.get("n_excluded_comparisons", 0)
     out.append(f"  {doc['n_queries']} queries · judge {doc['model_id']}{cost_s}")
+    method = doc.get("aggregation_method")
+    method_s = f" · {method}" + (" (reliability-weighted)" if doc.get("reliability_weighted") else "") if method else ""
     out.append(f"  {n_dec}/{n_tot} comparisons used" +
-               (f" · judge reliability {sc:.2f}" if sc is not None else ""))
+               (f" · judge reliability {sc:.2f}" if sc is not None else "") + method_s)
     judge = doc.get("judge") or {}
+    kappa = judge.get("inter_judge_kappa")
+    if kappa is not None:
+        out.append(f"  inter-judge agreement κ {kappa:.2f} "
+                   f"({'≥0.60 ok' if kappa >= 0.60 else 'below 0.60 bar'})")
     if judge.get("self_preference_caveat"):
         n = judge.get("self_preference_flags", 0)
         out.append(f"  ⚠  native-answer mode: {n} pair(s) flagged possible-self-preference "
