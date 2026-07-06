@@ -15,7 +15,7 @@ import sys
 from arena import secrets
 from arena.adapters.registry import REGISTRY
 from arena.config import load_config, load_queries, resolve_config_path
-from arena.llm import DEFAULT_MODEL, LLMClient
+from arena.llm import DEFAULT_MODEL, LLMClient, build_llm_client
 from arena.paths import copy_config_to_results, get_output_dir
 from arena.pipeline import run_arena
 from arena.report import build_document, render_cli_summary, write_results
@@ -99,9 +99,10 @@ def main() -> int:
     judge_llm = LLMClient(model=model_id)
     reader_llm = LLMClient(model=reader_model)
     grader_llm = LLMClient(model=reader_model)  # accuracy anchor (Claude fallback if no OPENAI_API_KEY)
-    # Optional neutral second judge (§5): ensemble + self-preference. Anthropic-only client, so a
-    # secondary is a second Claude model id here; a cross-family judge is future work.
-    secondary_judge_llm = LLMClient(model=config.judge_secondary) if config.judge_secondary else None
+    # Optional neutral second judge (§5): ensemble + self-preference. Cross-family via a model-id
+    # prefix — judge.secondary: "openai:<model>" builds an OpenAI-family judge (the genuinely
+    # non-Claude judge §5 asks for); a bare id (or "claude:<model>") stays on the Anthropic client.
+    secondary_judge_llm = build_llm_client(config.judge_secondary) if config.judge_secondary else None
 
     tracer = build_tracer(config.langfuse_enabled)  # NullTracer unless enabled + Langfuse keys present
 

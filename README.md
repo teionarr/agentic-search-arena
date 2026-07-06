@@ -360,8 +360,10 @@ are invisible to the judge. **Claude web search** additionally returns its own s
 (the native-answer path). Because the default judge is Claude, a Claude-family native answer could
 be favored by style — so the judge is always **blinded + order-swapped**, and in native-answer mode
 pairs involving a Claude-family provider are routed to a configured secondary judge or, if none is
-set, flagged `possible-self-preference`. The caveat is surfaced in the run summary and rationale
-log whenever native mode runs. Reader-synthesized (primary-path) pairs are never flagged.
+set, flagged `possible-self-preference`. The secondary judge can be a genuinely different model
+family (§5): set `judge.secondary: "openai:<model>"` to route those pairs to an OpenAI judge
+(requires `OPENAI_API_KEY`); a bare model id keeps a second Claude judge. The caveat is surfaced
+in the run summary and rationale log whenever native mode runs. Reader-synthesized (primary-path) pairs are never flagged.
 
 > **Data note:** `results.json` and the rationale log contain your full query text and the web
 > content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
