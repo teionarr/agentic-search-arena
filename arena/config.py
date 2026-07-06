@@ -51,6 +51,7 @@ class ArenaConfig:
     order_swap: bool = True
     exclude_on_flip: bool = True
     evidence_budget_tokens: int = 600           # common per-provider evidence cap (§ heterogeneity)
+    consensus_min_providers: int = 3            # Tier-1 (§3): min converging providers for a silver label
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
@@ -67,6 +68,11 @@ class ArenaConfig:
         # evidence cap (uncapped providers skew the comparison); concurrency must be >= 1.
         if self.evidence_budget_tokens <= 0:
             raise ValueError("evidence_budget_tokens must be > 0")
+        # A value < 2 (or a bool/non-int) would turn a single answer into "consensus" (§3 Tier 1).
+        if (isinstance(self.consensus_min_providers, bool)
+                or not isinstance(self.consensus_min_providers, int)
+                or self.consensus_min_providers < 2):
+            raise ValueError("consensus_min_providers must be an integer >= 2")
         if self.max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
 
@@ -121,6 +127,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         order_swap=judge.get("order_swap", True),
         exclude_on_flip=judge.get("exclude_on_flip", True),
         evidence_budget_tokens=raw.get("evidence_budget_tokens", 600),
+        consensus_min_providers=raw.get("consensus_min_providers", 3),
         max_concurrency=raw.get("max_concurrency", 8),
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),

@@ -77,6 +77,7 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "scope": result["scope"],
         "degenerate_run": result["degenerate_run"],
         "calibration": result.get("calibration"),
+        "anchors": result.get("anchors"),
         "ranking": result["ranking"],
         "tie_groups": result["tie_groups"],
         "metrics": result["metrics"],
@@ -101,16 +102,19 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
     csv_path = os.path.join(output_dir, "ranking.csv")
     with open(csv_path, "w", newline="") as f:
         w = csv.writer(f)
+        av_all = (doc.get("anchors") or {}).get("auto_verify", {}) or {}
         w.writerow(["rank", "provider", "win_rate", "ci_low", "ci_high", "n_comparisons",
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
                     "accuracy_rate", "accuracy_correct", "accuracy_total",
                     "cost_usd_per_query", "cost_as_of",
-                    "freshness_score", "freshness_coverage", "freshness_low_confidence"])
+                    "freshness_score", "freshness_coverage", "freshness_low_confidence",
+                    "auto_verify_rate", "auto_verify_correct", "auto_verify_total"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
             cost = m.get("cost", {}) or {}
             fr = m.get("freshness", {}) or {}
+            av = av_all.get(s["provider"], {}) or {}
             w.writerow([_csv_safe(x) for x in [
                 s["rank"], s["provider"], s["win_rate"], s["ci_low"], s["ci_high"],
                 s["n_comparisons"], s["tie_group"], s["status"],
@@ -120,6 +124,7 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                 cost.get("usd_per_query"), cost.get("as_of"),
                 fr.get("score"), fr.get("coverage"),
                 fr.get("low_confidence") if fr else None,
+                av.get("rate"), av.get("correct"), av.get("total"),
             ]])
 
     return {"json": json_path, "csv": csv_path}
@@ -175,6 +180,15 @@ def render_cli_summary(doc: dict) -> str:
         bar = "≥0.80 ok" if cal["agreement"] >= 0.80 else "below 0.80 bar"
         out.append(f"  judge-vs-gold agreement {cal['agreement']:.0%} "
                    f"({cal['n_decidable']} decidable pairs · {bar})")
+
+    anc = doc.get("anchors") or {}
+    if anc.get("consensus_coverage") is not None:
+        cov_s = (f"  free anchors · consensus {anc['consensus_coverage']:.0%} coverage "
+                 f"(≥{anc['min_providers']} providers, {anc['n_consensus_queries']}/{anc['n_queries']} queries)")
+        av_agree = anc.get("arena_vs_consensus_agreement")
+        if av_agree is not None:
+            cov_s += f" · arena-vs-consensus agreement {av_agree:.0%} ({anc['n_arena_checked']} checked)"
+        out.append(cov_s)
 
     has_acc = any((doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {}).get("rate") is not None
                   for s in doc["ranking"])

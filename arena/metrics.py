@@ -78,6 +78,13 @@ def renormalize_weights(weights: Dict[str, float], present_metrics: List[str]) -
     return {k: v / total for k, v in kept.items()}
 
 
+def accuracy_dict(correct: int, total: int) -> Dict[str, Optional[float]]:
+    """The common ``{correct, total, rate}`` shape for any accuracy anchor column (§8) — the
+    LLM-graded accuracy and the Tier-1 free auto-verify anchor both render through this."""
+    return {"correct": correct, "total": total,
+            "rate": (correct / total) if total else None}
+
+
 def grade_accuracy(query: str, predicted: str, expected: str) -> Optional[bool]:
     """Optional accuracy anchor via the reused SimpleQA grader.
 
