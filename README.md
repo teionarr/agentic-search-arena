@@ -268,12 +268,31 @@ A run prints a CLI dashboard and writes `results.json` + `ranking.csv` under
 - **scope** + **stage status** — exactly what ran/was skipped and why, and a green/red health
   line per pipeline stage.
 
-Other commands:
+- **BY CATEGORY** — when the queries file tags rows with `category`, each slice gets its own
+  ranking (same judge, same aggregation). "Best" is workload-dependent; the slices show it.
+- **ok N%** — reliability: a provider that *errors* is flagged separately from one that merely
+  finds nothing (only deviations from 100% are shown).
+- **cost/q (… /correct)** — $/query from the dated pricing map, and where accuracy anchors
+  exist, **$ per correct answer** ($/query ÷ accuracy) — a cheap API that needs three tries
+  isn't cheap.
+
+Other commands and flags:
 
 ```sh
+python run_arena.py --queries q.csv --repeats 3      # re-search every query 3× — providers are
+                                                     # non-deterministic; reports the per-repeat
+                                                     # win-rate spread as the noise floor
+python run_arena.py --queries q.csv --save-traces    # persist per-query audit traces (redacted
+                                                     # raw payloads + exact reader inputs)
+python compare_runs.py old/results.json new/results.json   # drift report between two runs:
+                                                     # rank moves flagged only beyond CI overlap
 python -m arena.spike --n 30       # quick run on vendored SimpleQA (gold) — prints calibration too
 python -m arena.calibrate --n 50   # judge-vs-gold calibration on a larger gold sample
 ```
+
+Providers ship changes weekly, so treat any ranking as dated. Re-run on a schedule (cron / CI)
+and diff with `compare_runs.py`; the report warns when query sets or judge models differ, so
+you never compare apples to oranges silently.
 
 ### Benchmark-suite mode (§7)
 
@@ -331,12 +350,22 @@ log whenever native mode runs. Reader-synthesized (primary-path) pairs are never
 > **Data note:** `results.json` and the rationale log contain your full query text and the web
 > content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
 
+### Neutrality & governance
+
+Neutrality is an **enforced invariant, not an intention**: provider identity is stripped before
+the reader and judge see anything, no provider-specific branch exists in the scoring path, and
+the symmetry test fails the build if two providers given byte-identical evidence score
+differently. Every run snapshots its config, query-set hash, and environment manifest (harness
+commit + package versions) so a third party can re-run it. Funding, affiliations (including
+that this fork builds on a repo maintained by Tavily, a ranked provider), the provider
+inclusion process, and the dispute process are documented in [GOVERNANCE.md](GOVERNANCE.md).
+
 ### Extending
 
 Adding a provider is **one adapter + one registry line** (the only documented extension point):
 a normalizer in `arena/adapters/normalize.py` mapping the raw response to
 `{url, title, content}`, and an entry in `arena/adapters/registry.py`. No auto-discovery, no
-plugin system.
+plugin system. Full walkthrough in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Roadmap (deferred)
 
