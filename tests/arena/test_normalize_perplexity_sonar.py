@@ -86,7 +86,7 @@ def test_sonar_adapter_maps_fixture_to_unified_shape():
     assert res.answer == fx["answer"]                # native answer preserved
     assert res.needs_synthesis is False              # native-answer path
     assert res.latency_ms == fx["provider_latency"] * 1000.0
-    assert res.cost_units is None                    # cost mapping is downstream (M1 metrics)
+    assert res.cost_units is None                    # bare adapter (and Sonar bills per token, §8.2)
     assert res.raw is fx                             # native payload preserved
     assert res.empty_evidence is False
     assert [d.url for d in res.results] == [

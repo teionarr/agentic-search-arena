@@ -178,9 +178,10 @@ def test_pipeline_normalizes_units_to_cost_per_query(tmp_path):
 
 
 def test_pipeline_drops_cost_weight_when_no_units_reported(tmp_path):
-    # Current production reality: adapters hardcode cost_units=None (FakeAdapter reports none),
-    # so cost is blank for every provider → the pipeline must drop the cost weight from the
-    # effective weights and renormalize the remainder (the wired §8 renormalization path).
+    # A run where no adapter reports units (FakeAdapter reports none — like a real provider
+    # whose billing is token-based/unknowable, §8.2) leaves cost blank for every provider →
+    # the pipeline must drop the cost weight from the effective weights and renormalize the
+    # remainder (the wired §8 renormalization path).
     docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
     cfg = ArenaConfig(evidence_budget_tokens=600, pricing_path=_write_pricing(tmp_path),
                       weights={"cost": 0.2, "latency": 0.4, "coverage": 0.4})

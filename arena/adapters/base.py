@@ -58,6 +58,9 @@ class HandlerAdapter:
         self._handler = handler
         self._normalize_fn = normalize_fn
         self.min_interval_s = 0.0  # min seconds between requests (set from the registry spec)
+        # Billable units one successful search consumes (set from the registry spec, §8.2).
+        # None = per-call billing is not deterministic/public for this provider → blank cost.
+        self.cost_units_per_call: Optional[float] = None
         # When True this provider returns its own synthesized answer (native-answer path, §5):
         # the answer is preserved and needs_synthesis=False. The reader still synthesizes from
         # the same evidence too, so the report can compare both apples-to-apples.
@@ -88,7 +91,9 @@ class HandlerAdapter:
             results=docs,
             answer=native or None,
             latency_ms=latency_ms,
-            cost_units=None,
+            # Units are reported only on usable evidence; an empty/errored cell carries no
+            # units so it can never contribute to the cost column (§8.2).
+            cost_units=self.cost_units_per_call if docs else None,
             raw=raw,
             needs_synthesis=not self.native_answer,
             empty_evidence=len(docs) == 0,

@@ -4,19 +4,39 @@
 # computed as `usd_per_unit × units_consumed`, normalized to $/query. Prices go stale, so the
 # `as_of` date below is recorded in the run snapshot and printed alongside the cost column —
 # never silently wrong. These are each vendor's PUBLIC published prices (§15); override to
-# update. A provider that reports no units gets a BLANK cost (never fabricated).
+# update. A provider that reports no units gets a BLANK cost (never fabricated). Providers
+# with no entry here bill per token or publish no per-call price (perplexity Sonar, gemini,
+# claude_search, youcom — see the registry comments) and stay blank for the same reason.
 #
 # `unit` documents the billable unit each `usd_per_unit` is priced in (credit / request /
-# page). It is descriptive only — the arena multiplies whatever `cost_units` the adapter
+# search). It is descriptive only — the arena multiplies whatever `cost_units` the adapter
 # reports for that provider by `usd_per_unit`.
 
-as_of: "2026-07-01"
+as_of: "2026-07-06"
 
 providers:
-  tavily:            { unit: credit,  usd_per_unit: 0.008 }    # $8 / 1,000 API credits (advanced search = 2 credits)
-  exa:               { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 neural searches
-  brave:             { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 requests (Base plan)
-  serper:            { unit: request, usd_per_unit: 0.0003 }   # $0.30 / 1,000 queries (2.5M-credit tier)
-  perplexity_search: { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 Search API requests
-  firecrawl:         { unit: page,    usd_per_unit: 0.0009 }   # ~$0.89 / 1,000 pages (Standard plan credits)
-  linkup:            { unit: request, usd_per_unit: 0.005 }    # $5 / 1,000 standard searches
+  # $0.008/credit pay-as-you-go (tavily.com/pricing); basic search = 1 credit, advanced = 2
+  # (docs.tavily.com/documentation/api-credits) — the adapter reports depth-dependent credits.
+  tavily:            { unit: credit,  usd_per_unit: 0.008 }
+  # $7 / 1,000 search requests with up to 10 results (exa.ai/pricing). Contents (highlights)
+  # bill $1/1k pages ON TOP, per page actually returned — that varies per query, so the
+  # adapter reports no units and exa's cost stays blank; this entry is the request price only.
+  exa:               { unit: request, usd_per_unit: 0.007 }
+  # $5 / 1,000 requests, Search plan (brave.com/search/api).
+  brave:             { unit: request, usd_per_unit: 0.005 }
+  # $0.30 / 1,000 queries at the 2.5M-credit tier. Serper shows tier prices only in the
+  # dashboard after login (serper.dev publicly lists just the free 2,500 queries) — edit this
+  # to your tier ($1.00/1k at the smallest tier).
+  serper:            { unit: request, usd_per_unit: 0.0003 }
+  # $5 / 1,000 Search API requests, no token costs (docs.perplexity.ai/getting-started/pricing).
+  perplexity_search: { unit: request, usd_per_unit: 0.005 }
+  # Standard plan billed yearly: $83/mo ÷ 100,000 credits (firecrawl.dev/pricing). A search is
+  # 2 credits per <=10 results (docs.firecrawl.dev/features/search).
+  firecrawl:         { unit: credit,  usd_per_unit: 0.00083 }
+  # $5 / 1,000 Search API requests including up to 10 results (parallel.ai/pricing;
+  # max_results defaults to 10 per docs.parallel.ai/api-reference/search/search).
+  parallel:          { unit: request, usd_per_unit: 0.005 }
+  # $0.005 per standard search with searchResults output — the unit here. Deep / sourcedAnswer
+  # / structured variants bill $0.05 / $0.006 / $0.055 and are reported as unit multiples by
+  # the registry (docs.linkup.so/pages/documentation/development/pricing).
+  linkup:            { unit: search,  usd_per_unit: 0.005 }
