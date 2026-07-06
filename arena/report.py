@@ -295,7 +295,10 @@ def render_cli_summary(doc: dict) -> str:
         cov_s += f"  cost ${cpq:.4f}/q" if cpq is not None else ("  cost n/a" if cost_as_of else "")
         cpc = cost_m.get("usd_per_correct")
         cov_s += f" (${cpc:.4f}/correct)" if cpc is not None else ""
-        if group_sizes.get(s["tie_group"], 0) == 1:
+        # "clear leader" = alone in its tie group AND at rank 1. Any other singleton group
+        # (e.g. a provider cleanly separated at the BOTTOM) gets no tag — labeling last place
+        # "clear leader" happened in a real run.
+        if group_sizes.get(s["tie_group"], 0) == 1 and s["rank"] == 1:
             tag = "  ← clear leader"
         elif group_sizes.get(s["tie_group"], 0) > 1:
             tag = "  · tied"
