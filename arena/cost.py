@@ -88,6 +88,24 @@ def attach_cost(metrics: Dict[str, dict], pricing: dict,
     return metrics
 
 
+def attach_cost_per_success(metrics: Dict[str, dict]) -> Dict[str, dict]:
+    """Cost per *successful outcome*: ``usd_per_query ÷ accuracy_rate`` (§8 cost normalization —
+    a cheap API that needs three tries isn't cheap).
+
+    Derived only where an accuracy anchor exists AND the provider has a cost; blank (None) when
+    unanchored, unpriced, or the provider never answered correctly — never fabricated. Assumes
+    uniform per-query cost across anchored and unanchored queries (the only per-query cost we
+    track), which the field name makes auditable rather than hidden."""
+    for m in metrics.values():
+        cost = m.get("cost")
+        if cost is None:
+            continue
+        upq = cost.get("usd_per_query")
+        rate = (m.get("accuracy") or {}).get("rate")
+        cost["usd_per_correct"] = (upq / rate) if (upq is not None and rate) else None
+    return metrics
+
+
 def present_cost_providers(metrics: Dict[str, dict]) -> List[str]:
     """Providers that have a non-blank cost — used to decide whether the cost weight survives."""
     return [p for p, m in metrics.items()

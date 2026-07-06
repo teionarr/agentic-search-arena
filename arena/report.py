@@ -155,7 +155,7 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
         w.writerow(["rank", "provider", "win_rate", "ci_low", "ci_high", "n_comparisons",
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
                     "accuracy_rate", "accuracy_correct", "accuracy_total",
-                    "cost_usd_per_query", "cost_as_of",
+                    "cost_usd_per_query", "cost_usd_per_correct", "cost_as_of",
                     "freshness_score", "freshness_coverage", "freshness_low_confidence",
                     "success_rate", "error_rate"])
         for s in doc["ranking"]:
@@ -169,7 +169,7 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                 m.get("coverage", {}).get("avg_tokens_per_result"),
                 m.get("latency", {}).get("p50"),
                 acc.get("rate"), acc.get("correct"), acc.get("total"),
-                cost.get("usd_per_query"), cost.get("as_of"),
+                cost.get("usd_per_query"), cost.get("usd_per_correct"), cost.get("as_of"),
                 fr.get("score"), fr.get("coverage"),
                 fr.get("low_confidence") if fr else None,
                 (m.get("reliability", {}) or {}).get("success_rate"),
@@ -268,8 +268,11 @@ def render_cli_summary(doc: dict) -> str:
         ci = f"[{s['ci_low']:.2f}–{s['ci_high']:.2f}]"
         cov = (doc["metrics"].get(s["provider"], {}).get("coverage", {}) or {}).get("avg_tokens_per_result")
         cov_s = f"cov {cov:.0f}" if cov is not None else "cov n/a"
-        cpq = (doc["metrics"].get(s["provider"], {}).get("cost", {}) or {}).get("usd_per_query")
+        cost_m = doc["metrics"].get(s["provider"], {}).get("cost", {}) or {}
+        cpq = cost_m.get("usd_per_query")
         cov_s += f"  cost ${cpq:.4f}/q" if cpq is not None else ("  cost n/a" if cost_as_of else "")
+        cpc = cost_m.get("usd_per_correct")
+        cov_s += f" (${cpc:.4f}/correct)" if cpc is not None else ""
         if group_sizes.get(s["tie_group"], 0) == 1:
             tag = "  ← clear leader"
         elif group_sizes.get(s["tie_group"], 0) > 1:

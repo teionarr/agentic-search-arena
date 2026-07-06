@@ -23,7 +23,7 @@ from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
 from arena.judge import judge_pair
-from arena.cost import attach_cost, effective_weights, load_pricing
+from arena.cost import attach_cost, attach_cost_per_success, effective_weights, load_pricing
 from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_score,
                            latency_percentiles, parse_freshness_window_days)
 from arena.scope import Scope
@@ -365,6 +365,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     units_per_query = {p: (cost_units[p] / cost_unit_cells[p]) if cost_unit_cells[p] else None
                        for p in provider_names}
     attach_cost(per_provider, pricing, units_per_query)
+    attach_cost_per_success(per_provider)  # $/correct-answer where anchors exist (§8)
     # Drop the cost weight and renormalize the rest when cost is blank for the run (§8).
     weights_effective = effective_weights(config.weights, per_provider) if config.weights else {}
 
