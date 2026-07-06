@@ -121,13 +121,19 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     conc = max(1, config.max_concurrency)
 
     # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
-    # a Claude judge with no secondary judge may favour a Claude-family native answer by style.
+    # a Claude judge may favour a Claude-family native answer by style.
     from arena.adapters.registry import claude_family_providers
     native_providers = {a.name for a in adapters if getattr(a, "native_answer", False)}
     claude_family = set(claude_family_providers())
     judge_is_claude = (config.judge_primary or "").lower() == "claude"
-    has_secondary_judge = bool(config.judge_secondary)
-    native_mode = bool(native_providers)  # true whenever a native-answer provider is in scope
+    # A configured secondary judge is not actually invoked yet (config.judge_secondary is
+    # reserved, not wired), so it must NOT be allowed to suppress the mitigation: we neither
+    # route Claude-native pairs to it nor let its mere presence silence the label/caveat.
+    has_secondary_judge = False
+    # The caveat fires only for a *Claude-family* native provider — a non-Claude native
+    # provider (e.g. a future Perplexity Sonar) shares the native-answer path but not the
+    # self-preference risk.
+    claude_native_mode = bool(native_providers & claude_family)
 
     # Per-provider accumulators.
     latencies: Dict[str, List] = {p: [] for p in provider_names}
@@ -292,11 +298,11 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "judge": {"swap_consistency": swap_consistency, "swap_total": swap_total,
                   "swap_flips": swap_flips, "judge_skipped": judge_skipped,
                   "injection_flags": injection_flags,
-                  # Self-preference caveat (§5/§6): surfaced whenever native mode runs.
-                  "native_mode": native_mode,
+                  # Self-preference caveat (§5/§6): surfaced when a Claude-family native
+                  # provider is ranked under a Claude judge.
+                  "native_mode": claude_native_mode,
                   "self_preference_flags": self_pref_flags,
-                  "self_preference_caveat": (native_mode and judge_is_claude
-                                             and not has_secondary_judge)},
+                  "self_preference_caveat": claude_native_mode and judge_is_claude},
         "calibration": {"agreement": (cal_agree / cal_decidable) if cal_decidable else None,
                         "n_decidable": cal_decidable, "n_abstained": cal_abstained},
         "cost_usd": round(cost, 4),

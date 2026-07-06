@@ -148,8 +148,8 @@ def normalize_claude_search(raw: Any) -> List[EvidenceDoc]:
     docs = []
     for res in data.get("results", []) or []:
         url = res.get("url", "")
-        title = res.get("title", "")
-        if url and title:
+        title = res.get("title", "") or ""
+        if url:  # title is optional; content falls back to the title (may be empty)
             docs.append(EvidenceDoc(url=url, title=title, content=title,
                                     published_date=res.get("page_age")))
     return docs

@@ -75,20 +75,21 @@ class ClaudeSearchHandler:
     def _get_client(self) -> Any:
         if self._client is None:
             import anthropic  # lazy: no key needed just to import arena
-            self._client = anthropic.Anthropic(timeout=60.0, max_retries=0)
+            # Async client so awaiting the search does not block the pipeline's event loop.
+            self._client = anthropic.AsyncAnthropic(timeout=60.0, max_retries=0)
         return self._client
 
     async def search(self, query: str) -> Dict[str, Any]:
         tool = {"type": "web_search_20250305", "name": "web_search", "max_uses": self.max_uses}
         try:
             start_time = time.time()
-            response = self._get_client().messages.create(
+            response = await self._get_client().messages.create(
                 model=self.model, max_tokens=1024,
                 messages=[{"role": "user", "content": query}], tools=[tool])
             end_time = time.time()
             flat = _serialize(response)
             return {"answer": flat["answer"], "search_response": flat,
                     "provider_latency": end_time - start_time}
-        except Exception as e:
-            logger.error(f"Error in Claude search: {str(e)}")
+        except Exception as e:  # noqa: BLE001 — sentinel-not-raise idiom (matches base handlers)
+            logger.error(f"Error in Claude search: {e!s}")
             return {"answer": "", "search_response": None, "provider_latency": None}

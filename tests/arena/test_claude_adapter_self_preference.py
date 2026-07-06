@@ -41,7 +41,7 @@ class _FakeMessages:
         self._response = response
         self.calls = []
 
-    def create(self, **kwargs):
+    async def create(self, **kwargs):  # AsyncAnthropic: create is awaitable
         self.calls.append(kwargs)
         return self._response
 
@@ -79,7 +79,7 @@ def test_claude_handler_error_is_sentinel_not_raise():
     class Boom:
         class messages:
             @staticmethod
-            def create(**kwargs):
+            async def create(**kwargs):
                 raise RuntimeError("network down")
     handler = ClaudeSearchHandler(client=Boom())
     raw = asyncio.run(handler.search("q"))
@@ -129,6 +129,17 @@ def test_normalize_claude_search():
 def test_normalize_claude_search_registered_and_none_safe():
     assert "claude_search" in normalize.NORMALIZERS
     assert normalize.normalize_claude_search({"search_response": None}) == []
+
+
+def test_normalize_claude_search_keeps_url_only_results():
+    # A result with a valid url but empty/missing title must be kept, not silently dropped.
+    raw = {"search_response": {"results": [
+        {"url": "http://x", "title": ""},        # empty title
+        {"url": "http://y"},                       # missing title
+        {"title": "no url"}]}}                      # no url -> dropped
+    docs = normalize.normalize_claude_search(raw)
+    assert [d.url for d in docs] == ["http://x", "http://y"]
+    assert all(d.content == d.title for d in docs)
 
 
 # ---- registry: one entry, marked native + claude-family ----
@@ -193,3 +204,57 @@ def test_judge_pair_no_label_by_default():
     x, y = _pair()
     out = judge_pair(llm, "q", x, y, nonce="n")
     assert out["self_preference"] is None
+
+
+# ---- pipeline: caveat gating on claude_native_mode (§5/§6) ----
+
+def _native_adapter(name, docs):
+    from _fakes import FakeAdapter
+    a = FakeAdapter(name, docs)
+    a.native_answer = True  # exercises the native-answer path in run_arena
+    return a
+
+
+def _run_arena(adapters, judge_primary="claude", secondary=None):
+    from arena.config import ArenaConfig, Query
+    from arena.pipeline import run_arena
+    from arena.scope import INCLUDED, Scope, ScopeEntry
+    from _fakes import FakeLLM, sync_gather
+    cfg = ArenaConfig(evidence_budget_tokens=600, judge_primary=judge_primary,
+                      judge_secondary=secondary)
+    scope = Scope(entries=[ScopeEntry(a.name, INCLUDED) for a in adapters])
+    q = [Query(query="capital of France?")] * 3
+    return run_arena(cfg, q, adapters, scope, FakeLLM(), FakeLLM(), search_gatherer=sync_gather)
+
+
+def test_caveat_fires_for_claude_native_provider():
+    docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
+    result = _run_arena([_native_adapter("claude_search", docs), _native_adapter("tavily", docs)])
+    j = result["judge"]
+    assert j["native_mode"] is True and j["self_preference_caveat"] is True
+    assert j["self_preference_flags"] >= 1  # the claude-native pair was flagged
+
+
+def test_no_caveat_when_only_non_claude_native_provider():
+    # A native-answer provider that is NOT Claude-family shares the native path but not the risk.
+    docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
+    result = _run_arena([_native_adapter("tavily", docs), _native_adapter("brave", docs)])
+    j = result["judge"]
+    assert j["native_mode"] is False and j["self_preference_caveat"] is False
+    assert j["self_preference_flags"] == 0
+
+
+def test_secondary_judge_config_does_not_suppress_caveat():
+    # A configured-but-unwired secondary judge must NOT silence the mitigation.
+    docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
+    result = _run_arena([_native_adapter("claude_search", docs), _native_adapter("tavily", docs)],
+                        secondary="gpt-4o")
+    j = result["judge"]
+    assert j["self_preference_caveat"] is True and j["self_preference_flags"] >= 1
+
+
+def test_no_caveat_under_non_claude_judge():
+    docs = [EvidenceDoc(url="u", title="t", content="Paris is the capital of France.")]
+    result = _run_arena([_native_adapter("claude_search", docs), _native_adapter("tavily", docs)],
+                        judge_primary="gpt-4o")
+    assert result["judge"]["self_preference_caveat"] is False
