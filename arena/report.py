@@ -313,6 +313,33 @@ def render_cli_summary(doc: dict) -> str:
             tag = ""
         out.append(f"  #{s['rank']} {s['provider']:<18} {bar} {s['win_rate']:.2f} {ci:<13} {cov_s}{acc_s}{fresh_s}{tag}")
 
+    # Weighted re-rank (§8/§10): only when the run carried user priority weights. The
+    # unweighted RANKING above always stays primary; this is the same doc re-scored by
+    # arena.rerank (imported locally so report has no hard dependency at module load).
+    weights = doc.get("weights_effective") or {}
+    if weights:
+        from arena.rerank import effective_axis_weights, weighted_scores
+        out.append("")
+        out.append("  WEIGHTED (your priorities)   re-ranked by your weights · unweighted RANKING above stays primary")
+        out.append("  " + "─" * (W - 2))
+        try:
+            eff = effective_axis_weights(doc, weights)
+            scored = weighted_scores(doc, weights)
+        except ValueError as e:
+            out.append(f"   ⚠  weighted view unavailable: {e}")
+        else:
+            w_line = " · ".join(f"{a} {w:.2f}" for a, w in eff.items())
+            dropped = sorted(a for a, v in weights.items() if v is not None and a not in eff)
+            if dropped:
+                w_line += f"   (dropped — no data: {', '.join(dropped)}; rest renormalized)"
+            out.append(f"   weights: {w_line}" if eff else
+                       "   no weighted axis has data this run — nothing to re-rank")
+            for e in scored:
+                if e["weighted_score"] is None:
+                    out.append(f"   --  {e['provider']:<18} no scored axes")
+                else:
+                    out.append(f"   #{e['rank']} {e['provider']:<18} score {e['weighted_score']:.2f}")
+
     per_cat = doc.get("per_category") or {}
     if per_cat:
         out.append("")
