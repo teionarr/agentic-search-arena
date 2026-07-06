@@ -22,6 +22,16 @@ judge:
 
 evidence_budget_tokens: 600     # common per-provider evidence cap (bounds the verbosity confound)
 
+# Benchmark-suite mode (M2, §7): re-run public sets under ONE identical policy, then emit the
+# judge-vs-gold calibration report and the marketing-claims ledger. Off by default; a sample per
+# set unless you opt into a full run. (--benchmark-suite on the CLI also turns it on.)
+modes:
+  benchmark_suite:
+    enabled: false
+    datasets: [simpleqa]          # simpleqa (vendored) · frames · freshqa (drop the data file in)
+    sample_size: 300              # per set; raise for a full (costlier) run
+    published_claims_path: null   # e.g. configs/published_claims.yaml — vendor-published numbers
+
 # Metric weights (absent/partial metrics are dropped and the rest renormalized).
 weights: { accuracy: 0.0, latency: 0.5, coverage: 0.5 }
 

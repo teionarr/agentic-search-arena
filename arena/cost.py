@@ -94,14 +94,34 @@ def present_cost_providers(metrics: Dict[str, dict]) -> List[str]:
             if (m.get("cost") or {}).get("usd_per_query") is not None]
 
 
-def effective_weights(weights: Dict[str, float], metrics: Dict[str, dict]) -> Dict[str, float]:
-    """Renormalized metric weights with the ``cost`` axis dropped when it's blank for the run (§8).
+# How to tell whether a weighted metric axis is actually populated for the run. An axis with no
+# data has its weight dropped and the rest renormalized (§8) — never scored as zero. Axes not
+# listed here (unknown/custom) pass through as present. This is the single presence oracle shared
+# by cost, freshness, accuracy, latency and coverage so they all renormalize together.
+_AXIS_PRESENCE = {
+    "cost": lambda m: (m.get("cost") or {}).get("usd_per_query") is not None,
+    "freshness": lambda m: (m.get("freshness") or {}).get("score") is not None,
+    "accuracy": lambda m: (m.get("accuracy") or {}).get("rate") is not None,
+    "latency": lambda m: (m.get("latency") or {}).get("p50") is not None,
+    "coverage": lambda m: (m.get("coverage") or {}).get("avg_tokens_per_result") is not None,
+}
 
-    Non-cost axes pass through as present; the ``cost`` weight is kept only if some provider
-    reported cost units, else dropped and the remainder renormalized via the existing
-    :func:`arena.metrics.renormalize_weights` — the single sanctioned renormalization path."""
+
+def _axis_present(axis: str, metrics: Dict[str, dict]) -> bool:
+    """True if any provider has data for ``axis``. Unknown axes are treated as present."""
+    check = _AXIS_PRESENCE.get(axis)
+    if check is None:
+        return True
+    return any(check(m) for m in metrics.values())
+
+
+def effective_weights(weights: Dict[str, float], metrics: Dict[str, dict]) -> Dict[str, float]:
+    """Renormalized metric weights with every absent/partial axis dropped (§8).
+
+    The single sanctioned renormalization path for all weighted metrics: cost, freshness,
+    accuracy, latency and coverage each survive only if some provider has data for them, else
+    the weight is dropped and the remainder renormalized via the existing
+    :func:`arena.metrics.renormalize_weights`. No competing per-axis renormalization exists."""
     from arena.metrics import renormalize_weights
-    present = [k for k in weights if k != "cost"]
-    if present_cost_providers(metrics):
-        present.append("cost")
+    present = [k for k in weights if _axis_present(k, metrics)]
     return renormalize_weights(weights, present)

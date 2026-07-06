@@ -12,7 +12,7 @@ arena core and its Tier-A tests runnable without the base's heavy dependencies.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Optional
 
 from arena.adapters.base import HandlerAdapter
 from arena.adapters import normalize
@@ -27,10 +27,16 @@ class ProviderSpec:
     _factory: Callable[[Dict[str, Any], str], Any] = None
     # Minimum seconds between requests to this provider (respects per-plan rate limits).
     min_interval_s: float = 0.0
+    # True for providers that return their own synthesized answer (native-answer path, §5).
+    native_answer: bool = False
+    # Model family, used only for the self-preference caveat (§5/§6). None = not applicable.
+    family: Optional[str] = None
 
     def build(self, name: str, config: Dict[str, Any], token_model: str = "gpt-4.1") -> HandlerAdapter:
         handler = self._factory(config, token_model)
-        adapter = HandlerAdapter(name=name, handler=handler, normalize_fn=normalize.NORMALIZERS[name])
+        adapter = HandlerAdapter(name=name, handler=handler,
+                                 normalize_fn=normalize.NORMALIZERS[name],
+                                 native_answer=self.native_answer)
         adapter.min_interval_s = self.min_interval_s
         return adapter
 
@@ -69,6 +75,12 @@ def _firecrawl_factory(config, token_model):
 def _linkup_factory(config, token_model):
     from arena.adapters.linkup_handler import LinkupHandler
     return LinkupHandler(config, token_model=token_model)
+
+
+def _claude_search_factory(config, token_model):
+    # Arena-native native-answer handler (not in the base repo); lazily imports anthropic.
+    from arena.adapters.claude_search_handler import ClaudeSearchHandler
+    return ClaudeSearchHandler(config, token_model=token_model)
 
 
 # In-scope (document-returning) providers only. Finished-answer providers (perplexity Sonar,
@@ -111,7 +123,24 @@ REGISTRY: Dict[str, ProviderSpec] = {
         default_config={"depth": "standard", "outputType": "searchResults"},
         _factory=_linkup_factory,
     ),
+    "claude_search": ProviderSpec(
+        required_env_keys=["ANTHROPIC_API_KEY"],
+        default_config={"max_uses": 5},
+        _factory=_claude_search_factory,
+        native_answer=True,   # returns its own synthesized answer (native-answer path, §5)
+        family="claude",      # frontier baseline; triggers the self-preference caveat (§5/§6)
+    ),
 }
+
+
+def native_answer_providers() -> List[str]:
+    """Providers that return their own synthesized answer (native-answer path, §5)."""
+    return [name for name, spec in REGISTRY.items() if spec.native_answer]
+
+
+def claude_family_providers() -> List[str]:
+    """Providers in the Claude model family — used for the self-preference caveat (§5/§6)."""
+    return [name for name, spec in REGISTRY.items() if spec.family == "claude"]
 
 
 def provider_names() -> List[str]:

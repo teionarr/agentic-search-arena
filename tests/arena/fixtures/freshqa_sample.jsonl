@@ -1,0 +1,2 @@
+{"question": "Who is the current CEO of OpenAI?", "answer": "Sam Altman", "fact_type": "slow-changing"}
+{"question": "What is the latest stable version of Python?", "answer": "", "fact_type": "fast-changing"}

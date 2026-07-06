@@ -62,7 +62,8 @@ def judge_once(llm, query, ans_a, docs_a, ans_b, docs_b, nonce) -> Optional[Pair
     return llm.structured(JUDGE_SYSTEM, user, PairwiseVerdict, max_tokens=512)
 
 
-def judge_pair(llm, query, x, y, nonce, order_swap=True, exclude_on_flip=True) -> dict:
+def judge_pair(llm, query, x, y, nonce, order_swap=True, exclude_on_flip=True,
+               self_preference=None) -> dict:
     """Judge providers ``x`` and ``y`` (each a dict: ``answer``, ``docs``).
 
     Returns a dict:
@@ -71,11 +72,15 @@ def judge_pair(llm, query, x, y, nonce, order_swap=True, exclude_on_flip=True) -
       low_confidence: bool
       rationales: List[str]
       injection_flag: bool
+      self_preference: str | None   (``possible-self-preference`` for native-answer pairs; §5)
+
+    ``self_preference`` is decided upstream (``arena.self_preference``) and only carried here;
+    the judge stays identity-blind. Blinding + order-swap are unchanged.
     """
     # Pass 1: A=x, B=y
     v1 = judge_once(llm, query, x["answer"], x["docs"], y["answer"], y["docs"], nonce)
     if v1 is None:
-        return _skip("pass-1 skipped")
+        return _skip("pass-1 skipped", self_preference)
     win1 = {"A": "x", "B": "y", "tie": "tie"}[v1.winner]
 
     rationales = [v1.rationale]
@@ -83,12 +88,13 @@ def judge_pair(llm, query, x, y, nonce, order_swap=True, exclude_on_flip=True) -
 
     if not order_swap:
         return {"outcome": win1, "flipped": False, "low_confidence": False,
-                "rationales": rationales, "injection_flag": injection}
+                "rationales": rationales, "injection_flag": injection,
+                "self_preference": self_preference}
 
     # Pass 2: A=y, B=x (swapped)
     v2 = judge_once(llm, query, y["answer"], y["docs"], x["answer"], x["docs"], nonce)
     if v2 is None:
-        return _skip("pass-2 skipped")
+        return _skip("pass-2 skipped", self_preference)
     win2 = {"A": "y", "B": "x", "tie": "tie"}[v2.winner]
     rationales.append(v2.rationale)
     injection = injection or looks_injected(v2.rationale)
@@ -97,12 +103,15 @@ def judge_pair(llm, query, x, y, nonce, order_swap=True, exclude_on_flip=True) -
     if flipped:
         outcome = None if exclude_on_flip else "tie"
         return {"outcome": outcome, "flipped": True, "low_confidence": True,
-                "rationales": rationales, "injection_flag": injection}
+                "rationales": rationales, "injection_flag": injection,
+                "self_preference": self_preference}
 
     return {"outcome": win1, "flipped": False, "low_confidence": False,
-            "rationales": rationales, "injection_flag": injection}
+            "rationales": rationales, "injection_flag": injection,
+            "self_preference": self_preference}
 
 
-def _skip(reason: str) -> dict:
+def _skip(reason: str, self_preference=None) -> dict:
     return {"outcome": None, "flipped": False, "low_confidence": True,
-            "rationales": [reason], "injection_flag": False, "skipped": True}
+            "rationales": [reason], "injection_flag": False, "skipped": True,
+            "self_preference": self_preference}

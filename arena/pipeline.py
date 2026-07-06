@@ -24,8 +24,10 @@ from arena.evidence import cap_evidence
 from arena.grade import grade_answer
 from arena.judge import judge_pair
 from arena.cost import attach_cost, effective_weights, load_pricing
-from arena.metrics import evidence_coverage, latency_percentiles
+from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_score,
+                           latency_percentiles, parse_freshness_window_days)
 from arena.scope import Scope
+from arena.self_preference import self_preference_label
 from arena.tokens import calculate_token_consumption
 
 logger = logging.getLogger(__name__)
@@ -120,6 +122,21 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     provider_names = [a.name for a in adapters]
     conc = max(1, config.max_concurrency)
 
+    # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
+    # a Claude judge may favour a Claude-family native answer by style.
+    from arena.adapters.registry import claude_family_providers
+    native_providers = {a.name for a in adapters if getattr(a, "native_answer", False)}
+    claude_family = set(claude_family_providers())
+    judge_is_claude = (config.judge_primary or "").lower() == "claude"
+    # A configured secondary judge is not actually invoked yet (config.judge_secondary is
+    # reserved, not wired), so it must NOT be allowed to suppress the mitigation: we neither
+    # route Claude-native pairs to it nor let its mere presence silence the label/caveat.
+    has_secondary_judge = False
+    # The caveat fires only for a *Claude-family* native provider — a non-Claude native
+    # provider (e.g. a future Perplexity Sonar) shares the native-answer path but not the
+    # self-preference risk.
+    claude_native_mode = bool(native_providers & claude_family)
+
     # Per-provider accumulators.
     latencies: Dict[str, List] = {p: [] for p in provider_names}
     coverage_tokens: Dict[str, List[int]] = {p: [] for p in provider_names}
@@ -136,17 +153,24 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     cost_units: Dict[str, Optional[float]] = {p: None for p in provider_names}
     cost_unit_cells: Dict[str, int] = {p: 0 for p in provider_names}
 
+    # Per-provider per-query freshness tallies, gathered only on time-sensitive queries (§8.3).
+    freshness_tallies: Dict[str, List[dict]] = {p: [] for p in provider_names}
+    any_freshness_query = any(q.freshness_need for q in queries)
+
     # ---- The per-query LLM chain (reader -> grade -> judge). Pure: reads only its own
     #      search results + config/llms and returns a local delta to merge (no shared state). ----
     def _process_query(qi: int, results_for_q: Dict[str, UnifiedResult]) -> dict:
         q = queries[qi]
         loc = {"qi": qi, "comparisons": [], "rationale": [],
                "swap_total": 0, "swap_flips": 0, "judge_skipped": 0, "injection_flags": 0,
+               "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
                "prov": {p: {"latency": [], "coverage": [], "cells_att": 0, "cells_succ": 0,
                             "empty": 0, "reader_made": 0, "reader_degen": 0,
                             "acc_correct": 0, "acc_total": 0,
-                            "units": None, "units_cells": 0} for p in provider_names}}
+                            "units": None, "units_cells": 0,
+                            "freshness": []} for p in provider_names}}
+        fresh_window = parse_freshness_window_days(q.freshness_need) if q.freshness_need else None
         answers, correct = {}, {}
         for name in provider_names:
             pv = loc["prov"][name]
@@ -161,6 +185,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 pv["units_cells"] += 1
             if res.latency_ms is not None:
                 pv["latency"].append(res.latency_ms)
+            if fresh_window is not None:  # freshness measures the returned evidence's dating
+                pv["freshness"].append(freshness_score(res.results, fresh_window))
             capped = cap_evidence(res.results, config.evidence_budget_tokens, token_model)
             for d in capped:
                 pv["coverage"].append(calculate_token_consumption(d.content, token_model))
@@ -178,8 +204,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     correct[name] = bool(c)
 
         for x, y in itertools.combinations([p for p in provider_names if p in answers], 2):
+            sp_label = self_preference_label(
+                x, y, x in native_providers, y in native_providers, claude_family,
+                judge_is_claude, has_secondary_judge)
             verdict = judge_pair(judge_llm, q.query, answers[x], answers[y], run_nonce,
-                                 order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip)
+                                 order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip,
+                                 self_preference=sp_label)
             if verdict.get("skipped"):
                 loc["judge_skipped"] += 1
             else:
@@ -188,6 +218,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["swap_flips"] += 1
             if verdict["injection_flag"]:
                 loc["injection_flags"] += 1
+            if verdict.get("self_preference"):
+                loc["self_pref_flags"] += 1
             outcome = verdict["outcome"]
             winner = x if outcome == "x" else y if outcome == "y" else ("tie" if outcome == "tie" else None)
             cx, cy = correct.get(x), correct.get(y)
@@ -202,6 +234,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 "query": q.query, "a": x, "b": y, "winner": winner,
                 "flipped": verdict["flipped"], "low_confidence": verdict["low_confidence"],
                 "injection_flag": verdict["injection_flag"], "rationales": verdict["rationales"],
+                "self_preference": verdict.get("self_preference"),
             })
         return loc
 
@@ -217,13 +250,14 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     # ---- Merge per-query deltas ----
     comparisons: List[dict] = []
     rationale_log: List[dict] = []
-    swap_flips = swap_total = judge_skipped = injection_flags = 0
+    swap_flips = swap_total = judge_skipped = injection_flags = self_pref_flags = 0
     cal_agree = cal_decidable = cal_abstained = 0
     for loc in sorted(locals_out, key=lambda l: l["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
         swap_total += loc["swap_total"]; swap_flips += loc["swap_flips"]
         judge_skipped += loc["judge_skipped"]; injection_flags += loc["injection_flags"]
+        self_pref_flags += loc["self_pref_flags"]
         cal_agree += loc["cal_agree"]; cal_decidable += loc["cal_decidable"]; cal_abstained += loc["cal_abstained"]
         for p in provider_names:
             pv = loc["prov"][p]
@@ -235,6 +269,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             if pv["units"] is not None:
                 cost_units[p] = (cost_units[p] or 0.0) + pv["units"]
                 cost_unit_cells[p] += pv["units_cells"]
+            freshness_tallies[p].extend(pv["freshness"])
 
     agg = aggregate(comparisons, provider_names, seed=0)
 
@@ -251,6 +286,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             "cells_succeeded": cells_succeeded[p],
             "cells_attempted": cells_attempted[p],
         }
+        # Freshness is present only when the run had time-sensitive queries AND this provider
+        # returned results on them (§8.3); absent -> its weight is dropped + renormalized (§8).
+        if any_freshness_query:
+            fresh = aggregate_freshness(freshness_tallies[p])
+            if fresh is not None:
+                per_provider[p]["freshness"] = fresh
 
     # Cost-per-query column (§8.2): normalize each provider's summed units to units/query, then
     # price via the dated pricing map. Providers reporting no units get a blank cost.
@@ -294,7 +335,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "weights_effective": weights_effective,
         "judge": {"swap_consistency": swap_consistency, "swap_total": swap_total,
                   "swap_flips": swap_flips, "judge_skipped": judge_skipped,
-                  "injection_flags": injection_flags},
+                  "injection_flags": injection_flags,
+                  # Self-preference caveat (§5/§6): surfaced when a Claude-family native
+                  # provider is ranked under a Claude judge.
+                  "native_mode": claude_native_mode,
+                  "self_preference_flags": self_pref_flags,
+                  "self_preference_caveat": claude_native_mode and judge_is_claude},
         "calibration": {"agreement": (cal_agree / cal_decidable) if cal_decidable else None,
                         "n_decidable": cal_decidable, "n_abstained": cal_abstained},
         "cost_usd": round(cost, 4),

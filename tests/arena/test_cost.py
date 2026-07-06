@@ -98,16 +98,32 @@ def test_cost_weight_kept_when_present():
 
 
 def test_effective_weights_drops_cost_when_blank():
-    metrics = {"tavily": {"cost": {"usd_per_query": None}}}
+    # latency + coverage are populated; only cost is blank → cost drops, the rest renormalize.
+    metrics = {"tavily": {"cost": {"usd_per_query": None},
+                          "latency": {"p50": 100.0},
+                          "coverage": {"avg_tokens_per_result": 50.0}}}
     ew = effective_weights({"cost": 0.2, "latency": 0.4, "coverage": 0.4}, metrics)
     assert "cost" not in ew
     assert abs(sum(ew.values()) - 1.0) < 1e-9 and abs(ew["latency"] - 0.5) < 1e-9
 
 
 def test_effective_weights_keeps_cost_when_present():
-    metrics = {"tavily": {"cost": {"usd_per_query": 0.016}}}
+    metrics = {"tavily": {"cost": {"usd_per_query": 0.016}, "latency": {"p50": 100.0}}}
     ew = effective_weights({"cost": 0.2, "latency": 0.8}, metrics)
     assert "cost" in ew and abs(sum(ew.values()) - 1.0) < 1e-9
+
+
+def test_effective_weights_unified_cost_and_freshness_drop_together():
+    # The coordinator's interaction: cost AND freshness both absent → both weights drop and
+    # latency/coverage renormalize through the one shared path (no competing renormalization).
+    metrics = {"tavily": {"cost": {"usd_per_query": None},
+                          "latency": {"p50": 100.0},
+                          "coverage": {"avg_tokens_per_result": 50.0}}}  # no freshness block at all
+    ew = effective_weights({"cost": 0.25, "freshness": 0.25, "latency": 0.25, "coverage": 0.25},
+                           metrics)
+    assert "cost" not in ew and "freshness" not in ew
+    assert abs(sum(ew.values()) - 1.0) < 1e-9
+    assert abs(ew["latency"] - 0.5) < 1e-9 and abs(ew["coverage"] - 0.5) < 1e-9
 
 
 # ---- pipeline: units → $/query normalization + attach ----

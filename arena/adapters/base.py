@@ -53,11 +53,15 @@ class HandlerAdapter:
     ``normalize_fn``. This is the single sanctioned provider-specific code path.
     """
 
-    def __init__(self, name: str, handler: Any, normalize_fn) -> None:
+    def __init__(self, name: str, handler: Any, normalize_fn, native_answer: bool = False) -> None:
         self.name = name
         self._handler = handler
         self._normalize_fn = normalize_fn
         self.min_interval_s = 0.0  # min seconds between requests (set from the registry spec)
+        # When True this provider returns its own synthesized answer (native-answer path, §5):
+        # the answer is preserved and needs_synthesis=False. The reader still synthesizes from
+        # the same evidence too, so the report can compare both apples-to-apples.
+        self.native_answer = native_answer
 
     async def search(self, query: str) -> UnifiedResult:
         """Run the provider search and normalize it. Never raises past this boundary."""
@@ -77,12 +81,15 @@ class HandlerAdapter:
             logger.info(f"[{self.name}] {len(docs)} results, {lat}")
         else:
             logger.warning(f"[{self.name}] returned no usable evidence, {lat}")
+        # Retrieval-only providers force synthesis (native answer discarded, §5 primary path).
+        # A native-answer provider (e.g. Claude web search) keeps its own answer.
+        native = raw.get("answer") if (self.native_answer and isinstance(raw, dict)) else None
         return UnifiedResult(
             results=docs,
-            answer=None,  # native answer intentionally discarded in M0 (forced synthesis)
+            answer=native or None,
             latency_ms=latency_ms,
             cost_units=None,
             raw=raw,
-            needs_synthesis=True,
+            needs_synthesis=not self.native_answer,
             empty_evidence=len(docs) == 0,
         )

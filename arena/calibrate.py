@@ -57,6 +57,10 @@ def run_calibration(queries, adapters, reader_llm, judge_llm, grader_llm, config
         "n_judge_abstained": cal["n_abstained"],
         "n_graded_answers": graded,
         "grader": grader_kind(),
+        # Surfaced for benchmark-suite mode (§7): the neutral-rerun accuracy column and the
+        # public-benchmark ranking. Additive — existing callers ignore these keys.
+        "metrics": result["metrics"],
+        "ranking": result["ranking"],
     }
 
 

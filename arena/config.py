@@ -26,6 +26,10 @@ class ArenaType(Enum):
     ARENA = "arena"
 
 
+# Default per-set sample for benchmark-suite mode (§7): a few hundred; full runs opt-in.
+DEFAULT_BENCHMARK_SAMPLE_SIZE = 300
+
+
 @dataclass
 class Query:
     """One row of the queries file."""
@@ -52,6 +56,11 @@ class ArenaConfig:
     output_dir: str = "results"
     config_path: Optional[str] = None
     pricing_path: Optional[str] = None          # cost pricing map (§8.2); None -> configs/pricing.yaml
+    # Benchmark-suite mode (M2, §7). Off by default; a sample per set unless overridden.
+    benchmark_suite: bool = False
+    benchmark_datasets: List[str] = field(default_factory=lambda: ["simpleqa"])
+    benchmark_sample_size: int = DEFAULT_BENCHMARK_SAMPLE_SIZE
+    published_claims_path: Optional[str] = None
 
     def __post_init__(self):
         # Fail fast on nonsensical values: a non-positive budget would silently disable the
@@ -98,6 +107,12 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         )
 
     judge = raw.get("judge", {}) or {}
+    bench = ((raw.get("modes", {}) or {}).get("benchmark_suite", {})) or {}
+    if not isinstance(bench, dict):  # allow `benchmark_suite: true` shorthand
+        bench = {"enabled": bool(bench)}
+    datasets = bench.get("datasets", ["simpleqa"])
+    if isinstance(datasets, str):  # `datasets: simpleqa` — don't explode the string into chars
+        datasets = [datasets]
     return ArenaConfig(
         providers=providers,
         reader_model=(raw.get("reader", {}) or {}).get("model"),
@@ -111,6 +126,10 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,
         pricing_path=(raw.get("pricing", {}) or {}).get("path"),
+        benchmark_suite=bool(bench.get("enabled", False)),
+        benchmark_datasets=list(datasets) or ["simpleqa"],
+        benchmark_sample_size=int(bench.get("sample_size", DEFAULT_BENCHMARK_SAMPLE_SIZE)),
+        published_claims_path=bench.get("published_claims_path"),
     )
 
 

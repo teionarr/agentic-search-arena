@@ -139,6 +139,22 @@ def normalize_linkup(raw: Any) -> List[EvidenceDoc]:
     return docs
 
 
+def normalize_claude_search(raw: Any) -> List[EvidenceDoc]:
+    # Claude's web_search results carry only {url, title, page_age}; the result body is
+    # encrypted (not human-readable), so content falls back to the title.
+    data = _response_data(raw)
+    if not isinstance(data, dict):
+        return []
+    docs = []
+    for res in data.get("results", []) or []:
+        url = res.get("url", "")
+        title = res.get("title", "") or ""
+        if url:  # title is optional; content falls back to the title (may be empty)
+            docs.append(EvidenceDoc(url=url, title=title, content=title,
+                                    published_date=res.get("page_age")))
+    return docs
+
+
 NORMALIZERS = {
     "tavily": normalize_tavily,
     "exa": normalize_exa,
@@ -147,4 +163,5 @@ NORMALIZERS = {
     "perplexity_search": normalize_perplexity_search,
     "firecrawl": normalize_firecrawl,
     "linkup": normalize_linkup,
+    "claude_search": normalize_claude_search,
 }
