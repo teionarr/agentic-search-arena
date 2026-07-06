@@ -1,0 +1,115 @@
+name: Drift measurement
+
+# Scheduled/recurring drift measurement (continuous eval): run the arena on the example
+# query set, diff against the previous run's results.json with compare_runs.py, and
+# publish the drift report as an artifact.
+#
+# COST: every run makes real API calls (Anthropic judge/reader + search providers),
+# roughly $8-15 per run. Manual dispatch ONLY as shipped.
+#
+# Artifacts are private to the repository (only users with repo access can download
+# them). results.json is already redacted by the harness before it is written.
+on:
+  workflow_dispatch:
+    inputs:
+      reader_model:
+        description: "Reader/grader model (cheaper model keeps cost down)"
+        required: false
+        default: claude-haiku-4-5-20251001
+  # Uncomment to enable weekly drift runs; each run costs real API credits (~$8-15).
+  # schedule:
+  #   - cron: "0 6 * * 1"  # Mondays 06:00 UTC
+
+permissions:
+  contents: read
+  actions: read  # gh run download: fetch the previous run's artifact
+
+concurrency:
+  group: drift-measurement
+  cancel-in-progress: false  # queue, never run two paid runs at once
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Download previous run's results.json (if any)
+        id: prev
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p previous
+          run_id=$(gh run list --workflow drift.yml --status success --limit 1 \
+            --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$run_id" ]; then
+            # May fail if the artifact expired; that's fine — treat as no baseline.
+            gh run download "$run_id" --name arena-results --dir previous \
+              || echo "No arena-results artifact on run $run_id (expired or missing)"
+          else
+            echo "No previous successful drift run — this run becomes the baseline."
+          fi
+          if [ -f previous/results.json ]; then
+            echo "have_previous=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "have_previous=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run arena on example queries
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Providers without a key are skipped gracefully (see the scope report).
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+          SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          python run_arena.py \
+            --queries datasets/example_queries.csv \
+            --output_dir results \
+            --reader-model "${{ inputs.reader_model || 'claude-haiku-4-5-20251001' }}"
+
+      - name: Collect new results.json
+        run: |
+          mkdir -p artifact
+          new_json=$(find results/arena -name results.json | sort | tail -n 1)
+          if [ -z "$new_json" ]; then
+            echo "run_arena.py produced no results.json" >&2
+            exit 1
+          fi
+          cp "$new_json" artifact/results.json
+
+      - name: Diff against previous run (drift report)
+        if: steps.prev.outputs.have_previous == 'true'
+        shell: bash  # explicit bash => pipefail, so a compare_runs failure isn't masked by tee
+        run: |
+          mkdir -p drift
+          python compare_runs.py previous/results.json artifact/results.json \
+            --json drift/drift.json | tee drift/drift.txt
+
+      - name: Upload arena results (baseline for the next run)
+        uses: actions/upload-artifact@v4
+        with:
+          name: arena-results
+          path: artifact/results.json
+          if-no-files-found: error
+
+      - name: Upload drift report
+        if: steps.prev.outputs.have_previous == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: drift/
+          if-no-files-found: error
