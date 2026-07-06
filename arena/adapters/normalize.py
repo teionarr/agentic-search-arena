@@ -100,6 +100,32 @@ def normalize_perplexity_search(raw: Any) -> List[EvidenceDoc]:
     return docs
 
 
+def normalize_perplexity(raw: Any) -> List[EvidenceDoc]:
+    # Sonar's chat completion carries ``search_results`` ({url,title,date,snippet}) alongside a
+    # bare ``citations`` URL list. Prefer search_results; content falls back to the title when
+    # a result has no snippet (mirrors claude_search's title fallback).
+    data = _response_data(raw)
+    if not isinstance(data, dict):
+        return []
+    docs = []
+    results = data.get("search_results") or []
+    if results:
+        for res in results:
+            url = res.get("url", "")
+            title = res.get("title", "") or ""
+            content = res.get("snippet") or title
+            if url:  # snippet/title optional; content may fall back to the (possibly empty) title
+                docs.append(EvidenceDoc(url=url, title=title, content=content,
+                                        published_date=res.get("date")))
+    else:
+        # Citations-only responses carry bare URLs — keep them as evidence (content falls back
+        # to the URL; there is no snippet or title to use).
+        for url in data.get("citations", []) or []:
+            if url:
+                docs.append(EvidenceDoc(url=url, title="", content=url))
+    return docs
+
+
 def normalize_firecrawl(raw: Any) -> List[EvidenceDoc]:
     data = _response_data(raw)
     if not isinstance(data, dict):
@@ -236,6 +262,7 @@ NORMALIZERS = {
     "brave": normalize_brave,
     "serper": normalize_serper,
     "perplexity_search": normalize_perplexity_search,
+    "perplexity": normalize_perplexity,
     "firecrawl": normalize_firecrawl,
     "linkup": normalize_linkup,
     "claude_search": normalize_claude_search,

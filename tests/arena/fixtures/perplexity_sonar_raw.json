@@ -1,0 +1,58 @@
+{
+  "answer": "The James Webb Space Telescope launched on December 25, 2021, aboard an Ariane 5 rocket from Kourou, French Guiana[1][3].",
+  "search_response": {
+    "id": "b7c1f2a8-4d3e-4f19-9a6b-2c8e5d0f7a41",
+    "model": "sonar",
+    "created": 1751790000,
+    "usage": {
+      "prompt_tokens": 12,
+      "completion_tokens": 33,
+      "total_tokens": 45,
+      "search_context_size": "low"
+    },
+    "citations": [
+      "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope",
+      "https://www.nasa.gov/mission/webb/",
+      "https://www.esa.int/Science_Exploration/Space_Science/Webb"
+    ],
+    "search_results": [
+      {
+        "title": "James Webb Space Telescope - Wikipedia",
+        "url": "https://en.wikipedia.org/wiki/James_Webb_Space_Telescope",
+        "date": "2021-12-25",
+        "last_updated": "2026-06-30",
+        "snippet": "The James Webb Space Telescope (JWST) launched on 25 December 2021 on an Ariane 5 rocket from Kourou, French Guiana, and arrived at the Sun-Earth L2 point in January 2022."
+      },
+      {
+        "title": "Webb - NASA Science",
+        "url": "https://www.nasa.gov/mission/webb/",
+        "date": null,
+        "last_updated": "2026-07-01",
+        "snippet": "NASA's James Webb Space Telescope is the largest, most powerful space telescope ever built, launched Dec. 25, 2021."
+      },
+      {
+        "title": "Webb - ESA",
+        "url": "https://www.esa.int/Science_Exploration/Space_Science/Webb",
+        "date": "2022-01-10",
+        "last_updated": "2026-05-12",
+        "snippet": "Webb lifted off on an Ariane 5 from Europe's Spaceport in French Guiana at 13:20 CET on 25 December 2021."
+      }
+    ],
+    "object": "chat.completion",
+    "choices": [
+      {
+        "index": 0,
+        "finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "The James Webb Space Telescope launched on December 25, 2021, aboard an Ariane 5 rocket from Kourou, French Guiana[1][3]."
+        },
+        "delta": {
+          "role": "assistant",
+          "content": ""
+        }
+      }
+    ]
+  },
+  "provider_latency": 2.417
+}
