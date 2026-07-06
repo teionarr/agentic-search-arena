@@ -18,7 +18,7 @@ python -m pytest tests/arena -q      # Tier A: fast, no network, no keys — mus
 
 One straight pipeline, provider-agnostic after the first stage:
 
-```
+```text
 adapters ──▶ reader ──▶ judge ──▶ aggregate ──▶ report
 ```
 
