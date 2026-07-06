@@ -37,8 +37,28 @@ prompt, or accepting a documented 0.80 bar for near-tie-heavy gold sets.
 - One judge call hit an API timeout and was recovered by the retry machinery (4 attempts,
   backoff) — no manual intervention.
 
-## Pending
+## Example workload run (same day)
 
-A committed redacted **example workload run** (20 mixed queries × 2 repeats, `--save-traces`)
-is queued behind an API-credit top-up; it will land here as `results.json` + `ranking.csv` +
-two sample traces when re-run.
+A real 20-query mixed workload ([datasets/example_queries.csv](../../datasets/example_queries.csv))
+× **2 repeats**, 6 providers, Sonnet judge + Haiku reader, `--save-traces`. Committed here:
+[results.json](results.json) · [ranking.csv](ranking.csv) · two sample [traces](traces/).
+Total judge/reader/grader spend: **$15.47**.
+
+What the run demonstrates, feature by feature:
+
+- **Ranking with honest ties** — perplexity_search (0.84) and exa (0.81) lead, but the CI
+  overlap chain groups #1–#5 as statistically tied at n=40; only claude_search separates.
+- **Reliability column earning its keep** — claude_search suffered repeated live connection
+  errors (`ok 65%`) and ranked last (0.03): an availability problem, visibly distinct from
+  a quality problem.
+- **Per-category segmentation** — exa takes #1 on sports and tech while perplexity_search
+  leads finance and research; the aggregate rank hides exactly this.
+- **Repeats variance** — win-rate spread across the two repeats ≤ 0.05 for every provider,
+  so the ordering is stable against provider non-determinism on this workload.
+- **Self-preference caveat surfaced** — 130 native-answer pairs flagged
+  `possible-self-preference` (Claude judge, no secondary configured), exactly as §5 requires.
+- **Freshness with coverage honesty** — tavily's 60% freshness carries a `datecov 10% !`
+  low-confidence flag rather than being presented as comparable to exa's.
+- **Swap-consistency 0.75 on this workload** (red stage status) — lower than the 0.83 on
+  gold, consistent with the flagged Tier-B miss above; the 133 flipped/skipped comparisons
+  were excluded from aggregation, not averaged in.
