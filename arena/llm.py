@@ -51,9 +51,15 @@ class LLMClient:
         self.usage = {"input": 0, "output": 0, "cache_write": 0, "cache_read": 0, "calls": 0}
 
     def _get_client(self) -> Any:
+        # Lock the lazy init: one LLMClient is shared across pipelined worker threads, so an
+        # unlocked first-use could race and build several clients. Own the retry/timeout budget
+        # here (the SDK's own default 10-min timeout + 2 retries would otherwise stack on top of
+        # this class's bounded-retry loop and tie a worker up far longer than intended).
         if self._client is None:
-            import anthropic  # lazy: no key needed just to import arena
-            self._client = anthropic.Anthropic()
+            with self._lock:
+                if self._client is None:
+                    import anthropic  # lazy: no key needed just to import arena
+                    self._client = anthropic.Anthropic(timeout=60.0, max_retries=0)
         return self._client
 
     def _record_usage(self, resp: Any) -> None:

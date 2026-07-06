@@ -43,7 +43,8 @@ def main() -> int:
 
     secrets.load_secrets()
 
-    config = load_config(resolve_config_path(args.config))  # honors configs/arena.yaml by default
+    config_path = resolve_config_path(args.config)  # honors configs/arena.yaml by default
+    config = load_config(config_path)
     config.output_dir = args.output_dir
     queries = load_queries(args.queries)
 
@@ -84,11 +85,12 @@ def main() -> int:
 
     out_dir = get_output_dir(config.output_dir)
     os.makedirs(out_dir, exist_ok=True)
-    if args.config:
-        copy_config_to_results(args.config, out_dir)
+    if config_path:  # snapshot whichever config was actually used (incl. auto-detected arena.yaml)
+        copy_config_to_results(config_path, out_dir)
 
     doc = build_document(result, [q.query for q in queries],
                          config_snapshot={"model_id": model_id,
+                                          "reader_model": reader_model,
                                           "evidence_budget_tokens": config.evidence_budget_tokens,
                                           "order_swap": config.order_swap,
                                           "exclude_on_flip": config.exclude_on_flip},

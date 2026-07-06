@@ -35,7 +35,7 @@ class FirecrawlHandler:
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         data = {"query": query, **self.search_params}
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
                 start_time = time.time()
                 async with session.post(FIRECRAWL_API_URL, json=data, headers=headers) as response:
                     if response.status != 200:

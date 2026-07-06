@@ -81,8 +81,10 @@ def ensure_ca_bundle() -> None:
     try:
         import aiohttp.connector as _c
         _c._SSL_CONTEXT_VERIFIED = _orig(cafile=bundle)
-    except Exception:
-        pass
+    except Exception as e:
+        # Don't let a silent failure look like a provider outage later — surface it.
+        logger.info(f"Could not patch aiohttp default SSL context ({e.__class__.__name__}); "
+                    "TLS will use system defaults")
 
 
 def load_secrets(dotenv_path: Optional[str] = None) -> None:

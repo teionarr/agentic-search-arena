@@ -80,7 +80,14 @@ def main() -> int:
     adapters = []
     for name in included:
         spec = REGISTRY[name]
-        adapters.append(spec.build(name, dict(spec.default_config)))
+        override = (config.providers.get(name, {}) or {}).get("config", {})
+        try:
+            adapters.append(spec.build(name, {**spec.default_config, **(override or {})}))
+        except Exception as e:
+            logger.error(f"[{name}] failed to initialize: {e}")
+    if not adapters:
+        logger.error("All included providers failed to initialize.")
+        return 1
 
     model_id = args.model or DEFAULT_MODEL
     llm = LLMClient(model=model_id)

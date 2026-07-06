@@ -74,7 +74,17 @@ def main() -> int:
         logger.error("Calibration needs >=2 providers enabled with keys present.")
         return 1
 
-    adapters = [REGISTRY[n].build(n, dict(REGISTRY[n].default_config)) for n in scope.included]
+    adapters = []
+    for n in scope.included:
+        spec = REGISTRY[n]
+        override = (config.providers.get(n, {}) or {}).get("config", {})
+        try:
+            adapters.append(spec.build(n, {**spec.default_config, **(override or {})}))
+        except Exception as e:
+            logger.error(f"[{n}] failed to initialize: {e}")
+    if not adapters:
+        logger.error("All included providers failed to initialize.")
+        return 1
     model_id = args.model or DEFAULT_MODEL
     judge_llm = LLMClient(model=model_id)
     reader_llm = LLMClient(model=model_id)

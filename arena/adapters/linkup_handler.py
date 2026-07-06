@@ -35,7 +35,7 @@ class LinkupHandler:
         headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
         data = {"q": query, **self.search_params}  # Linkup uses 'q', not 'query'
         try:
-            async with aiohttp.ClientSession() as session:
+            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=30)) as session:
                 start_time = time.time()
                 async with session.post(LINKUP_API_URL, json=data, headers=headers) as response:
                     if response.status != 200:

@@ -50,6 +50,18 @@ def test_config_defaults_zero_config():
     assert cfg.order_swap is True and cfg.evidence_budget_tokens > 0
 
 
+def test_config_rejects_nonpositive_budget_and_concurrency(tmp_path):
+    from arena.config import ArenaConfig
+    with pytest.raises(ValueError):
+        ArenaConfig(evidence_budget_tokens=0)          # would silently disable the evidence cap
+    with pytest.raises(ValueError):
+        ArenaConfig(max_concurrency=0)
+    p = tmp_path / "c.yaml"
+    p.write_text("evidence_budget_tokens: -5\n")
+    with pytest.raises(ValueError):
+        load_config(str(p))
+
+
 def _clear_provider_keys(monkeypatch):
     for k in ["TAVILY_API_KEY", "EXA_API_KEY", "BRAVE_API_KEY", "SERPER_API_KEY", "PERPLEXITY_API_KEY"]:
         monkeypatch.delenv(k, raising=False)

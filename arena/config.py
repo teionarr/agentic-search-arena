@@ -52,6 +52,14 @@ class ArenaConfig:
     output_dir: str = "results"
     config_path: Optional[str] = None
 
+    def __post_init__(self):
+        # Fail fast on nonsensical values: a non-positive budget would silently disable the
+        # evidence cap (uncapped providers skew the comparison); concurrency must be >= 1.
+        if self.evidence_budget_tokens <= 0:
+            raise ValueError("evidence_budget_tokens must be > 0")
+        if self.max_concurrency < 1:
+            raise ValueError("max_concurrency must be >= 1")
+
 
 DEFAULT_CONFIG_PATH = "configs/arena.yaml"
 

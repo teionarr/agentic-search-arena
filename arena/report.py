@@ -91,7 +91,7 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
 
 
 def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
-    """Write results.json + ranking.csv + results.html (all rendered from the doc)."""
+    """Write results.json (source of truth) + ranking.csv (rendered from it)."""
     os.makedirs(output_dir, exist_ok=True)
     json_path = os.path.join(output_dir, "results.json")
     with open(json_path, "w") as f:
