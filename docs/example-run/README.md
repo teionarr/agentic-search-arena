@@ -3,7 +3,7 @@
 The first execution of `python -m arena.tier_b` against real provider APIs — 30 SimpleQA gold
 queries × 6 keyed providers, judge `claude-sonnet-4-6`. Raw artifact: [tier_b.json](tier_b.json).
 
-| Check (§14) | Bar | Value | Verdict |
+| Check | Bar | Value | Verdict |
 |---|---|---|---|
 | Judge-vs-gold calibration | ≥ 0.80 | **0.91** (97 decidable pairs) | ✅ |
 | Judge swap-consistency | ≥ 0.85 | **0.83** (440 double-judged pairs) | ❌ |
@@ -14,9 +14,9 @@ queries × 6 keyed providers, judge `claude-sonnet-4-6`. Raw artifact: [tier_b.j
 
 **Calibration 0.91 is the headline.** On pairs where gold decides which answer is right, the
 reference-free pairwise judge agreed with ground truth 91% of the time. This is the number that
-converts "the judge said so" into a measured credibility claim (§6.5).
+converts "the judge said so" into a measured credibility claim.
 
-**Swap-consistency 0.83 is a flagged miss, recorded per §14 — not silently tuned away.**
+**Swap-consistency 0.83 is a flagged miss, recorded — not silently tuned away.**
 Interpretation and mitigants:
 
 - SimpleQA is a near-tie-heavy sample: most providers surface the same fact, so the two answers
@@ -56,7 +56,8 @@ What the run demonstrates, feature by feature:
 - **Repeats variance** — win-rate spread across the two repeats ≤ 0.05 for every provider,
   so the ordering is stable against provider non-determinism on this workload.
 - **Self-preference caveat surfaced** — 130 native-answer pairs flagged
-  `possible-self-preference` (Claude judge, no secondary configured), exactly as §5 requires.
+  `possible-self-preference` (Claude judge, no secondary configured), exactly as the
+  self-preference policy requires.
 - **Freshness with coverage honesty** — tavily's 60% freshness carries a `datecov 10% !`
   low-confidence flag rather than being presented as comparable to exa's.
 - **Swap-consistency 0.75 on this workload** (red stage status) — lower than the 0.83 on
