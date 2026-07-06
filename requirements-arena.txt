@@ -1,18 +1,15 @@
 # Slim install for the arena (see README "Quickstart"). Covers run_arena.py,
-# compare_runs.py, every `python -m arena.*` command, and these providers:
-# perplexity (Sonar), firecrawl, linkup, claude_search, youcom, parallel, gemini.
-#
-# KNOWN LIMIT: five providers — tavily, exa, brave, serper, perplexity_search —
-# reuse the handlers inherited from the upstream project, which import the legacy
-# dependency stack (gpt_researcher, pandas, quotientai, langchain_openai) at load
-# time. To include them in a ranking, install the full requirements.txt instead
-# (a strict superset of this file). With the slim install they are skipped
-# gracefully and reported in the scope report — never a crash.
+# compare_runs.py, every `python -m arena.*` command, and all twelve providers —
+# including tavily, exa, brave, serper, and perplexity_search, whose handlers are
+# inherited from the upstream project (their legacy dependencies — gpt_researcher,
+# pandas, quotientai, langchain_openai — are now imported lazily and not needed
+# here). The full requirements.txt (a strict superset of this file) is required
+# only for the legacy run_evaluation.py harness (docs/legacy-benchmarks.md).
 anthropic==0.116.0
 pyyaml==6.0.2
 numpy==1.26.4
 tiktoken==0.11.0
-aiohttp==3.13.3
+aiohttp==3.14.1
 python-dotenv==1.1.0
 pydantic==2.11.5
 langfuse==4.13.0            # optional Langfuse tracing; imported lazily, only if enabled

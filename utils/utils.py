@@ -1,12 +1,24 @@
-import pandas as pd
+from __future__ import annotations
+
 import logging
 import csv
 import os
 import json
 from datetime import datetime
 from typing import Dict, List, Optional
-from quotientai import QuotientAI, DetectionType
 from enum import Enum
+
+# pandas and quotientai are only needed by the legacy run_evaluation.py flow; the
+# slim arena install (requirements-arena.txt) imports this module solely for
+# EvaluationType, so tolerate their absence at import time.
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+try:
+    from quotientai import QuotientAI, DetectionType
+except ImportError:
+    QuotientAI = DetectionType = None
 import random
 import uuid
 import shutil

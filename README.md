@@ -65,7 +65,7 @@ python -m arena.rerank results.json --weights accuracy=0.5,latency=0.3,cost=0.2
 
 ```sh
 git clone https://github.com/teionarr/agentic-search-arena && cd agentic-search-arena
-pip install -r requirements.txt           # Python ≥ 3.11
+pip install -r requirements-arena.txt     # Python ≥ 3.11 — slim install, covers all 12 providers
 cp .env.example .env                      # add ANTHROPIC_API_KEY + whichever provider keys you have
 ```
 
