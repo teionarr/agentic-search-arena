@@ -331,6 +331,14 @@ log whenever native mode runs. Reader-synthesized (primary-path) pairs are never
 > **Data note:** `results.json` and the rationale log contain your full query text and the web
 > content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
 
+### Optional Langfuse tracing (§11)
+
+Off by default. Set `langfuse.enabled: true` in your config **and** provide Langfuse keys in your
+secrets (`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST`) to trace each query as
+one Langfuse trace with `provider.search`, `reader.synthesize`, and `judge.compare` spans. Missing
+keys silently disable tracing (no error). Trace data goes to **your** Langfuse project and passes
+through the same `redact()` boundary as `results.json`, so no secret value is ever exported.
+
 ### Extending
 
 Adding a provider is **one adapter + one registry line** (the only documented extension point):

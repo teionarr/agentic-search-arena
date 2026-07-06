@@ -54,6 +54,7 @@ class ArenaConfig:
     consensus_min_providers: int = 3            # Tier-1 (§3): min converging providers for a silver label
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
     weights: Dict[str, float] = field(default_factory=dict)
+    langfuse_enabled: bool = False           # M5 — optional tracing, off by default (§11)
     output_dir: str = "results"
     config_path: Optional[str] = None
     pricing_path: Optional[str] = None          # cost pricing map (§8.2); None -> configs/pricing.yaml
@@ -130,6 +131,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         consensus_min_providers=raw.get("consensus_min_providers", 3),
         max_concurrency=raw.get("max_concurrency", 8),
         weights=raw.get("weights", {}) or {},
+        langfuse_enabled=bool((raw.get("langfuse", {}) or {}).get("enabled", False)),
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,
         pricing_path=(raw.get("pricing", {}) or {}).get("path"),

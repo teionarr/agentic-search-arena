@@ -20,6 +20,7 @@ from arena.paths import copy_config_to_results, get_output_dir
 from arena.pipeline import run_arena
 from arena.report import build_document, render_cli_summary, write_results
 from arena.scope import resolve_scope
+from arena.tracing import build_tracer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -83,9 +84,12 @@ def main() -> int:
     reader_llm = LLMClient(model=reader_model)
     grader_llm = LLMClient(model=reader_model)  # accuracy anchor (Claude fallback if no OPENAI_API_KEY)
 
+    tracer = build_tracer(config.langfuse_enabled)  # NullTracer unless enabled + Langfuse keys present
+
     logger.info(f"Running arena over: {', '.join(a.name for a in adapters)} "
                 f"({len(queries)} queries, judge={model_id})")
-    result = run_arena(config, queries, adapters, scope, reader_llm, judge_llm, grader_llm=grader_llm)
+    result = run_arena(config, queries, adapters, scope, reader_llm, judge_llm,
+                       grader_llm=grader_llm, tracer=tracer)
 
     out_dir = get_output_dir(config.output_dir)
     os.makedirs(out_dir, exist_ok=True)
