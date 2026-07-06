@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 # sourced in arena.config so the dataclass default and the loader agree.
 DEFAULT_SAMPLE_SIZE = DEFAULT_BENCHMARK_SAMPLE_SIZE
 
-# Where each vendored dataset lives. Only SimpleQA is vendored in this repo today; FRAMES /
-# FreshQA loaders exist (§14) and read a file at the mapped path if the user drops one in.
+# Where each vendored dataset lives. All three are vendored (source/license/retrieval date in
+# datasets/DATASETS.md); an explicit ``path`` can still override any of them.
 DATASET_PATHS = {
     "simpleqa": "datasets/simple_qa_test_set.csv",
     "frames": "datasets/frames_test_set.csv",
