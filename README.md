@@ -294,6 +294,30 @@ Providers ship changes weekly, so treat any ranking as dated. Re-run on a schedu
 and diff with `compare_runs.py`; the report warns when query sets or judge models differ, so
 you never compare apples to oranges silently.
 
+### Drift workflow (GitHub Actions)
+
+`.github/workflows/drift.yml` automates the loop above: it runs the arena on
+`datasets/example_queries.csv`, downloads the previous run's `results.json` artifact, diffs the
+two with `compare_runs.py`, and uploads two artifacts — `arena-results` (the new canonical
+`results.json`, which becomes the next run's baseline) and `drift-report` (`drift.txt` +
+`drift.json`). The first run has no baseline and just establishes one. Artifacts are private to
+the repository, and `results.json` is redacted by the harness before it's written.
+
+**Cost warning:** every run spends real API credits (Anthropic judge/reader + provider search
+calls), roughly **$8–15 per run**. The workflow is therefore `workflow_dispatch` (manual) only
+as shipped; the weekly cron is a commented-out block in `drift.yml` — uncomment the `schedule:`
+lines there to enable it, knowing each scheduled run costs money.
+
+Setup:
+
+1. Add repo secrets (**Settings → Secrets and variables → Actions**): `ANTHROPIC_API_KEY`
+   (required) plus any provider keys you want in the arena — `TAVILY_API_KEY`, `EXA_API_KEY`,
+   `BRAVE_API_KEY`, `SERPER_API_KEY`, `PERPLEXITY_API_KEY`. Providers without a secret are
+   skipped gracefully and show up in the scope report.
+2. Dispatch it from **Actions → Drift measurement → Run workflow** (or
+   `gh workflow run drift.yml`). The optional `reader_model` input defaults to a Haiku model to
+   keep cost down; the judge model stays at the pinned default.
+
 ### Benchmark-suite mode (§7)
 
 A second mode re-runs **public sets** (SimpleQA, and FRAMES / FreshQA when you vendor the data
