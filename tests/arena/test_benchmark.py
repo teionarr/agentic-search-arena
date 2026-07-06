@@ -49,6 +49,20 @@ def test_load_freshqa_fixture_jsonl_and_freshness_tag():
     assert all(q.category == "freshqa" for q in rows)
 
 
+def test_vendored_frames_file_exists_and_parses():
+    # Vendored full set (datasets/DATASETS.md): exists, parses, and is the real thing (824 rows).
+    rows = load_frames(10_000)
+    assert len(rows) > 800
+    assert all(q.query and q.category == "frames" for q in rows[:5])
+
+
+def test_vendored_freshqa_file_exists_and_parses():
+    # Vendored TEST split (datasets/DATASETS.md): exists, parses, carries the freshness tag.
+    rows = load_freshqa(10_000)
+    assert len(rows) > 400
+    assert all(q.query and q.category == "freshqa" and q.freshness_need for q in rows[:5])
+
+
 def test_load_benchmark_sample_sizing_honored():
     assert len(load_benchmark("simpleqa", sample_size=5)) == 5
     assert len(load_benchmark("simpleqa", sample_size=1)) == 1
