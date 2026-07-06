@@ -31,7 +31,7 @@ One command on your queries CSV → this lands in your terminal:
   SEARCH ARENA                                   your-workload ranking
 ════════════════════════════════════════════════════════
   40 queries × 2 repeats · judge claude-sonnet-4-6 · cost $11.20
-  412/480 comparisons used · judge reliability 0.88 · bradley_terry
+  412/480 comparisons used · judge reliability 0.83 · bradley_terry
 
   #1 tavily            ████████████████┃██░░░░ 0.81 [0.75–0.86]  acc 95%  cost $0.0160/q ($0.0168/correct)  ← clear leader
   #2 exa               ██████████████┃░░░░░░░░ 0.68 [0.61–0.74]  acc 92%  cost n/a                          · tied
@@ -75,7 +75,7 @@ cp .env.example .env                      # add ANTHROPIC_API_KEY + whichever pr
 python run_arena.py --queries datasets/example_queries.csv --reader-model claude-haiku-4-5-20251001
 ```
 
-**2️⃣ The real thing** — your queries, **~$8–15** (a committed reference run measured $15.47 for 20 queries × 2 repeats × 6 providers):
+**2️⃣ The real thing** — your queries — a committed reference run measured **$15.47** for 20 queries × 2 repeats × 6 providers; cost scales roughly linearly with queries × repeats:
 
 ```sh
 python run_arena.py --queries my_queries.csv --repeats 2 --save-traces
