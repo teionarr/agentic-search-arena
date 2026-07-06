@@ -111,6 +111,18 @@ def main() -> int:
     result = run_arena(config, queries, adapters, scope, reader_llm, judge_llm,
                        grader_llm=grader_llm, secondary_judge_llm=secondary_judge_llm, tracer=tracer)
 
+    # Tier-3 downstream success (§3): run the user's own end-task loop per provider and add
+    # the judge-free success-rate column. Off unless downstream.command is configured.
+    if config.downstream_command:
+        from arena.downstream import attach_downstream, run_downstream
+        # The command string itself is never logged — quick eval scripts often embed tokens.
+        logger.info(f"Running downstream loop ({config.downstream_runs}× per provider, "
+                    f"timeout {config.downstream_timeout_s}s)")
+        outcomes = run_downstream(config.downstream_command, [a.name for a in adapters],
+                                  runs=config.downstream_runs,
+                                  timeout_s=config.downstream_timeout_s)
+        attach_downstream(result["metrics"], outcomes)
+
     out_dir = get_output_dir(config.output_dir)
     os.makedirs(out_dir, exist_ok=True)
     if config_path:  # snapshot whichever config was actually used (incl. auto-detected arena.yaml)

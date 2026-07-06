@@ -69,6 +69,12 @@ class ArenaConfig:
     benchmark_datasets: List[str] = field(default_factory=lambda: ["simpleqa"])
     benchmark_sample_size: int = DEFAULT_BENCHMARK_SAMPLE_SIZE
     published_claims_path: Optional[str] = None
+    # Tier-3 downstream success (§3): the user's own end-task loop, run per provider.
+    # ``{provider}`` in the command is substituted (also exported as ARENA_PROVIDER); exit 0
+    # = success. None = Tier 3 off.
+    downstream_command: Optional[str] = None
+    downstream_runs: int = 5
+    downstream_timeout_s: int = 300
 
     def __post_init__(self):
         # Fail fast on nonsensical values: a non-positive budget would silently disable the
@@ -84,6 +90,14 @@ class ArenaConfig:
             raise ValueError("max_concurrency must be >= 1")
         if self.repeats < 1:
             raise ValueError("repeats must be >= 1")
+        if self.downstream_runs < 1:
+            raise ValueError("downstream_runs must be >= 1")
+        # A non-positive timeout would silently fail every downstream run (confusing 0%
+        # success with no error); a non-string command would only blow up inside shlex.
+        if self.downstream_timeout_s < 1:
+            raise ValueError("downstream_timeout_s must be >= 1")
+        if self.downstream_command is not None and not isinstance(self.downstream_command, str):
+            raise ValueError("downstream.command must be a string")
 
 
 DEFAULT_CONFIG_PATH = "configs/arena.yaml"
@@ -128,6 +142,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
     datasets = bench.get("datasets", ["simpleqa"])
     if isinstance(datasets, str):  # `datasets: simpleqa` — don't explode the string into chars
         datasets = [datasets]
+    downstream = raw.get("downstream", {}) or {}
     aggregation = raw.get("aggregation", {}) or {}
     method = aggregation.get("method", "bradley_terry")
     if method not in ("bradley_terry", "winrate"):
@@ -157,6 +172,9 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         benchmark_datasets=list(datasets) or ["simpleqa"],
         benchmark_sample_size=int(bench.get("sample_size", DEFAULT_BENCHMARK_SAMPLE_SIZE)),
         published_claims_path=bench.get("published_claims_path"),
+        downstream_command=downstream.get("command"),
+        downstream_runs=int(downstream.get("runs", 5)),
+        downstream_timeout_s=int(downstream.get("timeout_s", 300)),
     )
 
 

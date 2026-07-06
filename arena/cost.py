@@ -122,6 +122,7 @@ _AXIS_PRESENCE = {
     "accuracy": lambda m: (m.get("accuracy") or {}).get("rate") is not None,
     "latency": lambda m: (m.get("latency") or {}).get("p50") is not None,
     "coverage": lambda m: (m.get("coverage") or {}).get("avg_tokens_per_result") is not None,
+    "downstream": lambda m: (m.get("downstream") or {}).get("success_rate") is not None,
 }
 
 
