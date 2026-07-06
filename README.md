@@ -273,6 +273,35 @@ python -m arena.spike --n 30       # quick run on vendored SimpleQA (gold) — p
 python -m arena.calibrate --n 50   # judge-vs-gold calibration on a larger gold sample
 ```
 
+### Benchmark-suite mode (§7)
+
+A second mode re-runs **public sets** (SimpleQA, and FRAMES / FreshQA when you vendor the data
+file) across every enabled provider under **one identical policy** — one config, one reader, one
+judge, one grader. Same machinery as the arena; it just swaps your queries for a public set. Two
+payoffs from one run:
+
+- **Calibration report** (§6.5) — judge-vs-gold agreement %: on gold-decidable pairs, how often
+  the reference-free pairwise judge agrees with ground truth. This is the judge's headline
+  credibility number (bar ≥0.80).
+- **Marketing-claims ledger** (§7) — each vendor's *published* benchmark number shown next to the
+  neutral re-run under identical conditions, with the **delta and the trace**. It does **not**
+  accuse: a gap can be legitimate (different reader/judge/config/run-date; the web drifts), so
+  every claim carries an `as_of` date + `source` and every re-run is timestamped. Supply the
+  numbers in a user-editable file (see `configs/published_claims.example.yaml`); with none, the
+  neutral re-run is still produced.
+
+When both the arena (your queries) and a benchmark ran, an **arena-vs-benchmark cross-signal**
+shows your-workload rank next to the public rank — disagreement is the insight the blogs can't
+sell, and you believe the public half because you re-ran it neutrally yourself.
+
+Defaults to a **sample** (a few hundred per set); full runs are opt-in via `sample_size`.
+
+```sh
+python run_arena.py --queries my_queries.csv --benchmark-suite   # or modes.benchmark_suite in config
+```
+
+Writes `benchmark_suite.json` alongside `results.json` in the run dir.
+
 ### Config (optional)
 
 Copy `configs/arena.example.yaml` to `configs/arena.yaml` (git-ignored) to override defaults —
@@ -301,9 +330,8 @@ plugin system.
 ### Roadmap (deferred)
 
 Native-answer providers (Perplexity Sonar, GPT-Researcher) + self-preference handling; cost-per-
-query from a provider pricing map; freshness scoring; benchmark-suite mode (marketing-claims
-ledger); Tier-1 consensus anchors; Tier-2 human adjudication; Tier-3 downstream success +
-Langfuse tracing.
+query from a provider pricing map; freshness scoring; Tier-1 consensus anchors; Tier-2 human
+adjudication; Tier-3 downstream success + Langfuse tracing.
 
 **Prior art / design credit:** Arena mode extends this repo's provider-handler architecture, and
 draws on [`youdotcom-oss/web-search-api-evals`](https://github.com/youdotcom-oss/web-search-api-evals)

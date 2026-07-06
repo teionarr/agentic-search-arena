@@ -1,0 +1,31 @@
+# Marketing-claims ledger — vendor-PUBLISHED benchmark numbers (§7, output #6).
+#
+# OPTIONAL and user-editable. The benchmark-suite mode shows each of these published numbers
+# next to a neutral re-run under identical conditions, and reports the delta + trace. A gap is
+# NOT an accusation — it can be legitimate (different reader/judge/config/run-date; the web
+# drifts). So every entry MUST carry `as_of` (when the vendor published it) and `source` (a URL
+# or citation) so the comparison is auditable. If this file is absent, the neutral re-run is
+# still produced — just without the published column.
+#
+# Shape:  published_claims: { <dataset>: { <provider>: { score, as_of, source } } }
+#   score : the vendor's published accuracy in [0, 1] on that dataset.
+#   as_of : ISO date the number was published/observed.
+#   source: URL or citation for the claim.
+#
+# Point at this file from your arena config:
+#   modes:
+#     benchmark_suite:
+#       enabled: true
+#       datasets: [simpleqa]
+#       published_claims_path: configs/published_claims.yaml
+
+published_claims:
+  simpleqa:
+    tavily:
+      score: 0.93
+      as_of: "2025-01-15"
+      source: "https://example.com/tavily-simpleqa-post"    # replace with the real citation
+    exa:
+      score: 0.90
+      as_of: "2024-11-02"
+      source: "https://example.com/exa-benchmarks"
