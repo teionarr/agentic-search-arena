@@ -30,12 +30,13 @@ from typing import Callable, Dict, List, Optional
 import yaml
 
 from arena.calibrate import run_calibration
-from arena.config import ArenaConfig, Query
+from arena.config import DEFAULT_BENCHMARK_SAMPLE_SIZE, ArenaConfig, Query
 
 logger = logging.getLogger(__name__)
 
-# Default per-set sample (§7): a few hundred; full runs are opt-in via config/flag.
-DEFAULT_SAMPLE_SIZE = 300
+# Default per-set sample (§7): a few hundred; full runs are opt-in via config/flag. Single-
+# sourced in arena.config so the dataclass default and the loader agree.
+DEFAULT_SAMPLE_SIZE = DEFAULT_BENCHMARK_SAMPLE_SIZE
 
 # Where each vendored dataset lives. Only SimpleQA is vendored in this repo today; FRAMES /
 # FreshQA loaders exist (§14) and read a file at the mapped path if the user drops one in.
@@ -244,27 +245,33 @@ def run_benchmark_suite(datasets: List[str], sample_size: int, adapters, reader_
 
     for dataset in datasets:
         key = dataset.lower()
-        queries = load_benchmark(key, sample_size)
-        logger.info(f"[benchmark-suite] {key}: {len(queries)} queries "
-                    f"across {[a.name for a in adapters]}")
+        # Isolate each dataset: a missing FRAMES/FreshQA file or a run_calibration failure must
+        # not discard calibration already computed for earlier sets. Record the error and go on.
+        try:
+            queries = load_benchmark(key, sample_size)
+            logger.info(f"[benchmark-suite] {key}: {len(queries)} queries "
+                        f"across {[a.name for a in adapters]}")
 
-        cal = run_calibration(queries, adapters, reader_llm, judge_llm, grader_llm, config,
-                              search_gatherer=search_gatherer)
-        rerun_accuracy = _accuracy_from_metrics(cal["metrics"])
-        ledger = build_ledger(key, rerun_accuracy, published.get(key, {}), timestamp)
+            cal = run_calibration(queries, adapters, reader_llm, judge_llm, grader_llm, config,
+                                  search_gatherer=search_gatherer)
+            rerun_accuracy = _accuracy_from_metrics(cal["metrics"])
+            ledger = build_ledger(key, rerun_accuracy, published.get(key, {}), timestamp)
 
-        report["datasets"][key] = {
-            "n_queries": len(queries),
-            "calibration": {
-                "agreement": cal["agreement"],
-                "n_decidable_pairs": cal["n_decidable_pairs"],
-                "n_judge_abstained": cal["n_judge_abstained"],
-                "grader": cal["grader"],
-            },
-            "rerun_accuracy": rerun_accuracy,
-            "benchmark_rank": cal["ranking"],
-            "ledger": ledger,
-        }
+            report["datasets"][key] = {
+                "n_queries": len(queries),
+                "calibration": {
+                    "agreement": cal["agreement"],
+                    "n_decidable_pairs": cal["n_decidable_pairs"],
+                    "n_judge_abstained": cal["n_judge_abstained"],
+                    "grader": cal["grader"],
+                },
+                "rerun_accuracy": rerun_accuracy,
+                "benchmark_rank": cal["ranking"],
+                "ledger": ledger,
+            }
+        except Exception as e:
+            logger.error(f"[benchmark-suite] {key} failed: {e}")
+            report["datasets"][key] = {"error": str(e)}
     return report
 
 
@@ -285,6 +292,10 @@ def render_benchmark_summary(report: dict) -> str:
     out = ["", "═" * W, "  BENCHMARK SUITE (one policy, all providers)".ljust(W), "═" * W]
     out.append(f"  sample {report.get('sample_size')} / set · run {report.get('timestamp')}")
     for dataset, d in report.get("datasets", {}).items():
+        if d.get("error"):  # isolated failure — surface it, keep rendering the rest
+            out.append("")
+            out.append(f"  {dataset}  ·  FAILED: {d['error']}")
+            continue
         cal = d.get("calibration", {}) or {}
         agree = cal.get("agreement")
         agree_s = (f"{agree:.0%} ({'≥0.80 ok' if agree >= 0.80 else 'below 0.80 bar'})"

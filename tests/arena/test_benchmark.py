@@ -13,6 +13,7 @@ from arena.adapters.base import EvidenceDoc
 from arena.benchmark import (build_ledger, cross_signal, load_benchmark, load_frames,
                              load_freshqa, load_published_claims, load_simpleqa,
                              run_benchmark_suite)
+import arena.benchmark as benchmark_mod
 from arena.config import ArenaConfig, Query, load_config
 from arena.grade import _GradeResult
 from arena.judge import PairwiseVerdict
@@ -158,7 +159,7 @@ def test_run_benchmark_suite_calibration_and_ledger(monkeypatch, tmp_path):
     # A one-row benchmark file so we exercise the real loader path too.
     data = tmp_path / "mini.csv"
     data.write_text("problem,answer\ncapital of France?,Paris\n")
-    monkeypatch.setitem(__import__("arena.benchmark", fromlist=["DATASET_PATHS"]).DATASET_PATHS,
+    monkeypatch.setitem(benchmark_mod.DATASET_PATHS,
                         "simpleqa", str(data))
 
     published = {"simpleqa": {"tavily": {"score": 1.0, "as_of": "2025-01-01", "source": "s"}}}
@@ -193,7 +194,7 @@ def test_run_benchmark_suite_without_published_still_produces_rerun(monkeypatch,
                                             content="Lyon is a city in France.")])
     data = tmp_path / "mini.csv"
     data.write_text("problem,answer\ncapital of France?,Paris\n")
-    monkeypatch.setitem(__import__("arena.benchmark", fromlist=["DATASET_PATHS"]).DATASET_PATHS,
+    monkeypatch.setitem(benchmark_mod.DATASET_PATHS,
                         "simpleqa", str(data))
     report = run_benchmark_suite(
         ["simpleqa"], sample_size=50, adapters=[good, bad],
@@ -206,3 +207,37 @@ def test_run_benchmark_suite_without_published_still_produces_rerun(monkeypatch,
     d = report["datasets"]["simpleqa"]
     assert len(d["ledger"]) == 2                       # neutral re-run row per provider
     assert all(r["published_score"] is None and r["delta"] is None for r in d["ledger"])
+
+
+def test_run_benchmark_suite_isolates_per_dataset_failure(monkeypatch, tmp_path):
+    # A failing later dataset (missing FRAMES file) must not discard the earlier one's result.
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    good = FakeAdapter("tavily", [EvidenceDoc(url="a", title="t",
+                                              content="Paris is the capital of France.")])
+    bad = FakeAdapter("brave", [EvidenceDoc(url="b", title="t",
+                                            content="Lyon is a city in France.")])
+    data = tmp_path / "mini.csv"
+    data.write_text("problem,answer\ncapital of France?,Paris\n")
+    monkeypatch.setitem(benchmark_mod.DATASET_PATHS, "simpleqa", str(data))
+    monkeypatch.setitem(benchmark_mod.DATASET_PATHS, "frames", str(tmp_path / "no_such.csv"))
+    report = run_benchmark_suite(
+        ["simpleqa", "frames"], sample_size=50, adapters=[good, bad],
+        reader_llm=FakeLLM(complete_fn=_reader_fn),
+        judge_llm=FakeLLM(structured_fn=lambda s, u, sch: PairwiseVerdict(winner="tie", rationale="x")),
+        grader_llm=FakeLLM(structured_fn=_grader_fn),
+        config=ArenaConfig(evidence_budget_tokens=600),
+        published={}, search_gatherer=sync_gather,
+    )
+    # simpleqa completed with its ledger; frames recorded an error — the run did not blow up.
+    assert "ledger" in report["datasets"]["simpleqa"]
+    assert "error" in report["datasets"]["frames"]
+    # The CLI renderer tolerates the error entry.
+    assert "FAILED" in benchmark_mod.render_benchmark_summary(report)
+
+
+def test_config_benchmark_suite_scalar_datasets_not_exploded(tmp_path):
+    # `datasets: simpleqa` (a scalar) must become ["simpleqa"], not list of chars.
+    p = tmp_path / "c.yaml"
+    p.write_text("modes:\n  benchmark_suite:\n    enabled: true\n    datasets: simpleqa\n")
+    cfg = load_config(str(p))
+    assert cfg.benchmark_datasets == ["simpleqa"]
