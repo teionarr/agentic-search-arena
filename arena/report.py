@@ -163,7 +163,7 @@ def render_cli_summary(doc: dict) -> str:
     has_fresh = any((doc["metrics"].get(s["provider"], {}).get("freshness", {}) or {}).get("score") is not None
                     for s in doc["ranking"])
     acc_hdr = " · acc = judge-free accuracy vs gold" if has_acc else ""
-    fresh_hdr = " · fresh = dated-in-window share (cov = date coverage; ! = low-confidence)" if has_fresh else ""
+    fresh_hdr = " · fresh = dated-in-window share (datecov = date coverage; ! = low-confidence)" if has_fresh else ""
     out.append("")
     out.append("  RANKING   bar = win-rate · │ = 0.50 even line · [ ] = 95% CI · cov = avg tok/result" + acc_hdr + fresh_hdr)
     out.append("  " + "─" * (W - 2))
@@ -171,7 +171,7 @@ def render_cli_summary(doc: dict) -> str:
         acc = (doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {})
         acc_s = f"  acc {acc['rate']:.0%} ({acc['correct']}/{acc['total']})" if acc.get("rate") is not None else ""
         fr = (doc["metrics"].get(s["provider"], {}).get("freshness", {}) or {})
-        fresh_s = (f"  fresh {fr['score']:.0%} (cov {fr['coverage']:.0%}{' !' if fr.get('low_confidence') else ''})"
+        fresh_s = (f"  fresh {fr['score']:.0%} (datecov {fr['coverage']:.0%}{' !' if fr.get('low_confidence') else ''})"
                    if fr.get("score") is not None else "")
         if s["status"] == "unranked":
             out.append(f"   --  {s['provider']:<18}  unranked — insufficient valid comparisons{acc_s}{fresh_s}")

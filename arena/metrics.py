@@ -29,6 +29,10 @@ _FRESHNESS_WINDOW_ALIASES = {
 
 # Date formats we accept as reliable, tried in order. We never guess: an unparseable value
 # leaves the result undated (excluded from the score, counted only in coverage — §8.3).
+# Note: the %B/%b (month-name) formats are locale-dependent — strptime only recognizes the
+# active locale's month names, so a non-English date silently fails to parse. That is the safe
+# failure here (the result is simply left undated, never mis-dated), so we accept it rather than
+# add a dependency; these formats are best-effort for provider-native `published_date` strings.
 _DATE_FORMATS = (
     "%Y-%m-%dT%H:%M:%S%z",
     "%Y-%m-%dT%H:%M:%SZ",
@@ -39,7 +43,11 @@ _DATE_FORMATS = (
     "%B %d, %Y",
     "%b %d, %Y",
 )
-_ISO_DATE_RE = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
+# Free-text ISO date used only as a last resort on result content. The lookarounds reject a
+# date-shaped run that is part of a longer version/build/ID token: not preceded by a digit, dot,
+# or dash, and not followed by a dash, a digit, or a dot-then-digit. A trailing sentence period
+# ("...2026-06-15.") is still fine. So "1.2026-01-01", "2026-01-01.5", "v3-2026-01-01" are ignored.
+_ISO_DATE_RE = re.compile(r"(?<![\d.\-])(\d{4})-(\d{2})-(\d{2})(?![\d\-])(?!\.\d)")
 
 
 def latency_percentiles(latencies_ms: List[Optional[float]]) -> Dict[str, Optional[float]]:

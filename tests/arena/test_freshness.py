@@ -57,6 +57,15 @@ def test_parse_reliable_date_none_when_absent_or_future():
     assert parse_reliable_date(_doc(published="2099-01-01"), now=NOW) is None
 
 
+def test_free_text_iso_ignores_version_like_strings():
+    # A date-shaped substring inside a version/build/ID string must NOT be read as a publish date
+    # (the free-text last-resort match is flanked-digit/dot/dash guarded).
+    for junk in ("build 1.2026-01-01", "id 2026-01-01.5", "release v3-2026-01-01"):
+        assert parse_reliable_date(_doc(published=None, content=junk), now=NOW) is None
+    # A genuinely standalone date in content is still picked up.
+    assert parse_reliable_date(_doc(published=None, content="Published 2026-06-15."), now=NOW) is not None
+
+
 # ---- score on known dates within/outside the window ----
 
 def test_score_counts_only_dated_in_window():
