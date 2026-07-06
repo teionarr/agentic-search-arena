@@ -44,9 +44,10 @@ symmetry test will fail your PR if it does).
 ## Ground rules (from the requirements, enforced in review)
 
 - **Tier A green to merge**: `python -m pytest tests/arena -q` — deterministic, no AI, no keys.
-- **Additive & upstream-compatible**: this fork aims at a clean upstream PR. Don't modify or
-  reformat existing base-repo files (`handlers/`, `run_evaluation.py`, `utils/`) or change
-  their signatures; new adapters, evaluators, and output files only.
+- **Additive by default**: this repo is a standalone fork (no upstream PRs are planned).
+  Still, avoid modifying or reformatting the inherited base files (`handlers/`,
+  `run_evaluation.py`, `utils/`) without need — additive changes (new adapters, evaluators,
+  output files) keep diffs reviewable and history clean.
 - **Never fabricate a metric**: a missing date, price, unit count, or gold answer produces a
   blank (plus a coverage note), never an estimate. Absent metrics drop their weight and the
   rest renormalize.
