@@ -181,11 +181,23 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                             "units": None, "units_cells": 0,
                             "freshness": []} for p in provider_names}}
         fresh_window = parse_freshness_window_days(q.freshness_need) if q.freshness_need else None
+        # Audit trace (§15, opt-in): the raw provider payload + the exact evidence the reader
+        # saw + the reader's answer, per provider — so any verdict can be replayed by hand.
+        trace = ({"query": q.query, "category": q.category, "repeat": qi // base_n,
+                  "providers": {}} if config.save_traces else None)
+        loc["trace"] = trace
         answers, correct = {}, {}
         for name in provider_names:
             pv = loc["prov"][name]
             pv["cells_att"] += 1
             res = results_for_q.get(name)
+            if trace is not None:
+                trace["providers"][name] = {
+                    "raw": (res.raw if res is not None else None),
+                    "latency_ms": (res.latency_ms if res is not None else None),
+                    "n_results": (len(res.results) if res is not None and res.results else 0),
+                    "evidence": None, "reader_answer": None,
+                }
             if res is None or res.empty_evidence or not res.results:
                 pv["empty"] += 1
                 # Reliability: an *errored* call (exception, or a base handler that swallowed
@@ -209,6 +221,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 pv["coverage"].append(calculate_token_consumption(d.content, token_model))
             ans = reader_mod.synthesize(reader_llm, q.query, capped, run_nonce)
             pv["reader_made"] += 1
+            if trace is not None:
+                trace["providers"][name]["evidence"] = [
+                    {"url": d.url, "title": d.title, "content": d.content} for d in capped]
+                trace["providers"][name]["reader_answer"] = ans
             if reader_mod.is_degenerate(ans, capped):
                 pv["reader_degen"] += 1
                 continue
@@ -268,11 +284,14 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     # ---- Merge per-query deltas ----
     comparisons: List[dict] = []
     rationale_log: List[dict] = []
+    traces: List[dict] = []
     swap_flips = swap_total = judge_skipped = injection_flags = self_pref_flags = 0
     cal_agree = cal_decidable = cal_abstained = 0
     for loc in sorted(locals_out, key=lambda l: l["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
+        if loc.get("trace") is not None:
+            traces.append(loc["trace"])
         swap_total += loc["swap_total"]; swap_flips += loc["swap_flips"]
         judge_skipped += loc["judge_skipped"]; injection_flags += loc["injection_flags"]
         self_pref_flags += loc["self_pref_flags"]
@@ -396,6 +415,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "stage_status": stage_status,
         "degenerate_run": len(scope.included) < 3,
         "rationale_log": rationale_log,
+        "traces": traces if config.save_traces else None,
         "n_queries": base_n,
     }
 

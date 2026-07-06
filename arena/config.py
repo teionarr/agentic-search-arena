@@ -54,6 +54,8 @@ class ArenaConfig:
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
     repeats: int = 1                             # ×N runs per query — providers are non-deterministic;
                                                  # single-shot numbers are noise (statistical honesty)
+    save_traces: bool = False                    # persist per-query raw payloads + reader inputs
+                                                 # (auditability §15); opt-in, redacted on write
     weights: Dict[str, float] = field(default_factory=dict)
     output_dir: str = "results"
     config_path: Optional[str] = None
@@ -127,6 +129,7 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         evidence_budget_tokens=raw.get("evidence_budget_tokens", 600),
         max_concurrency=raw.get("max_concurrency", 8),
         repeats=int(raw.get("repeats", 1)),
+        save_traces=bool((raw.get("output", {}) or {}).get("save_traces", False)),
         weights=raw.get("weights", {}) or {},
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),
         config_path=config_path,

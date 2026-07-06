@@ -39,6 +39,10 @@ def main() -> int:
     parser.add_argument("--reader-model", default=None,
                         help="Reader/grader model (default = judge model). Use a cheaper model "
                              "here to cut cost — the reader/grader are less quality-sensitive.")
+    parser.add_argument("--save-traces", action="store_true", default=None,
+                        help="Persist per-query audit traces (redacted raw provider payloads, "
+                             "the exact evidence the reader saw, and reader answers) to "
+                             "<output_dir>/traces/ so any verdict can be replayed by hand.")
     parser.add_argument("--repeats", type=int, default=None,
                         help="Run each query N times per provider (default 1, or config "
                              "'repeats'). Providers are non-deterministic — repeats turn a "
@@ -60,6 +64,8 @@ def main() -> int:
             logger.error("--repeats must be >= 1")
             return 1
         config.repeats = args.repeats
+    if args.save_traces:
+        config.save_traces = True
     queries = load_queries(args.queries)
 
     scope = resolve_scope(config.providers)
@@ -110,6 +116,10 @@ def main() -> int:
                                           "exclude_on_flip": config.exclude_on_flip},
                          model_id=model_id)
     paths = write_results(doc, out_dir)
+    if config.save_traces and result.get("traces"):
+        from arena.report import write_traces
+        trace_paths = write_traces(result["traces"], out_dir)
+        logger.info(f"Wrote {len(trace_paths)} audit trace(s) to {out_dir}/traces/")
     print(render_cli_summary(doc))
     logger.info(f"Wrote {paths['json']} and {paths['csv']}")
 

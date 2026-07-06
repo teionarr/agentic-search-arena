@@ -64,6 +64,54 @@ def _csv_safe(value: Any) -> str:
     return s
 
 
+def run_manifest() -> dict:
+    """Environment provenance for the run: harness commit + interpreter + key package versions.
+
+    Every field is best-effort (None on failure) — the manifest must never break a run. Together
+    with the config snapshot and query-set hash this is what lets a third party re-run the
+    harness and land on the same numbers (§15)."""
+    manifest = {"git_commit": None, "python": None, "packages": {}}
+    try:
+        import subprocess
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        out = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo_root,
+                             capture_output=True, text=True, timeout=5)
+        if out.returncode == 0:
+            manifest["git_commit"] = out.stdout.strip()
+    except Exception:
+        pass
+    try:
+        import sys
+        manifest["python"] = sys.version.split()[0]
+    except Exception:
+        pass
+    try:
+        from importlib.metadata import PackageNotFoundError, version
+        for pkg in ("anthropic", "numpy", "aiohttp", "PyYAML", "tiktoken"):
+            try:
+                manifest["packages"][pkg] = version(pkg)
+            except PackageNotFoundError:
+                manifest["packages"][pkg] = None
+    except Exception:
+        pass
+    return manifest
+
+
+def write_traces(traces: List[dict], output_dir: str) -> List[str]:
+    """Persist per-query audit traces (redacted) to ``<output_dir>/traces/query_NNNN.json``.
+
+    One file per query keeps single traces greppable/clickable without loading a giant blob."""
+    trace_dir = os.path.join(output_dir, "traces")
+    os.makedirs(trace_dir, exist_ok=True)
+    paths = []
+    for i, tr in enumerate(traces):
+        path = os.path.join(trace_dir, f"query_{i:04d}.json")
+        with open(path, "w") as f:
+            json.dump(redact(tr), f, indent=2)
+        paths.append(path)
+    return paths
+
+
 def build_document(result: dict, queries: List[str], config_snapshot: dict,
                    model_id: str) -> dict:
     """Assemble the canonical results.json document from the pipeline result."""
@@ -74,6 +122,7 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "n_queries": result.get("n_queries"),
         "model_id": model_id,
         "config": config_snapshot,
+        "manifest": run_manifest(),
         "scope": result["scope"],
         "degenerate_run": result["degenerate_run"],
         "calibration": result.get("calibration"),
