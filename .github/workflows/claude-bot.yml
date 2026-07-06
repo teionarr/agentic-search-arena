@@ -8,6 +8,10 @@ on:
       body:
         description: "Comment body"
         required: true
+
+# The job comments via the GitHub App token, not GITHUB_TOKEN — the default token needs nothing.
+permissions: {}
+
 jobs:
   comment:
     runs-on: ubuntu-latest
