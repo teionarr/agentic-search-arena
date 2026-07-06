@@ -1,4 +1,4 @@
-# 🔍 Agentic Search Picker
+# 🔍 Agentic Search Provider Picker
 
 > **Stop picking your AI agent's search API from vendors' blog posts. Rank them on *your* data.**
 
