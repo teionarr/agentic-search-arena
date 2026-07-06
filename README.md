@@ -1,186 +1,175 @@
-# Search Arena
+# 🔍 Agentic Search Picker
 
-**Which agentic search API actually wins on *your* workload?**
+> **Stop picking your AI agent's search API from vendors' blog posts. Rank them on *your* data.**
 
-Different solutions for different tasks — some faster, some more accurate, some cheaper. Vendor
-benchmarks won't tell you which one wins on *your* queries. This tool will: bring your own
-queries and whichever API keys you have, and get back a win-rate ranking with confidence
-intervals, accuracy, latency, cost, and freshness — with zero golden answers required.
+[![Tier A tests](https://github.com/teionarr/agentic-search-arena/actions/workflows/tests.yml/badge.svg)](https://github.com/teionarr/agentic-search-arena/actions/workflows/tests.yml)
+[![CodeQL](https://github.com/teionarr/agentic-search-arena/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/teionarr/agentic-search-arena/security/code-scanning)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg)](docs/DEVELOPMENT.md)
 
-- **Fully auditable.** This tool doesn't favor anyone — ask your AI to verify. Neutrality is
-  test-enforced, not promised: a symmetry test fails the build if two providers given
-  byte-identical evidence score differently, the judge is blinded and order-swapped, and every
-  decision writes its rationale to the log. See [GOVERNANCE.md](GOVERNANCE.md).
-- **Fully customizable.** Your data, your decisions, any judge you like: bring your own queries
-  CSV, set your own axis weights, and swap in a cross-family judge (`openai:<model>`).
-- **Fully traceable.** Optional per-query [Langfuse](https://langfuse.com) tracing — every
-  search, synthesis, and judgment as a span in your own project.
+Tavily or Exa? Brave or Perplexity? Every vendor's benchmark says *"me."* 🙄
 
-Three minutes to install, about thirty minutes to run on your data — and you have an answer.
-Companies burn hundreds of thousands of dollars living with a bad choice made on marketing
-benchmarks.
+This tool asks **your queries** instead — and hands you a ranked, priced, statistically honest
+answer in **~30 min** for **~$10**. A bad pick costs teams 6 figures. A good one costs a coffee. ☕
 
-## See it in 30 seconds
+- ⚡ **12 providers · 1 command · 0 golden answers needed**
+- 🏆 Win-rate ranking with **95% confidence intervals** — honest ties, never fake precision
+- 🎯 Accuracy vs gold · 💰 $/query **and $/correct answer** · ⏱️ p50/p95 latency · 📰 freshness · 🔌 reliability
+- 🕵️ **Fully auditable** — blinded judge, every verdict logged with its reasoning, neutrality enforced by tests (ask your AI to verify)
+- 🎛️ **Fully customizable** — your data, your metric weights, any judge you like (`openai:` / `claude:`)
+- 🔭 **Fully traceable** — optional [Langfuse](https://langfuse.com) span for every search, synthesis, and verdict
 
-```sh
-python run_arena.py --demo
+---
+
+## 🏁 The answer you get
+
+One command on your queries CSV → this lands in your terminal:
+
+```text
+════════════════════════════════════════════════════════
+  SEARCH ARENA                                   your-workload ranking
+════════════════════════════════════════════════════════
+  40 queries × 2 repeats · judge claude-sonnet-4-6 · cost $11.20
+  412/480 comparisons used · judge reliability 0.88 · bradley_terry
+
+  #1 tavily            ████████████████┃██░░░░ 0.81 [0.75–0.86]  acc 95%  cost $0.0160/q ($0.0168/correct)  ← clear leader
+  #2 exa               ██████████████┃░░░░░░░░ 0.68 [0.61–0.74]  acc 92%  cost n/a                          · tied
+  #3 perplexity_search █████████████┃░░░░░░░░░ 0.64 [0.57–0.71]  acc 90%  cost $0.0050/q ($0.0056/correct)  · tied
+  #4 brave             ██████████┃░░░░░░░░░░░░ 0.49 [0.42–0.56]  acc 88%  cost $0.0050/q ($0.0057/correct)
+  #5 serper            ███████░░░┃░░░░░░░░░░░░ 0.33 [0.27–0.40]  acc 84%  cost $0.0003/q ($0.0004/correct)  ok 92%
+
+  BY CATEGORY   finance: #1 tavily 0.90 · tech: #1 exa 0.86 · news: #1 perplexity_search 0.88
+════════════════════════════════════════════════════════
 ```
 
-No API keys, no spend: the demo renders a real committed run
-([docs/example-run/](docs/example-run/) — a 20-query mixed workload × 2 repeats across 6
-providers; actual spend $15.47). What it shows, straight from that run:
+*Illustrative output — your numbers **will** differ. That's the entire point.* 😉
+(Want to see a real, committed run first? `python run_arena.py --demo` — 0 keys, 0 spend.)
 
-| # | provider | win-rate | 95% CI | accuracy | reliability |
-|---|----------|---------:|--------|---------:|------------|
-| 1 | perplexity_search | 0.84 | [0.79, 0.88] | 16/16 | ok |
-| 2 | exa | 0.81 | [0.76, 0.85] | 16/16 | ok |
-| 3 | brave | 0.62 | [0.55, 0.70] | 16/16 | ok |
-| 4 | tavily | 0.57 | [0.50, 0.64] | 16/16 | ok |
-| 5 | serper | 0.44 | [0.37, 0.52] | 16/16 | ok |
-| 6 | claude_search | 0.03 | [0.01, 0.05] | 4/4 | ok 65% |
+How to read it in 10 seconds:
 
-perplexity_search (0.84) and exa (0.81) lead, but the CI overlap chain groups #1–#5 as
-statistically tied at n=40; only claude_search separates — and its `ok 65%` shows *why*: an
-availability problem, visibly distinct from a quality problem. Per-category slices flip the
-story: exa takes #1 on sports and tech while perplexity_search leads finance and research.
+- **`· tied`** = the CIs overlap; the tool refuses to invent an order it can't defend
+- **`$/correct answer`** = a cheap API that needs 3 tries isn't cheap 💸
+- **`ok 92%`** = that provider *errored* on 8% of calls — availability, not quality
+- **BY CATEGORY** = "best" flips per task; pick per workload, not per logo
 
-## Quickstart
-
-```sh
-git clone https://github.com/teionarr/agentic-search-arena
-cd agentic-search-arena
-pip install -r requirements-arena.txt      # Python ≥ 3.11
-cp .env.example .env                       # then fill in your keys
-```
-
-`ANTHROPIC_API_KEY` is required (judge + reader). Every provider key is optional — providers
-without a key are skipped per provider and reported in the scope report (you need at least one
-provider key for a real run; with none, the tool tells you exactly what's missing and exits
-cleanly). One install note: five
-providers (`tavily`, `exa`, `brave`, `serper`, `perplexity_search`) reuse the handlers inherited
-from the upstream project, which need the full legacy dependency set — if you want those in your
-ranking (you probably do), `pip install -r requirements.txt` instead (a superset; the legacy
-harness in [docs/legacy-benchmarks.md](docs/legacy-benchmarks.md) also uses it).
-
-First run, on the bundled example workload with a cheap reader (~$1–2):
-
-```sh
-python run_arena.py --queries datasets/example_queries.csv --reader-model claude-haiku-4-5-20251001
-```
-
-Then the real thing — your own queries (~$8–15 for a typical workload; the committed example run
-measured $15.47 for 20 queries × 2 repeats × 6 providers):
-
-```sh
-python run_arena.py --queries my_queries.csv --repeats 2 --save-traces
-```
-
-**Queries file** (CSV or JSONL; `query` required, everything else optional):
-
-| column | meaning |
-|--------|---------|
-| `query` | the search query (required) |
-| `expected_answer` | gold answer — unlocks the judge-free accuracy column + judge calibration |
-| `category` | tag for per-category rankings (e.g. `finance`, `tech`) |
-| `freshness_need` | mark queries where recency matters — unlocks the freshness column |
-
-Aim for ≥3 providers and ~30–50 queries for a statistically meaningful ranking; with less, the
-tool honestly reports `tied` / `unranked` rather than inventing precision.
-
-## What you get
-
-A CLI dashboard plus `results.json` + `ranking.csv` under `results/arena/<timestamp>/`:
-
-- **Win-rate ranking with 95% CIs and honest ties** — providers whose CIs overlap are grouped as
-  a statistical tie, never falsely ordered; too few comparisons → `unranked`.
-- **Accuracy vs gold** — judge-free, wherever rows carry `expected_answer` (plus free
-  machine-verified anchors for mechanically checkable answers — no extra key needed).
-- **Latency** — p50/p95 per provider.
-- **Cost** — $/query from a dated public pricing map, and **$ per correct answer** where
-  accuracy exists: a cheap API that needs three tries isn't cheap.
-- **Freshness + coverage honesty** — freshness scores carry a date-coverage figure and a
-  low-confidence flag instead of pretending sparse data is comparable.
-- **Reliability** — a provider that errors is flagged separately from one that finds nothing.
-- **Per-category slices** — "best" is workload-dependent; the slices show it.
-- **Repeats spread** — `--repeats N` re-searches every query N times and reports the per-repeat
-  win-rate spread as the noise floor.
-
-Priorities change; don't re-spend to re-rank. Re-weight any finished run offline:
+Priorities changed? Re-rank any finished run **offline, $0**:
 
 ```sh
 python -m arena.rerank results.json --weights accuracy=0.5,latency=0.3,cost=0.2
 ```
 
-## When the ranking is too close to call
+---
 
-Reference-free pairwise judging is a proxy, not a truth oracle: it cannot rigorously separate
-genuinely near-equal providers at small sample sizes — there the tool correctly reports a tie.
-For higher-stakes decisions, escalate up the ladder (all three tiers are implemented):
+## 🚀 Get *your* answer (3 steps)
 
-1. **Free anchors (automatic).** Consensus silver labels where ≥3 independent providers converge
-   on the same answer, plus deterministic machine-verification of checkable answers. No AI, no
-   extra cost — always on.
-2. **Human adjudication of pivotal ties.** `python -m arena.arbitrate <run_dir>` finds the
-   10–30 pairwise calls that would actually change the ranking and serves them to you blinded;
-   your verdicts re-aggregate with the rest.
-3. **Downstream task success.** Set `downstream.command` in your config to your own agent loop
-   or eval script; the arena runs it per provider and the exit codes become the metric. Your
-   *actual task* is the final word.
+```sh
+git clone https://github.com/teionarr/agentic-search-arena && cd agentic-search-arena
+pip install -r requirements.txt           # Python ≥ 3.11
+cp .env.example .env                      # add ANTHROPIC_API_KEY + whichever provider keys you have
+```
 
-## Trust, verified
+**1️⃣ Warm-up** — bundled queries, cheap reader, **~$1–2**:
 
-- **Judge validity is measured, not assumed:** 0.91 judge-vs-gold calibration on gold-decidable
-  pairs (bar ≥ 0.80), recorded in the committed
+```sh
+python run_arena.py --queries datasets/example_queries.csv --reader-model claude-haiku-4-5-20251001
+```
+
+**2️⃣ The real thing** — your queries, **~$8–15** (a committed reference run measured $15.47 for 20 queries × 2 repeats × 6 providers):
+
+```sh
+python run_arena.py --queries my_queries.csv --repeats 2 --save-traces
+```
+
+**3️⃣ Decide** — read the dashboard, re-weight offline, escalate if it's close (see below).
+
+**Your queries file** (CSV or JSONL — 1 required column, 3 optional superpowers):
+
+| column | what it unlocks |
+|--------|----------------|
+| `query` | required — the search query |
+| `expected_answer` | 🎯 judge-free accuracy column + judge calibration |
+| `category` | 📊 per-category rankings (`finance`, `tech`, …) |
+| `freshness_need` | 📰 the freshness column for recency-critical rows |
+
+Aim for **≥3 providers and 30–50 queries**; with less, you'll honestly get `tied`/`unranked`
+instead of made-up precision.
+
+---
+
+## 🔌 Providers (12 — every key optional)
+
+| provider | env key | | provider | env key |
+|----------|---------|-|----------|---------|
+| Tavily | `TAVILY_API_KEY` | | Firecrawl | `FIRECRAWL_API_KEY` |
+| Exa | `EXA_API_KEY` | | Linkup | `LINKUP_API_KEY` |
+| Brave | `BRAVE_API_KEY` | | You.com | `YOU_API_KEY` |
+| Serper (Google) | `SERPER_API_KEY` | | Parallel | `PARALLEL_API_KEY` |
+| Perplexity Search | `PERPLEXITY_API_KEY` | | Gemini grounding | `GEMINI_API_KEY` |
+| Perplexity Sonar | `PERPLEXITY_API_KEY` | | Claude web search | `ANTHROPIC_API_KEY` |
+
+- `ANTHROPIC_API_KEY` is the only **required** key (it powers the judge + reader).
+- No key → that provider is skipped and reported in the scope report. No crashes, no surprises.
+- Secrets load from `.env` or [Doppler](https://www.doppler.com/) (auto-detected) — never from CLI args.
+- Missing your provider? It's **1 adapter + 1 registry line** → [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+---
+
+## ⚖️ Too close to call? Climb the ladder
+
+Reference-free judging is a proxy, not an oracle — near-equal providers at small n are a
+genuine tie, and the tool says so. When the stakes justify more:
+
+1. 🆓 **Free anchors (always on):** consensus labels where ≥3 providers agree + deterministic
+   machine-checks. 0 extra cost.
+2. 🧑‍⚖️ **You, for 15 minutes:** `python -m arena.arbitrate <run_dir>` serves you *only* the
+   10–30 blinded calls that could actually flip the ranking.
+3. 🤖 **Your actual task:** point `downstream.command` at your own agent loop — its exit codes
+   become the metric. The final word is your workload, not our judge.
+
+---
+
+## 🛡️ Trust, verified (not promised)
+
+- **Judge validity is measured:** 0.91 judge-vs-gold calibration (bar ≥ 0.80), committed in
   [docs/example-run/tier_b.json](docs/example-run/tier_b.json).
-- **Swap-consistency is reported and allowed to fail red** — the same artifact records a 0.83
-  against a 0.85 bar, flagged rather than tuned away; verdicts that flip on order-swap are
-  excluded from aggregation, not averaged in.
-- **Blinded, order-swapped pairwise judging** — provider identity is stripped before the reader
-  and judge see anything, and every pair is judged in both orders.
-- **Two test tiers:** Tier A — 326 deterministic offline tests, run in CI on every push
-  (100% green is the merge gate); Tier B — a thresholded, AI-involved live gate
-  (`python -m arena.tier_b`) that gates releases.
-- **CodeQL scanning and Dependabot** run on the repository.
+- **Allowed to fail red:** the same artifact records swap-consistency 0.83 vs a 0.85 bar —
+  flagged, not tuned away. Verdicts that flip on order-swap are *excluded*, never averaged in.
+- **Blinded + order-swapped judging:** provider identity is stripped before the judge sees
+  anything; a symmetry test fails CI if 2 providers with byte-identical evidence score
+  differently.
+- **370 offline tests** gate every commit (CI); a thresholded live gate (`python -m arena.tier_b`)
+  gates releases. CodeQL + Dependabot watch the repo.
 
-Who's behind it, how providers get in, and how to dispute a ranking:
-[GOVERNANCE.md](GOVERNANCE.md). A fully worked real run with commentary:
-[docs/example-run/](docs/example-run/).
+Who runs this, how providers get in, how to dispute a ranking → [GOVERNANCE.md](GOVERNANCE.md).
+A fully worked real run with commentary → [docs/example-run/](docs/example-run/).
 
-## Going further
+---
 
-- **Benchmark-suite mode** — `python run_arena.py --queries q.csv --benchmark-suite` re-runs
-  public sets (SimpleQA, and FRAMES/FreshQA when vendored) across every enabled provider under
-  one identical policy, and emits a **marketing-claims ledger**: each vendor's published number
-  next to your neutral re-run, with the delta and the trace — real vendor claims ship in
-  [configs/published_claims.yaml](configs/published_claims.yaml). No accusations: every claim
-  carries an `as_of` date and source, every re-run a timestamp.
-- **Drift over time** — providers ship changes weekly, so any ranking is dated. Re-run and diff
-  with `python compare_runs.py old/results.json new/results.json` (rank moves flagged only
-  beyond CI overlap); `.github/workflows/drift.yml` automates the loop as a manual-dispatch
-  workflow (each run spends real credits, roughly $8–15).
-- **Langfuse tracing** — set `langfuse.enabled: true` in your config plus Langfuse keys in your
-  secrets; each query becomes one trace with `provider.search`, `reader.synthesize`, and
-  `judge.compare` spans, in your own Langfuse project.
-- **Config reference** — copy [configs/arena.example.yaml](configs/arena.example.yaml) to
-  `configs/arena.yaml` (git-ignored) to disable providers, set evidence budgets, pick models,
-  weights, and judges. Zero-config works: no file means every keyed provider runs on strong
-  defaults.
-- **Provider roster (12):** `tavily`, `exa`, `brave`, `serper`, `perplexity_search`,
-  `perplexity` (Sonar), `firecrawl`, `linkup`, `claude_search`, `youcom`, `parallel`, `gemini`.
-  Adding one is a single adapter + one registry line — see
-  [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+## 🧰 Going further
 
-> **Data note:** `results.json` and the rationale log contain your full query text and the web
-> content each provider returned — treat `results/` as sensitive. It is git-ignored by default.
+- 📜 **Marketing-claims ledger** — `--benchmark-suite` re-runs public sets (SimpleQA, FRAMES,
+  FreshQA) neutrally and prints each vendor's *published* number next to your re-run, with
+  sources and dates ([configs/published_claims.yaml](configs/published_claims.yaml)).
+- 📈 **Drift over time** — providers ship weekly; re-run and
+  `python compare_runs.py old.json new.json` flags rank moves only beyond CI overlap.
+  [`drift.yml`](.github/workflows/drift.yml) automates it (manual dispatch; each run ≈ $8–15).
+- 🔭 **Langfuse tracing** — `langfuse.enabled: true` + keys → every query is 1 trace with
+  search/synthesize/judge spans in *your* project.
+- ⚙️ **Config** — copy [configs/arena.example.yaml](configs/arena.example.yaml) to
+  `configs/arena.yaml` for provider toggles, models, weights, judges. 0-config works too.
 
-## Credits
+> 🔒 `results/` contains your query text and fetched web content — treat it as sensitive.
+> It's git-ignored by default.
 
-Based on [tavily-ai/tavily-search-evals](https://github.com/tavily-ai/tavily-search-evals) —
-the inherited SimpleQA / Document Relevance harness lives on unchanged in
-[docs/legacy-benchmarks.md](docs/legacy-benchmarks.md). The arena also draws on
-[`youdotcom-oss/web-search-api-evals`](https://github.com/youdotcom-oss/web-search-api-evals)
-(sampler / synthesize / grade design), reference-free LLM-as-judge and Chatbot-Arena-style
-pairwise aggregation, and the SimpleQA / FRAMES / FreshQA benchmark datasets (provenance in
-[datasets/DATASETS.md](datasets/DATASETS.md)).
+---
 
-Licensed under the [MIT License](LICENSE).
+## 🙏 Credits
+
+Based on [tavily-ai/tavily-search-evals](https://github.com/tavily-ai/tavily-search-evals)
+(the inherited harness lives on in [docs/legacy-benchmarks.md](docs/legacy-benchmarks.md)).
+Design draws on [youdotcom-oss/web-search-api-evals](https://github.com/youdotcom-oss/web-search-api-evals),
+Chatbot-Arena-style pairwise aggregation, and the SimpleQA / FRAMES / FreshQA datasets
+(provenance: [datasets/DATASETS.md](datasets/DATASETS.md)).
+
+[MIT License](LICENSE).
