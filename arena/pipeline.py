@@ -30,6 +30,7 @@ from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_sco
 from arena.scope import Scope
 from arena.self_preference import self_preference_label
 from arena.tokens import calculate_token_consumption
+from arena.tracing import NullTracer, Tracer
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,8 @@ def _pipelined_run(adapters: List, queries: List, conc: int, process_query: Call
 
 def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: Scope,
               reader_llm, judge_llm, token_model: str = "gpt-4.1",
-              search_gatherer: Optional[Callable] = None, grader_llm=None) -> dict:
+              search_gatherer: Optional[Callable] = None, grader_llm=None,
+              tracer: Optional[Tracer] = None) -> dict:
     """Run the arena and return the canonical result dict (source of truth for report.py).
 
     When queries carry ``expected_answer``, each provider's answer is graded against gold to
@@ -122,6 +124,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     run_nonce = uuid.uuid4().hex
     provider_names = [a.name for a in adapters]
     conc = max(1, config.max_concurrency)
+    tracer = tracer or NullTracer()  # off by default; NullTracer spans are inert
 
     # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
     # a Claude judge may favour a Claude-family native answer by style.
@@ -165,6 +168,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     #      search results + config/llms and returns a local delta to merge (no shared state). ----
     def _process_query(qi: int, results_for_q: Dict[str, UnifiedResult]) -> dict:
         q = queries[qi]
+        trace = tracer.trace("query", input={"query": q.query})
         loc = {"qi": qi, "comparisons": [], "rationale": [], "reader_answers": {},
                "swap_total": 0, "swap_flips": 0, "judge_skipped": 0, "injection_flags": 0,
                "self_pref_flags": 0,
@@ -181,6 +185,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             pv = loc["prov"][name]
             pv["cells_att"] += 1
             res = results_for_q.get(name)
+            trace.child(f"provider.search:{name}",
+                        input={"query": q.query},
+                        output={"latency_ms": getattr(res, "latency_ms", None),
+                                "results": [d.__dict__ for d in (res.results if res else [])]}).end()
             if res is None or res.empty_evidence or not res.results:
                 pv["empty"] += 1
                 continue
@@ -195,7 +203,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             capped = cap_evidence(res.results, config.evidence_budget_tokens, token_model)
             for d in capped:
                 pv["coverage"].append(calculate_token_consumption(d.content, token_model))
+            reader_span = trace.child("reader.synthesize",
+                                      input={"prompt": reader_mod.build_reader_prompt(q.query, capped, run_nonce)})
             ans = reader_mod.synthesize(reader_llm, q.query, capped, run_nonce)
+            reader_span.end(output={"answer": ans})
             pv["reader_made"] += 1
             if reader_mod.is_degenerate(ans, capped):
                 pv["reader_degen"] += 1
@@ -220,9 +231,12 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             sp_label = self_preference_label(
                 x, y, x in native_providers, y in native_providers, claude_family,
                 judge_is_claude, has_secondary_judge)
+            judge_span = trace.child("judge.compare", input={"query": q.query, "a": x, "b": y})
             verdict = judge_pair(judge_llm, q.query, answers[x], answers[y], run_nonce,
                                  order_swap=config.order_swap, exclude_on_flip=config.exclude_on_flip,
                                  self_preference=sp_label)
+            judge_span.end(output={"outcome": verdict["outcome"], "flipped": verdict["flipped"],
+                                   "rationales": verdict["rationales"]})
             if verdict.get("skipped"):
                 loc["judge_skipped"] += 1
             else:
@@ -249,6 +263,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                 "injection_flag": verdict["injection_flag"], "rationales": verdict["rationales"],
                 "self_preference": verdict.get("self_preference"),
             })
+        trace.end()
         return loc
 
     # ---- Orchestration: overlap searches with the per-query LLM chain ----
@@ -289,6 +304,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             freshness_tallies[p].extend(pv["freshness"])
             mv_correct[p] += pv["mv_correct"]; mv_total[p] += pv["mv_total"]
 
+    tracer.flush()  # no-op for NullTracer; sends buffered spans for LangfuseTracer
     agg = aggregate(comparisons, provider_names, seed=0)
     anchors = compute_anchors(per_query_answers, per_query_comparisons, provider_names,
                               min_providers=config.consensus_min_providers)
