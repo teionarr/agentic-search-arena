@@ -107,7 +107,8 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
                     "accuracy_rate", "accuracy_correct", "accuracy_total",
                     "cost_usd_per_query", "cost_as_of",
-                    "freshness_score", "freshness_coverage", "freshness_low_confidence"])
+                    "freshness_score", "freshness_coverage", "freshness_low_confidence",
+                    "success_rate", "error_rate"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
@@ -122,6 +123,8 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                 cost.get("usd_per_query"), cost.get("as_of"),
                 fr.get("score"), fr.get("coverage"),
                 fr.get("low_confidence") if fr else None,
+                (m.get("reliability", {}) or {}).get("success_rate"),
+                (m.get("reliability", {}) or {}).get("error_rate"),
             ]])
 
     return {"json": json_path, "csv": csv_path}
@@ -204,6 +207,11 @@ def render_cli_summary(doc: dict) -> str:
         fr = (doc["metrics"].get(s["provider"], {}).get("freshness", {}) or {})
         fresh_s = (f"  fresh {fr['score']:.0%} (datecov {fr['coverage']:.0%}{' !' if fr.get('low_confidence') else ''})"
                    if fr.get("score") is not None else "")
+        rel = (doc["metrics"].get(s["provider"], {}).get("reliability", {}) or {})
+        # Reliability is shown only when it deviates — a 100% line would be noise on every row.
+        rel_s = (f"  ok {rel['success_rate']:.0%}"
+                 if rel.get("success_rate") is not None and rel["success_rate"] < 1.0 else "")
+        fresh_s += rel_s
         if s["status"] == "unranked":
             out.append(f"   --  {s['provider']:<18}  unranked — insufficient valid comparisons{acc_s}{fresh_s}")
             continue

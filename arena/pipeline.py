@@ -152,6 +152,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     cells_attempted: Dict[str, int] = {p: 0 for p in provider_names}
     cells_succeeded: Dict[str, int] = {p: 0 for p in provider_names}
     empty_evidence_count: Dict[str, int] = {p: 0 for p in provider_names}
+    error_count: Dict[str, int] = {p: 0 for p in provider_names}
     reader_degenerate_count: Dict[str, int] = {p: 0 for p in provider_names}
     reader_answers_made: Dict[str, int] = {p: 0 for p in provider_names}
 
@@ -175,7 +176,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
                "prov": {p: {"latency": [], "coverage": [], "cells_att": 0, "cells_succ": 0,
-                            "empty": 0, "reader_made": 0, "reader_degen": 0,
+                            "empty": 0, "errors": 0, "reader_made": 0, "reader_degen": 0,
                             "acc_correct": 0, "acc_total": 0,
                             "units": None, "units_cells": 0,
                             "freshness": []} for p in provider_names}}
@@ -187,6 +188,13 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             res = results_for_q.get(name)
             if res is None or res.empty_evidence or not res.results:
                 pv["empty"] += 1
+                # Reliability: an *errored* call (exception, or a base handler that swallowed
+                # the error into search_response=None) is not the same as a genuine empty —
+                # a provider that errors is unreliable, one that finds nothing is just weak.
+                raw = res.raw if (res is not None and isinstance(res.raw, dict)) else None
+                if raw is not None and ("error" in raw or
+                                        ("search_response" in raw and raw.get("search_response") is None)):
+                    pv["errors"] += 1
                 continue
             pv["cells_succ"] += 1
             if res.cost_units is not None:  # sum billable units for the cost column (§8.2)
@@ -273,7 +281,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             pv = loc["prov"][p]
             latencies[p].extend(pv["latency"]); coverage_tokens[p].extend(pv["coverage"])
             cells_attempted[p] += pv["cells_att"]; cells_succeeded[p] += pv["cells_succ"]
-            empty_evidence_count[p] += pv["empty"]; reader_answers_made[p] += pv["reader_made"]
+            empty_evidence_count[p] += pv["empty"]; error_count[p] += pv["errors"]
+            reader_answers_made[p] += pv["reader_made"]
             reader_degenerate_count[p] += pv["reader_degen"]
             acc_correct[p] += pv["acc_correct"]; acc_total[p] += pv["acc_total"]
             if pv["units"] is not None:
@@ -320,6 +329,9 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                          "rate": _rate(acc_correct[p], acc_total[p])},
             "cells_succeeded": cells_succeeded[p],
             "cells_attempted": cells_attempted[p],
+            "reliability": {"success_rate": _rate(cells_succeeded[p], cells_attempted[p]),
+                            "error_rate": _rate(error_count[p], cells_attempted[p]),
+                            "errors": error_count[p]},
         }
         # Freshness is present only when the run had time-sensitive queries AND this provider
         # returned results on them (§8.3); absent -> its weight is dropped + renormalized (§8).
