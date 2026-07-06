@@ -39,6 +39,10 @@ def main() -> int:
     parser.add_argument("--reader-model", default=None,
                         help="Reader/grader model (default = judge model). Use a cheaper model "
                              "here to cut cost — the reader/grader are less quality-sensitive.")
+    parser.add_argument("--benchmark-suite", action="store_true", default=None,
+                        help="Also re-run public sets (SimpleQA/FRAMES/FreshQA) under one policy: "
+                             "calibration report + marketing-claims ledger (§7). Defaults to a "
+                             "sample per set; opt into full runs via config.")
     args = parser.parse_args()
 
     secrets.load_secrets()
@@ -98,6 +102,22 @@ def main() -> int:
     paths = write_results(doc, out_dir)
     print(render_cli_summary(doc))
     logger.info(f"Wrote {paths['json']} and {paths['csv']}")
+
+    # Benchmark-suite mode (M2, §7): re-run public sets under the same policy, then emit the
+    # calibration report, marketing-claims ledger, and arena-vs-benchmark cross-signal. The
+    # --benchmark-suite flag overrides the config toggle; either turns it on.
+    if args.benchmark_suite or config.benchmark_suite:
+        from arena.benchmark import (cross_signal, load_published_claims,
+                                     render_benchmark_summary, run_benchmark_suite,
+                                     write_benchmark_report)
+        published = load_published_claims(config.published_claims_path)
+        bench = run_benchmark_suite(config.benchmark_datasets, config.benchmark_sample_size,
+                                    adapters, reader_llm, judge_llm, grader_llm, config,
+                                    published=published)
+        bench["cross_signal"] = cross_signal(doc["ranking"], bench)
+        bench_path = write_benchmark_report(bench, out_dir)
+        print(render_benchmark_summary(bench))
+        logger.info(f"Wrote {bench_path}")
     return 0
 
 
