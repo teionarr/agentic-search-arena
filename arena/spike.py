@@ -8,8 +8,7 @@ SimpleQA sample and prints the kill-criteria signals:
 It also dumps one real raw payload per provider to tests/arena/fixtures/ so the adapter
 tests can be frozen against real shapes ("capture-real-then-freeze").
 
-Requires provider keys + ANTHROPIC_API_KEY in .env, and the base repo's full requirements
-installed (importing handlers pulls the base deps). Usage:
+Requires provider keys + ANTHROPIC_API_KEY in .env. Usage:
 
     python -m arena.spike --n 30
 """
