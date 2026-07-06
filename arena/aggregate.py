@@ -126,6 +126,20 @@ def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
                        n_excluded=n_excluded, tie_groups=tie_groups)
 
 
+def per_category_rankings(comparisons: List[dict], providers: List[str],
+                          seed: int = 0) -> Dict[str, Aggregation]:
+    """Re-run the identical aggregation per query-category slice (§8 use-case segmentation).
+
+    Comparisons carry an optional ``category`` (from the queries file); untagged comparisons
+    contribute only to the overall ranking. Each slice goes through the same aggregate() —
+    small slices fall out as ``unranked`` via the same min-comparisons floor, never forced
+    into an order."""
+    categories = sorted({c["category"] for c in comparisons if c.get("category")})
+    return {cat: aggregate([c for c in comparisons if c.get("category") == cat],
+                           providers, seed=seed)
+            for cat in categories}
+
+
 def _overlaps(a: ProviderScore, b: ProviderScore) -> bool:
     return not (a.ci_high < b.ci_low or b.ci_high < a.ci_low)
 

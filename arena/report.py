@@ -79,6 +79,7 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "calibration": result.get("calibration"),
         "ranking": result["ranking"],
         "tie_groups": result["tie_groups"],
+        "per_category": result.get("per_category", {}),
         "metrics": result["metrics"],
         "weights_effective": result.get("weights_effective", {}),
         "judge": result["judge"],
@@ -210,6 +211,18 @@ def render_cli_summary(doc: dict) -> str:
         else:
             tag = ""
         out.append(f"  #{s['rank']} {s['provider']:<18} {bar} {s['win_rate']:.2f} {ci:<13} {cov_s}{acc_s}{fresh_s}{tag}")
+
+    per_cat = doc.get("per_category") or {}
+    if per_cat:
+        out.append("")
+        out.append("  BY CATEGORY   same judge + aggregation, per query-category slice")
+        out.append("  " + "─" * (W - 2))
+        for cat, blk in per_cat.items():
+            ranked_c = [s for s in blk["ranking"] if s["status"] == "ranked"]
+            parts = "  ".join(f"#{s['rank']} {s['provider']} {s['win_rate']:.2f}" for s in ranked_c)
+            n_unranked = sum(1 for s in blk["ranking"] if s["status"] == "unranked")
+            extra = f"  (+{n_unranked} unranked)" if n_unranked else ""
+            out.append(f"   {cat:<14} {parts or 'no ranked providers'}{extra}")
 
     out.append("")
     out.append("  SCOPE")

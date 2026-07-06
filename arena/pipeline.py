@@ -18,7 +18,7 @@ from typing import Callable, Dict, List, Optional
 
 from arena import reader as reader_mod
 from arena.adapters.base import UnifiedResult
-from arena.aggregate import aggregate
+from arena.aggregate import aggregate, per_category_rankings
 from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
@@ -229,7 +229,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["cal_agree"] += int(winner == (x if cx else y))
                 else:
                     loc["cal_abstained"] += 1
-            loc["comparisons"].append({"a": x, "b": y, "winner": winner})
+            loc["comparisons"].append({"a": x, "b": y, "winner": winner, "category": q.category})
             loc["rationale"].append({
                 "query": q.query, "a": x, "b": y, "winner": winner,
                 "flipped": verdict["flipped"], "low_confidence": verdict["low_confidence"],
@@ -272,6 +272,17 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             freshness_tallies[p].extend(pv["freshness"])
 
     agg = aggregate(comparisons, provider_names, seed=0)
+
+    # Per-category rankings (§8 use-case segmentation): "best" is undefined without a job, so
+    # when the queries file tags rows with `category`, each slice is re-ranked with the same
+    # aggregation. Absent categories -> empty dict, nothing rendered.
+    per_category = {
+        cat: {"ranking": [_score_dict(s) for s in cat_agg.scores],
+              "tie_groups": cat_agg.tie_groups,
+              "n_decided_comparisons": cat_agg.n_decided,
+              "n_excluded_comparisons": cat_agg.n_excluded}
+        for cat, cat_agg in per_category_rankings(comparisons, provider_names, seed=0).items()
+    }
 
     # ---- Metrics + stage_status ----
     per_provider = {}
@@ -329,6 +340,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "scope": scope.as_dict(),
         "ranking": [_score_dict(s) for s in agg.scores],
         "tie_groups": agg.tie_groups,
+        "per_category": per_category,
         "n_decided_comparisons": agg.n_decided,
         "n_excluded_comparisons": agg.n_excluded,
         "metrics": per_provider,
