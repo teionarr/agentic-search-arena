@@ -274,6 +274,37 @@ def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
                        n_excluded=n_excluded, method=method, tie_groups=tie_groups)
 
 
+def point_winrates(comparisons: List[dict], providers: List[str]) -> Dict[str, Optional[float]]:
+    """Point win-rate per provider over the decided comparisons (no bootstrap).
+
+    Used for the per-repeat variance signal: with ``--repeats N`` the spread of these point
+    estimates across repeats shows how noisy each provider is on this workload."""
+    games: Dict[str, List[float]] = {p: [] for p in providers}
+    for c in comparisons:
+        a, b, w = c["a"], c["b"], c.get("winner")
+        if w == "tie":
+            games[a].append(0.5); games[b].append(0.5)
+        elif w == a:
+            games[a].append(1.0); games[b].append(0.0)
+        elif w == b:
+            games[a].append(0.0); games[b].append(1.0)
+    return {p: (float(np.mean(games[p])) if games[p] else None) for p in providers}
+
+
+def per_category_rankings(comparisons: List[dict], providers: List[str], seed: int = 0,
+                          method: str = "bradley_terry") -> Dict[str, Aggregation]:
+    """Re-run the identical aggregation per query-category slice (§8 use-case segmentation).
+
+    Comparisons carry an optional ``category`` (from the queries file); untagged comparisons
+    contribute only to the overall ranking. Each slice goes through the same aggregate() —
+    small slices fall out as ``unranked`` via the same min-comparisons floor, never forced
+    into an order."""
+    categories = sorted({c["category"] for c in comparisons if c.get("category")})
+    return {cat: aggregate([c for c in comparisons if c.get("category") == cat],
+                           providers, seed=seed, method=method)
+            for cat in categories}
+
+
 def _overlaps(a: ProviderScore, b: ProviderScore) -> bool:
     return not (a.ci_high < b.ci_low or b.ci_high < a.ci_low)
 

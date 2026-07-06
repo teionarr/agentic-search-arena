@@ -55,6 +55,10 @@ class ArenaConfig:
     evidence_budget_tokens: int = 600           # common per-provider evidence cap (§ heterogeneity)
     consensus_min_providers: int = 3            # Tier-1 (§3): min converging providers for a silver label
     max_concurrency: int = 8                     # concurrent reader/judge/search calls
+    repeats: int = 1                             # ×N runs per query — providers are non-deterministic;
+                                                 # single-shot numbers are noise (statistical honesty)
+    save_traces: bool = False                    # persist per-query raw payloads + reader inputs
+                                                 # (auditability §15); opt-in, redacted on write
     weights: Dict[str, float] = field(default_factory=dict)
     langfuse_enabled: bool = False           # M5 — optional tracing, off by default (§11)
     output_dir: str = "results"
@@ -78,6 +82,8 @@ class ArenaConfig:
             raise ValueError("consensus_min_providers must be an integer >= 2")
         if self.max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
+        if self.repeats < 1:
+            raise ValueError("repeats must be >= 1")
 
 
 DEFAULT_CONFIG_PATH = "configs/arena.yaml"
@@ -140,6 +146,8 @@ def load_config(config_path: Optional[str]) -> ArenaConfig:
         evidence_budget_tokens=raw.get("evidence_budget_tokens", 600),
         consensus_min_providers=raw.get("consensus_min_providers", 3),
         max_concurrency=raw.get("max_concurrency", 8),
+        repeats=int(raw.get("repeats", 1)),
+        save_traces=bool((raw.get("output", {}) or {}).get("save_traces", False)),
         weights=raw.get("weights", {}) or {},
         langfuse_enabled=bool((raw.get("langfuse", {}) or {}).get("enabled", False)),
         output_dir=(raw.get("output", {}) or {}).get("dir", "results"),

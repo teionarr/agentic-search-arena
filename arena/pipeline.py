@@ -18,13 +18,13 @@ from typing import Callable, Dict, List, Optional
 
 from arena import reader as reader_mod
 from arena.adapters.base import UnifiedResult
-from arena.aggregate import aggregate
+from arena.aggregate import aggregate, per_category_rankings, point_winrates
 from arena.anchors import compute_anchors, machine_verify
 from arena.config import ArenaConfig, Query
 from arena.evidence import cap_evidence
 from arena.grade import grade_answer
 from arena.judge import judge_pair, route_native_self_preference
-from arena.cost import attach_cost, effective_weights, load_pricing
+from arena.cost import attach_cost, attach_cost_per_success, effective_weights, load_pricing
 from arena.metrics import (aggregate_freshness, evidence_coverage, freshness_score,
                            latency_percentiles, parse_freshness_window_days)
 from arena.reliability import cohens_kappa, consensus_agreements, judge_weights
@@ -130,6 +130,15 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     conc = max(1, config.max_concurrency)
     tracer = tracer or NullTracer()  # off by default; NullTracer spans are inert
 
+    # Repeats (statistical honesty): providers are non-deterministic, so ``repeats: N`` runs
+    # every query N times — real re-searches, not replayed results. All comparisons feed one
+    # aggregation (CIs tighten with the extra samples); the per-repeat win-rate spread is
+    # reported as the noise signal. qi // base_n recovers a comparison's repeat index.
+    base_n = len(queries)
+    repeats = max(1, getattr(config, "repeats", 1))
+    if repeats > 1:
+        queries = [q for _ in range(repeats) for q in queries]
+
     # Self-preference caveat inputs (§5/§6). Native-answer providers keep their own answer;
     # a Claude judge may favour a Claude-family native answer by style.
     from arena.adapters.registry import claude_family_providers
@@ -151,6 +160,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     cells_attempted: Dict[str, int] = {p: 0 for p in provider_names}
     cells_succeeded: Dict[str, int] = {p: 0 for p in provider_names}
     empty_evidence_count: Dict[str, int] = {p: 0 for p in provider_names}
+    error_count: Dict[str, int] = {p: 0 for p in provider_names}
     reader_degenerate_count: Dict[str, int] = {p: 0 for p in provider_names}
     reader_answers_made: Dict[str, int] = {p: 0 for p in provider_names}
 
@@ -178,23 +188,43 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                "self_pref_flags": 0,
                "cal_agree": 0, "cal_decidable": 0, "cal_abstained": 0,
                "prov": {p: {"latency": [], "coverage": [], "cells_att": 0, "cells_succ": 0,
-                            "empty": 0, "reader_made": 0, "reader_degen": 0,
+                            "empty": 0, "errors": 0, "reader_made": 0, "reader_degen": 0,
                             "acc_correct": 0, "acc_total": 0,
                             "units": None, "units_cells": 0,
                             "freshness": [],
                             "mv_correct": 0, "mv_total": 0} for p in provider_names}}
         fresh_window = parse_freshness_window_days(q.freshness_need) if q.freshness_need else None
+        # Audit trace (§15, opt-in): the raw provider payload + the exact evidence the reader
+        # saw + the reader's answer, per provider — so any verdict can be replayed by hand.
+        # Named ``audit`` to stay clear of the Langfuse ``trace`` span above.
+        audit = ({"query": q.query, "category": q.category, "repeat": qi // base_n,
+                  "providers": {}} if config.save_traces else None)
+        loc["audit"] = audit
         answers, correct = {}, {}
         for name in provider_names:
             pv = loc["prov"][name]
             pv["cells_att"] += 1
             res = results_for_q.get(name)
+            if audit is not None:
+                audit["providers"][name] = {
+                    "raw": (res.raw if res is not None else None),
+                    "latency_ms": (res.latency_ms if res is not None else None),
+                    "n_results": (len(res.results) if res is not None and res.results else 0),
+                    "evidence": None, "reader_answer": None,
+                }
             trace.child(f"provider.search:{name}",
                         input={"query": q.query},
                         output={"latency_ms": getattr(res, "latency_ms", None),
                                 "results": [d.__dict__ for d in (res.results if res else [])]}).end()
             if res is None or res.empty_evidence or not res.results:
                 pv["empty"] += 1
+                # Reliability: an *errored* call (exception, or a base handler that swallowed
+                # the error into search_response=None) is not the same as a genuine empty —
+                # a provider that errors is unreliable, one that finds nothing is just weak.
+                raw = res.raw if (res is not None and isinstance(res.raw, dict)) else None
+                if raw is not None and ("error" in raw or
+                                        ("search_response" in raw and raw.get("search_response") is None)):
+                    pv["errors"] += 1
                 continue
             pv["cells_succ"] += 1
             if res.cost_units is not None:  # sum billable units for the cost column (§8.2)
@@ -212,6 +242,10 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             ans = reader_mod.synthesize(reader_llm, q.query, capped, run_nonce)
             reader_span.end(output={"answer": ans})
             pv["reader_made"] += 1
+            if audit is not None:
+                audit["providers"][name]["evidence"] = [
+                    {"url": d.url, "title": d.title, "content": d.content} for d in capped]
+                audit["providers"][name]["reader_answer"] = ans
             if reader_mod.is_degenerate(ans, capped):
                 pv["reader_degen"] += 1
                 continue
@@ -288,7 +322,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                     loc["cal_agree"] += int(winner == (x if cx else y))
                 else:
                     loc["cal_abstained"] += 1
-            loc["comparisons"].append({"a": x, "b": y, "winner": winner,
+            loc["comparisons"].append({"a": x, "b": y, "winner": winner, "category": q.category,
+                                       "repeat": qi // base_n,
                                        "decided_by": verdict.get("decided_by", "primary")})
             loc["rationale"].append({
                 "query": q.query, "a": x, "b": y, "winner": winner,
@@ -311,6 +346,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     # ---- Merge per-query deltas ----
     comparisons: List[dict] = []
     rationale_log: List[dict] = []
+    traces: List[dict] = []
     per_query_answers: List[Dict[str, Optional[str]]] = []   # Tier-1 consensus, ordered by qi
     per_query_comparisons: List[List[dict]] = []
     paired_labels: List[dict] = []
@@ -319,6 +355,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     for loc in sorted(locals_out, key=lambda local: local["qi"]):
         comparisons.extend(loc["comparisons"])
         rationale_log.extend(loc["rationale"])
+        if loc.get("audit") is not None:
+            traces.append(loc["audit"])
         per_query_answers.append(loc["reader_answers"])
         per_query_comparisons.append(loc["comparisons"])
         paired_labels.extend(loc["judge_labels"])
@@ -330,7 +368,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
             pv = loc["prov"][p]
             latencies[p].extend(pv["latency"]); coverage_tokens[p].extend(pv["coverage"])
             cells_attempted[p] += pv["cells_att"]; cells_succeeded[p] += pv["cells_succ"]
-            empty_evidence_count[p] += pv["empty"]; reader_answers_made[p] += pv["reader_made"]
+            empty_evidence_count[p] += pv["empty"]; error_count[p] += pv["errors"]
+            reader_answers_made[p] += pv["reader_made"]
             reader_degenerate_count[p] += pv["reader_degen"]
             acc_correct[p] += pv["acc_correct"]; acc_total[p] += pv["acc_total"]
             if pv["units"] is not None:
@@ -368,6 +407,32 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     for p in provider_names:
         anchors.auto_verify[p] = {"correct": mv_correct[p], "total": mv_total[p]}
 
+    # Per-repeat win-rate spread: the visible noise floor for this workload. Only computed when
+    # repeats ran; a spread wider than the CI gap between two providers means "don't trust the
+    # order between them yet".
+    repeats_block: dict = {"n": repeats}
+    if repeats > 1:
+        per_repeat = {r: point_winrates([c for c in comparisons if c.get("repeat") == r],
+                                        provider_names)
+                      for r in range(repeats)}
+        repeats_block["per_repeat_win_rates"] = {str(r): wr for r, wr in per_repeat.items()}
+        repeats_block["win_rate_spread"] = {
+            p: (max(vals) - min(vals) if (vals := [per_repeat[r][p] for r in range(repeats)
+                                                   if per_repeat[r][p] is not None]) else None)
+            for p in provider_names}
+
+    # Per-category rankings (§8 use-case segmentation): "best" is undefined without a job, so
+    # when the queries file tags rows with `category`, each slice is re-ranked with the same
+    # aggregation. Absent categories -> empty dict, nothing rendered.
+    per_category = {
+        cat: {"ranking": [_score_dict(s) for s in cat_agg.scores],
+              "tie_groups": cat_agg.tie_groups,
+              "n_decided_comparisons": cat_agg.n_decided,
+              "n_excluded_comparisons": cat_agg.n_excluded}
+        for cat, cat_agg in per_category_rankings(comparisons, provider_names, seed=0,
+                                                  method=config.aggregation_method).items()
+    }
+
     # ---- Metrics + stage_status ----
     per_provider = {}
     for p in provider_names:
@@ -380,6 +445,9 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
                          "rate": _rate(acc_correct[p], acc_total[p])},
             "cells_succeeded": cells_succeeded[p],
             "cells_attempted": cells_attempted[p],
+            "reliability": {"success_rate": _rate(cells_succeeded[p], cells_attempted[p]),
+                            "error_rate": _rate(error_count[p], cells_attempted[p]),
+                            "errors": error_count[p]},
         }
         # Freshness is present only when the run had time-sensitive queries AND this provider
         # returned results on them (§8.3); absent -> its weight is dropped + renormalized (§8).
@@ -394,6 +462,7 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
     units_per_query = {p: (cost_units[p] / cost_unit_cells[p]) if cost_unit_cells[p] else None
                        for p in provider_names}
     attach_cost(per_provider, pricing, units_per_query)
+    attach_cost_per_success(per_provider)  # $/correct-answer where anchors exist (§8)
     # Drop the cost weight and renormalize the rest when cost is blank for the run (§8).
     weights_effective = effective_weights(config.weights, per_provider) if config.weights else {}
 
@@ -428,6 +497,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "scope": scope.as_dict(),
         "ranking": [_score_dict(s) for s in agg.scores],
         "tie_groups": agg.tie_groups,
+        "per_category": per_category,
+        "repeats": repeats_block,
         "n_decided_comparisons": agg.n_decided,
         "n_excluded_comparisons": agg.n_excluded,
         "metrics": per_provider,
@@ -449,7 +520,8 @@ def run_arena(config: ArenaConfig, queries: List[Query], adapters: List, scope: 
         "stage_status": stage_status,
         "degenerate_run": len(scope.included) < 3,
         "rationale_log": rationale_log,
-        "n_queries": len(queries),
+        "traces": traces if config.save_traces else None,
+        "n_queries": base_n,
     }
 
 
