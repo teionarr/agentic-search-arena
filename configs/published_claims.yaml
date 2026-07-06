@@ -1,0 +1,70 @@
+# Marketing-claims ledger — vendor-PUBLISHED benchmark numbers (§7, output #6).
+#
+# Every entry below was verified 2026-07-06 against the cited primary source (vendor blog /
+# official vendor account). `score` is the vendor's own published number in [0, 1] on that
+# dataset; `as_of` is the claim's publication date (best effort — some vendors only give a
+# month or a testing window); `source` is the citation URL.
+#
+# IMPORTANT context — a gap vs. our neutral re-run is NOT an accusation. Vendors measure
+# different products/configs than the raw search adapter this suite re-runs:
+#   - Several claims are for an answer/research/grounding product built ON TOP of the search
+#     API (noted per entry), not the bare search endpoint the arena adapters call.
+#   - Metrics differ: some vendors report accuracy, others an F-score/F1 on SimpleQA.
+#   - The web drifts; run dates differ from publication dates.
+# The per-entry comments preserve that context so the ledger stays auditable.
+#
+# Vendors checked but with NO findable first-party published number on these datasets (omitted
+# on purpose — absence is honest): firecrawl (publishes latency/relevance comparisons and cites
+# competitors' SimpleQA numbers, but no first-party SimpleQA/FRAMES/FreshQA claim of its own).
+
+published_claims:
+  simpleqa:
+    tavily:
+      score: 0.933          # accuracy; also published in this repo's upstream README table.
+      as_of: "2025-06-18"
+      source: "https://www.tavily.com/blog/tavily-evaluation-part-1-tavily-achieves-sota-on-simpleqa-benchmark"
+    exa:
+      score: 0.949          # Exa /research endpoint (agentic), not the bare search API.
+                            # Blog post (exa.ai/blog/introducing-exa-research, 2025-06-03) is no
+                            # longer resolvable; official Exa announcement retained on X.
+      as_of: "2025-06-05"
+      source: "https://x.com/ExaAILabs/status/1930691085476745605"
+    perplexity_search:
+      score: 0.858          # Sonar Pro F-score at API launch (plain Sonar: 0.773). Claim is for
+                            # the Sonar answer API, not the raw Search API this suite calls.
+      as_of: "2025-01-21"
+      source: "https://www.perplexity.ai/hub/blog/introducing-the-sonar-pro-api"
+    brave:
+      score: 0.941          # F1, AI Grounding multi-search "Research" mode (single-search:
+                            # 0.921 F1 / 0.9078 accuracy). Grounding product, not bare search.
+      as_of: "2025-08-05"
+      source: "https://brave.com/blog/ai-grounding/"
+    linkup:
+      score: 0.91           # F-score, Linkup Deep Search; SOTA post originally 2025-02-21 at
+                            # 0.9010, updated 2025-03-12 to 0.910.
+      as_of: "2025-03-12"
+      source: "https://www.linkup.so/blog/linkup-establishes-sota-performance-on-simpleqa"
+    parallel:
+      score: 0.94           # Task API Core & Base processors (Lite: 0.92); deep-research
+                            # product, not the bare Search API. Tested 2025-04-21..24.
+      as_of: "2025-04-24"
+      source: "https://parallel.ai/blog/parallel-task-api"
+    youcom:
+      score: 0.7784         # answer accuracy (95% CI 76.60–79.08%), GPT-4o-mini agent over the
+                            # You.com Search API, OpenAI's official grading prompt.
+      as_of: "2025-08-26"
+      source: "https://you.com/resources/search-api-for-the-agentic-era"
+
+  frames:
+    parallel:
+      score: 0.87           # Parallel Advanced (Basic: 0.84); accuracy of final answer,
+                            # LLM-graded. Tested 2026-04-19..21.
+      as_of: "2026-04-21"
+      source: "https://parallel.ai/benchmarks"
+
+  freshqa:
+    parallel:
+      score: 0.79           # Parallel Advanced (Basic: 0.77); accuracy of final answer,
+                            # LLM-graded. Tested 2026-04-19..21.
+      as_of: "2026-04-21"
+      source: "https://parallel.ai/benchmarks"
