@@ -166,7 +166,8 @@ def _parse_weights_arg(s: str) -> Dict[str, float]:
         try:
             weights[key.strip()] = float(val)
         except ValueError:
-            raise ValueError(f"Malformed weight '{part}' (expected axis=number)")
+            # from None: the float() error adds nothing over the message itself.
+            raise ValueError(f"Malformed weight '{part}' (expected axis=number)") from None
     if not weights:
         raise ValueError("Empty --weights")
     return weights
@@ -226,8 +227,12 @@ def main(argv: Optional[List[str]] = None) -> int:
                              f" (known axes: {', '.join(AXES)})")
     args = parser.parse_args(argv)
 
-    with open(args.results, "r") as f:
-        doc = json.load(f)
+    try:
+        with open(args.results, "r") as f:
+            doc = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"error: cannot read {args.results}: {e}", file=sys.stderr)
+        return 2
 
     try:
         if args.weights:

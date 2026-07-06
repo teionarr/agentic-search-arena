@@ -260,3 +260,13 @@ def test_dashboard_weighted_section_survives_bad_weights():
     doc["weights_effective"] = {"vibes": 1.0}
     out = render_cli_summary(doc)
     assert "weighted view unavailable" in out
+
+
+def test_cli_bad_file_and_bad_json_exit_cleanly(tmp_path, capsys):
+    from arena.rerank import main
+    assert main([str(tmp_path / "missing.json"), "--weights", "accuracy=1"]) == 2
+    assert "cannot read" in capsys.readouterr().err
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json")
+    assert main([str(bad), "--weights", "accuracy=1"]) == 2
+    assert "cannot read" in capsys.readouterr().err
