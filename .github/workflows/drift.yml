@@ -75,11 +75,14 @@ jobs:
           BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
           SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          # Dispatch input passed via env, not template-spliced into the script — a crafted
+          # reader_model must never execute on a runner that holds the provider secrets.
+          READER_MODEL: ${{ inputs.reader_model }}
         run: |
           python run_arena.py \
             --queries datasets/example_queries.csv \
             --output_dir results \
-            --reader-model "${{ inputs.reader_model || 'claude-haiku-4-5-20251001' }}"
+            --reader-model "${READER_MODEL:-claude-haiku-4-5-20251001}"
 
       - name: Collect new results.json
         run: |
@@ -100,6 +103,8 @@ jobs:
             --json drift/drift.json | tee drift/drift.txt
 
       - name: Upload arena results (baseline for the next run)
+        # A diff failure must not cost us the paid run's baseline — upload regardless.
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: arena-results
