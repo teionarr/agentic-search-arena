@@ -1,11 +1,24 @@
-"""Aggregation: round-robin win-rate + bootstrap confidence intervals.
+"""Aggregation over the swap-survived pairwise comparisons.
 
-Deviation from requirements §6.3 (Bradley-Terry), documented in the plan: on M0's complete,
-balanced, single-judge comparison graph win-rate and BT rank equivalently, and win-rate
-removes the MLE/separability/convergence/prior-tuning risk surface. BT returns at M1 only if
-the comparison graph goes unbalanced.
+Two selectable estimators (config ``aggregation.method``):
 
-Deterministic: a pinned bootstrap seed + fixed resampling procedure => byte-reproducible.
+- ``bradley_terry`` (DEFAULT, §6.3): a Bradley-Terry MLE strength per provider, fit numpy-only
+  with the standard MM (minorization-maximization) iteration — no scipy. Strengths are mapped to
+  a 0–1 "win-rate-scale" expected-score so the CI/tie/report path is unchanged. Confidence
+  intervals come from the SAME seeded bootstrap the win-rate path uses, so output stays
+  byte-reproducible.
+- ``winrate``: the round-robin win-rate + bootstrap CI estimator (the documented M0 deviation),
+  kept intact for continuity.
+
+Both estimators share the seeded bootstrap, overlapping-CI tie grouping, and the
+``unranked — insufficient valid comparisons`` floor.
+
+**Judge-reliability weighting (§6.3)** is per-judge and engages ONLY when a per-judge signal
+exists (a secondary judge's agreement, or gold calibration). It is passed in as an optional
+per-comparison ``weight``; the default single-judge no-gold run supplies none, so aggregation is
+plain unweighted Bradley-Terry over the swap-survived set.
+
+Deterministic: a pinned bootstrap seed + fixed resampling + fixed BT iteration => byte-reproducible.
 """
 
 import logging
@@ -17,12 +30,18 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 MIN_COMPARISONS = 2  # below this a provider is 'unranked — insufficient valid comparisons'
+# MM fit converges fast; a 1e-9 tolerance is below float noise for this update, so the fit
+# used to burn all iterations every call — and it runs once per bootstrap resample (n_boot),
+# which made BT aggregation pathologically slow. 1e-7 lets it converge early (well inside the
+# <1e-6 tolerance the ranking is asserted at), with a lower hard cap as a backstop.
+BT_MAX_ITERS = 200
+BT_TOL = 1e-7
 
 
 @dataclass
 class ProviderScore:
     provider: str
-    win_rate: Optional[float]
+    win_rate: Optional[float]        # BT: expected-score on the 0–1 scale; winrate: raw win-rate
     ci_low: Optional[float]
     ci_high: Optional[float]
     n_comparisons: int
@@ -36,63 +55,192 @@ class Aggregation:
     scores: List[ProviderScore]
     n_decided: int
     n_excluded: int
+    method: str = "bradley_terry"
     tie_groups: List[List[str]] = field(default_factory=list)
 
 
-def _winrate_from(games: Dict[str, List[float]], providers: List[str]) -> Dict[str, float]:
-    return {p: (float(np.mean(games[p])) if games[p] else float("nan")) for p in providers}
+def _weight_of(c: dict) -> float:
+    """Per-comparison weight (judge-reliability weighting, §6.3). Absent => 1.0 (unweighted).
+
+    Validated at the boundary: nan/inf/zero/negative weights would corrupt the weighted
+    wins/games and BT CIs (and could mark a provider as played on a zero weight), so reject them.
+    """
+    w = c.get("weight")
+    if w is None:
+        return 1.0
+    wt = float(w)
+    if not np.isfinite(wt) or wt <= 0:
+        raise ValueError("comparison weight must be a positive finite number")
+    return wt
+
+
+def _winrate_point(decided: List[dict], providers: List[str]) -> Dict[str, float]:
+    """Weighted win-rate (win=1, loss=0, tie=0.5) per provider; NaN if it played nothing."""
+    num: Dict[str, float] = {p: 0.0 for p in providers}
+    den: Dict[str, float] = {p: 0.0 for p in providers}
+    for c in decided:
+        a, b, w = c["a"], c["b"], c["winner"]
+        wt = _weight_of(c)
+        if w == "tie":
+            num[a] += 0.5 * wt; num[b] += 0.5 * wt
+        elif w == a:
+            num[a] += 1.0 * wt
+        elif w == b:
+            num[b] += 1.0 * wt
+        else:
+            continue
+        den[a] += wt; den[b] += wt
+    return {p: (num[p] / den[p] if den[p] > 0 else float("nan")) for p in providers}
+
+
+def _components(games: np.ndarray, played: np.ndarray) -> List[List[int]]:
+    """Connected components of the comparison graph (adjacency ``games`` > 0), over played nodes.
+
+    BT strengths are only identifiable WITHIN a connected component — the relative scale between
+    two providers that never share a comparison path is undefined. So we fit and normalize each
+    component separately; cross-component providers then land at incomparable scales, which the
+    CI/tie logic honestly reflects as unresolved rather than as a spurious ordering.
+    """
+    n = games.shape[0]
+    seen = np.zeros(n, dtype=bool)
+    comps: List[List[int]] = []
+    for start in range(n):
+        if seen[start] or not played[start]:
+            continue
+        stack, comp = [start], []
+        seen[start] = True
+        while stack:
+            u = stack.pop()
+            comp.append(u)
+            for v in range(n):
+                if not seen[v] and games[u, v] > 0:
+                    seen[v] = True
+                    stack.append(v)
+        comps.append(comp)
+    return comps
+
+
+def _bt_fit(decided: List[dict], providers: List[str]) -> Dict[str, float]:
+    """Bradley-Terry MLE strengths via the MM iteration (Hunter 2004), numpy-only.
+
+    Returns per-provider strength ``pi`` (positive). Providers with no games get ``nan``. Ties
+    count as half a win to each side. Weights scale each game's contribution. Each CONNECTED
+    COMPONENT of the comparison graph is fit and geometric-mean-normalized independently — strength
+    is only identifiable within a component, so disconnected groups are not forced onto one scale.
+    """
+    idx = {p: i for i, p in enumerate(providers)}
+    n = len(providers)
+    # wins[i]: weighted wins credited to i; games[i][j]: weighted games between i and j.
+    wins = np.zeros(n)
+    games = np.zeros((n, n))
+    played = np.zeros(n, dtype=bool)
+    for c in decided:
+        a, b, w = c["a"], c["b"], c["winner"]
+        if a not in idx or b not in idx:
+            continue
+        i, j = idx[a], idx[b]
+        wt = _weight_of(c)
+        games[i, j] += wt; games[j, i] += wt
+        played[i] = played[j] = True
+        if w == "tie":
+            wins[i] += 0.5 * wt; wins[j] += 0.5 * wt
+        elif w == a:
+            wins[i] += wt
+        elif w == b:
+            wins[j] += wt
+
+    pi = np.ones(n)
+    active = played.copy()
+    if not active.any():
+        return {p: float("nan") for p in providers}
+
+    for comp in _components(games, played):
+        members = np.array(comp)
+        sub_games = games[np.ix_(members, members)]  # m×m weighted games within the component
+        sub_wins = wins[members]
+        cpi = np.ones(len(members))
+        for _ in range(BT_MAX_ITERS):
+            prev = cpi.copy()
+            # Vectorized MM update: denom_i = Σ_j games_ij / (pi_i + pi_j). Same fixed point as the
+            # per-node loop, but O(m²) numpy instead of a pure-Python triple loop — the fit runs once
+            # per bootstrap resample (n_boot), so this is the difference between seconds and minutes.
+            # (diagonal games are 0, so no self-term; pair sums are always positive.)
+            denom = (sub_games / (cpi[:, None] + cpi[None, :])).sum(axis=1)
+            upd = (denom > 0) & (sub_wins > 0)  # nodes with no credited wins stay positive, unchanged
+            cpi = np.where(upd, sub_wins / np.where(denom > 0, denom, 1.0), cpi)
+            cpi = cpi / np.exp(np.mean(np.log(np.clip(cpi, 1e-12, None))))
+            prev_gm = np.exp(np.mean(np.log(np.clip(prev, 1e-12, None))))
+            if np.max(np.abs(cpi - prev / prev_gm)) < BT_TOL:
+                break
+        pi[members] = cpi
+
+    return {p: (float(pi[idx[p]]) if active[idx[p]] else float("nan")) for p in providers}
+
+
+def _bt_expected_scores(decided: List[dict], providers: List[str]) -> Dict[str, float]:
+    """Map BT strengths to a 0–1 expected-score against the field's mean opponent.
+
+    Uses a fixed reference opponent (the geometric mean strength => 1 after normalization), so
+    ``score = pi / (pi + 1)``. Monotone in strength, on the same 0–1 scale as win-rate, so it
+    flows through the existing CI / tie-grouping / report path unchanged.
+    """
+    strengths = _bt_fit(decided, providers)
+    out: Dict[str, float] = {}
+    for p in providers:
+        s = strengths[p]
+        out[p] = float("nan") if (s is None or np.isnan(s)) else s / (s + 1.0)
+    return out
+
+
+def _point_estimate(method: str, decided: List[dict], providers: List[str]) -> Dict[str, float]:
+    if method == "winrate":
+        return _winrate_point(decided, providers)
+    if method == "bradley_terry":
+        return _bt_expected_scores(decided, providers)
+    raise ValueError(f"Unknown aggregation method: {method!r}. Known: 'bradley_terry', 'winrate'")
 
 
 def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
-              n_boot: int = 2000, ci: float = 0.95, min_comparisons: int = MIN_COMPARISONS) -> Aggregation:
+              n_boot: int = 1000, ci: float = 0.95, min_comparisons: int = MIN_COMPARISONS,
+              method: str = "bradley_terry") -> Aggregation:
     """Aggregate pairwise comparisons into a ranking.
 
-    ``comparisons``: list of ``{"a": name, "b": name, "winner": name|"tie"|None}``.
-    ``winner is None`` means excluded (swap-flip / skipped) and is ignored.
+    ``comparisons``: list of ``{"a": name, "b": name, "winner": name|"tie"|None, "weight"?: float}``.
+    ``winner is None`` means excluded (swap-flip / skipped) and is ignored. ``weight`` (optional,
+    §6.3) scales a comparison's contribution for judge-reliability weighting; absent => 1.0.
+    ``method``: ``"bradley_terry"`` (default) or ``"winrate"``.
     """
     decided = [c for c in comparisons if c.get("winner") is not None]
     n_excluded = len(comparisons) - len(decided)
 
-    # Per-provider game scores (win=1, loss=0, tie=0.5).
-    games: Dict[str, List[float]] = {p: [] for p in providers}
+    point = _point_estimate(method, decided, providers)
+
+    # Games-played count per provider (drives the min-comparisons floor). Weights don't count
+    # here — the floor is about how many valid comparisons exist, not their reliability.
+    n_games: Dict[str, int] = {p: 0 for p in providers}
     for c in decided:
-        a, b, w = c["a"], c["b"], c["winner"]
-        if w == "tie":
-            games[a].append(0.5); games[b].append(0.5)
-        elif w == a:
-            games[a].append(1.0); games[b].append(0.0)
-        elif w == b:
-            games[a].append(0.0); games[b].append(1.0)
+        n_games[c["a"]] += 1
+        n_games[c["b"]] += 1
 
-    point = _winrate_from(games, providers)
-
-    # Bootstrap over the decided comparisons (seeded, fixed procedure).
+    # Bootstrap over the decided comparisons (seeded, fixed procedure) — shared by both methods.
     rng = np.random.RandomState(seed)
     boot: Dict[str, List[float]] = {p: [] for p in providers}
     if decided:
         idx_all = np.arange(len(decided))
         for _ in range(n_boot):
             sample = rng.choice(idx_all, size=len(decided), replace=True)
-            g: Dict[str, List[float]] = {p: [] for p in providers}
-            for i in sample:
-                c = decided[i]
-                a, b, w = c["a"], c["b"], c["winner"]
-                if w == "tie":
-                    g[a].append(0.5); g[b].append(0.5)
-                elif w == a:
-                    g[a].append(1.0); g[b].append(0.0)
-                elif w == b:
-                    g[a].append(0.0); g[b].append(1.0)
+            resampled = [decided[i] for i in sample]
+            est = _point_estimate(method, resampled, providers)
             for p in providers:
-                if g[p]:
-                    boot[p].append(float(np.mean(g[p])))
+                if not np.isnan(est[p]):
+                    boot[p].append(est[p])
 
     lo_pct = (1 - ci) / 2 * 100
     hi_pct = (1 + ci) / 2 * 100
 
     scores: List[ProviderScore] = []
     for p in providers:
-        n = len(games[p])
+        n = n_games[p]
         if n < min_comparisons or np.isnan(point[p]):
             scores.append(ProviderScore(p, None, None, None, n, "unranked"))
             continue
@@ -123,7 +271,7 @@ def aggregate(comparisons: List[dict], providers: List[str], seed: int = 0,
         s.rank = i + 1
 
     return Aggregation(scores=ranked + unranked, n_decided=len(decided),
-                       n_excluded=n_excluded, tie_groups=tie_groups)
+                       n_excluded=n_excluded, method=method, tie_groups=tie_groups)
 
 
 def point_winrates(comparisons: List[dict], providers: List[str]) -> Dict[str, Optional[float]]:
@@ -143,8 +291,8 @@ def point_winrates(comparisons: List[dict], providers: List[str]) -> Dict[str, O
     return {p: (float(np.mean(games[p])) if games[p] else None) for p in providers}
 
 
-def per_category_rankings(comparisons: List[dict], providers: List[str],
-                          seed: int = 0) -> Dict[str, Aggregation]:
+def per_category_rankings(comparisons: List[dict], providers: List[str], seed: int = 0,
+                          method: str = "bradley_terry") -> Dict[str, Aggregation]:
     """Re-run the identical aggregation per query-category slice (§8 use-case segmentation).
 
     Comparisons carry an optional ``category`` (from the queries file); untagged comparisons
@@ -153,7 +301,7 @@ def per_category_rankings(comparisons: List[dict], providers: List[str],
     into an order."""
     categories = sorted({c["category"] for c in comparisons if c.get("category")})
     return {cat: aggregate([c for c in comparisons if c.get("category") == cat],
-                           providers, seed=seed)
+                           providers, seed=seed, method=method)
             for cat in categories}
 
 

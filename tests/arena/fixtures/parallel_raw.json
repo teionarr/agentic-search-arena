@@ -1,0 +1,31 @@
+{
+  "answer": "",
+  "search_response": {
+    "search_id": "search_fcb2b4f3c75e418687bccaa1a8381331",
+    "results": [
+      {
+        "url": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award",
+        "title": "IEEE Frank Rosenblatt Award - Wikipedia",
+        "publish_date": "2024-12-02",
+        "excerpts": [
+          "The 2010 recipient of the IEEE Frank Rosenblatt Award was Michio Sugeno.",
+          "The award recognizes contributions to biologically motivated computational paradigms."
+        ]
+      },
+      {
+        "url": "https://ethw.org/IEEE_Frank_Rosenblatt_Award",
+        "title": "IEEE Frank Rosenblatt Award",
+        "publish_date": "2024-12-02",
+        "excerpts": [
+          "Michio Sugeno, 2010",
+          "Hans-Paul Schwefel, 2011"
+        ]
+      }
+    ],
+    "session_id": "session_8a911eb27c7a4afaa20d0d9dc98d07c0",
+    "usage": [
+      {"unit": "request", "amount": 1}
+    ]
+  },
+  "provider_latency": 1.284530162811279
+}

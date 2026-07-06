@@ -20,6 +20,7 @@ from arena.paths import copy_config_to_results, get_output_dir
 from arena.pipeline import run_arena
 from arena.report import build_document, render_cli_summary, write_results
 from arena.scope import resolve_scope
+from arena.tracing import build_tracer
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -98,10 +99,17 @@ def main() -> int:
     judge_llm = LLMClient(model=model_id)
     reader_llm = LLMClient(model=reader_model)
     grader_llm = LLMClient(model=reader_model)  # accuracy anchor (Claude fallback if no OPENAI_API_KEY)
+    # Optional neutral second judge (§5): ensemble + self-preference. Anthropic-only client, so a
+    # secondary is a second Claude model id here; a cross-family judge is future work.
+    secondary_judge_llm = LLMClient(model=config.judge_secondary) if config.judge_secondary else None
+
+    tracer = build_tracer(config.langfuse_enabled)  # NullTracer unless enabled + Langfuse keys present
 
     logger.info(f"Running arena over: {', '.join(a.name for a in adapters)} "
-                f"({len(queries)} queries, judge={model_id})")
-    result = run_arena(config, queries, adapters, scope, reader_llm, judge_llm, grader_llm=grader_llm)
+                f"({len(queries)} queries, judge={model_id}"
+                + (f", secondary={config.judge_secondary}" if config.judge_secondary else "") + ")")
+    result = run_arena(config, queries, adapters, scope, reader_llm, judge_llm,
+                       grader_llm=grader_llm, secondary_judge_llm=secondary_judge_llm, tracer=tracer)
 
     out_dir = get_output_dir(config.output_dir)
     os.makedirs(out_dir, exist_ok=True)
@@ -111,6 +119,9 @@ def main() -> int:
     doc = build_document(result, [q.query for q in queries],
                          config_snapshot={"model_id": model_id,
                                           "reader_model": reader_model,
+                                          "judge_secondary": config.judge_secondary,
+                                          "aggregation_method": config.aggregation_method,
+                                          "judge_reliability_weighting": config.judge_reliability_weighting,
                                           "evidence_budget_tokens": config.evidence_budget_tokens,
                                           "order_swap": config.order_swap,
                                           "exclude_on_flip": config.exclude_on_flip},

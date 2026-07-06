@@ -125,7 +125,10 @@ def build_document(result: dict, queries: List[str], config_snapshot: dict,
         "manifest": run_manifest(),
         "scope": result["scope"],
         "degenerate_run": result["degenerate_run"],
+        "aggregation_method": result.get("aggregation_method"),
+        "reliability_weighted": result.get("reliability_weighted", False),
         "calibration": result.get("calibration"),
+        "anchors": result.get("anchors"),
         "ranking": result["ranking"],
         "tie_groups": result["tie_groups"],
         "per_category": result.get("per_category", {}),
@@ -152,17 +155,20 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
     csv_path = os.path.join(output_dir, "ranking.csv")
     with open(csv_path, "w", newline="") as f:
         w = csv.writer(f)
+        av_all = (doc.get("anchors") or {}).get("auto_verify", {}) or {}
         w.writerow(["rank", "provider", "win_rate", "ci_low", "ci_high", "n_comparisons",
                     "tie_group", "status", "avg_tokens_per_result", "latency_p50_ms",
                     "accuracy_rate", "accuracy_correct", "accuracy_total",
                     "cost_usd_per_query", "cost_usd_per_correct", "cost_as_of",
                     "freshness_score", "freshness_coverage", "freshness_low_confidence",
-                    "success_rate", "error_rate"])
+                    "success_rate", "error_rate",
+                    "auto_verify_rate", "auto_verify_correct", "auto_verify_total"])
         for s in doc["ranking"]:
             m = doc["metrics"].get(s["provider"], {})
             acc = m.get("accuracy", {}) or {}
             cost = m.get("cost", {}) or {}
             fr = m.get("freshness", {}) or {}
+            av = av_all.get(s["provider"], {}) or {}
             w.writerow([_csv_safe(x) for x in [
                 s["rank"], s["provider"], s["win_rate"], s["ci_low"], s["ci_high"],
                 s["n_comparisons"], s["tie_group"], s["status"],
@@ -174,6 +180,7 @@ def write_results(doc: dict, output_dir: str) -> Dict[str, str]:
                 fr.get("low_confidence") if fr else None,
                 (m.get("reliability", {}) or {}).get("success_rate"),
                 (m.get("reliability", {}) or {}).get("error_rate"),
+                av.get("rate"), av.get("correct"), av.get("total"),
             ]])
 
     return {"json": json_path, "csv": csv_path}
@@ -219,9 +226,15 @@ def render_cli_summary(doc: dict) -> str:
     n_rep = (doc.get("repeats") or {}).get("n", 1)
     rep_s = f" × {n_rep} repeats" if n_rep > 1 else ""
     out.append(f"  {doc['n_queries']} queries{rep_s} · judge {doc['model_id']}{cost_s}")
+    method = doc.get("aggregation_method")
+    method_s = f" · {method}" + (" (reliability-weighted)" if doc.get("reliability_weighted") else "") if method else ""
     out.append(f"  {n_dec}/{n_tot} comparisons used" +
-               (f" · judge reliability {sc:.2f}" if sc is not None else ""))
+               (f" · judge reliability {sc:.2f}" if sc is not None else "") + method_s)
     judge = doc.get("judge") or {}
+    kappa = judge.get("inter_judge_kappa")
+    if kappa is not None:
+        out.append(f"  inter-judge agreement κ {kappa:.2f} "
+                   f"({'≥0.60 ok' if kappa >= 0.60 else 'below 0.60 bar'})")
     if judge.get("self_preference_caveat"):
         n = judge.get("self_preference_flags", 0)
         out.append(f"  ⚠  native-answer mode: {n} pair(s) flagged possible-self-preference "
@@ -237,6 +250,15 @@ def render_cli_summary(doc: dict) -> str:
         bar = "≥0.80 ok" if cal["agreement"] >= 0.80 else "below 0.80 bar"
         out.append(f"  judge-vs-gold agreement {cal['agreement']:.0%} "
                    f"({cal['n_decidable']} decidable pairs · {bar})")
+
+    anc = doc.get("anchors") or {}
+    if anc.get("consensus_coverage") is not None:
+        cov_s = (f"  free anchors · consensus {anc['consensus_coverage']:.0%} coverage "
+                 f"(≥{anc['min_providers']} providers, {anc['n_consensus_queries']}/{anc['n_queries']} queries)")
+        av_agree = anc.get("arena_vs_consensus_agreement")
+        if av_agree is not None:
+            cov_s += f" · arena-vs-consensus agreement {av_agree:.0%} ({anc['n_arena_checked']} checked)"
+        out.append(cov_s)
 
     has_acc = any((doc["metrics"].get(s["provider"], {}).get("accuracy", {}) or {}).get("rate") is not None
                   for s in doc["ranking"])

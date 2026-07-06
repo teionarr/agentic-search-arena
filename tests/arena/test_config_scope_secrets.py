@@ -48,6 +48,25 @@ def test_config_unknown_provider_key_errors(tmp_path):
 def test_config_defaults_zero_config():
     cfg = load_config(None)
     assert cfg.order_swap is True and cfg.evidence_budget_tokens > 0
+    assert cfg.aggregation_method == "bradley_terry"          # §6.3 default
+    assert cfg.judge_reliability_weighting == "auto"
+
+
+def test_config_aggregation_method_parsed(tmp_path):
+    p = tmp_path / "c.yaml"
+    p.write_text("aggregation: {method: winrate, judge_reliability_weighting: 'off'}\n"
+                 "judge: {secondary: claude-opus-4-1}\n")
+    cfg = load_config(str(p))
+    assert cfg.aggregation_method == "winrate"
+    assert cfg.judge_reliability_weighting == "off"
+    assert cfg.judge_secondary == "claude-opus-4-1"
+
+
+def test_config_rejects_unknown_aggregation_method(tmp_path):
+    p = tmp_path / "c.yaml"
+    p.write_text("aggregation: {method: elo}\n")
+    with pytest.raises(ValueError):
+        load_config(str(p))
 
 
 def test_config_rejects_nonpositive_budget_and_concurrency(tmp_path):

@@ -16,9 +16,14 @@ reader:
 
 judge:
   primary: claude
-  secondary: null               # M1 — reserved, not wired in M0
+  secondary: null               # optional 2nd judge (a Claude model id) => ensemble + κ + weighting
   order_swap: true
   exclude_on_flip: true
+
+# Aggregation over the swap-survived comparisons (§6.3).
+aggregation:
+  method: bradley_terry         # default; "winrate" keeps the M0 round-robin estimator
+  judge_reliability_weighting: auto  # per-judge; engages only with a secondary judge, else plain BT
 
 evidence_budget_tokens: 600     # common per-provider evidence cap (bounds the verbosity confound)
 
