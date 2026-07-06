@@ -59,6 +59,10 @@ def resolve_scope(config_providers: Dict[str, dict]) -> Scope:
             scope.entries.append(ScopeEntry(name, USER_CHOICE))
             continue
         missing = [k for k in spec.required_env_keys if not secrets.has(k)]
+        # any_of gate: at least one of the alternates must be present (e.g. Gemini accepts
+        # GEMINI_API_KEY or GOOGLE_API_KEY). Report the full alternate set when none is set.
+        if spec.any_of_env_keys and not any(secrets.has(k) for k in spec.any_of_env_keys):
+            missing.append(" or ".join(spec.any_of_env_keys))
         if missing:
             scope.entries.append(ScopeEntry(name, NO_KEY, f"missing {', '.join(missing)}"))
             continue

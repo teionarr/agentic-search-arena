@@ -23,6 +23,9 @@ class ProviderSpec:
     """Registry entry for one in-scope provider."""
 
     required_env_keys: List[str]
+    # Optional any-of gate: the provider is satisfied if AT LEAST ONE of these keys is present
+    # (in addition to all of ``required_env_keys``). Used when a handler accepts alternate keys.
+    any_of_env_keys: List[str] = field(default_factory=list)
     default_config: Dict[str, Any] = field(default_factory=dict)
     _factory: Callable[[Dict[str, Any], str], Any] = None
     # Minimum seconds between requests to this provider (respects per-plan rate limits).
@@ -83,6 +86,21 @@ def _claude_search_factory(config, token_model):
     return ClaudeSearchHandler(config, token_model=token_model)
 
 
+def _youcom_factory(config, token_model):
+    from arena.adapters.youcom_handler import YouComHandler
+    return YouComHandler(config, token_model=token_model)
+
+
+def _parallel_factory(config, token_model):
+    from arena.adapters.parallel_handler import ParallelHandler
+    return ParallelHandler(config, token_model=token_model)
+
+
+def _gemini_factory(config, token_model):
+    from arena.adapters.gemini_handler import GeminiHandler
+    return GeminiHandler(config, token_model=token_model)
+
+
 # In-scope (document-returning) providers only. Finished-answer providers (perplexity Sonar,
 # gptr) are M1. max_results / top-k held constant at 10 across providers (§15).
 REGISTRY: Dict[str, ProviderSpec] = {
@@ -129,6 +147,25 @@ REGISTRY: Dict[str, ProviderSpec] = {
         _factory=_claude_search_factory,
         native_answer=True,   # returns its own synthesized answer (native-answer path, §5)
         family="claude",      # frontier baseline; triggers the self-preference caveat (§5/§6)
+    ),
+    "youcom": ProviderSpec(
+        required_env_keys=["YOU_API_KEY"],
+        default_config={"count": 10},
+        _factory=_youcom_factory,
+    ),
+    "parallel": ProviderSpec(
+        required_env_keys=["PARALLEL_API_KEY"],
+        # 'advanced' is Parallel's documented default (higher-quality retrieval + compression).
+        default_config={"mode": "advanced"},
+        _factory=_parallel_factory,
+    ),
+    "gemini": ProviderSpec(
+        # GeminiHandler accepts either key; gate on the any-of set so a deployment with only
+        # GOOGLE_API_KEY is still included (matches the handler's GEMINI_API_KEY-then-GOOGLE lookup).
+        required_env_keys=[],
+        any_of_env_keys=["GEMINI_API_KEY", "GOOGLE_API_KEY"],
+        default_config={"model": "gemini-2.5-flash"},
+        _factory=_gemini_factory,
     ),
 }
 

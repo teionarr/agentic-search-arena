@@ -1,0 +1,47 @@
+{
+  "answer": "",
+  "search_response": {
+    "results": {
+      "web": [
+        {
+          "url": "https://en.wikipedia.org/wiki/IEEE_Frank_Rosenblatt_Award",
+          "title": "IEEE Frank Rosenblatt Award - Wikipedia",
+          "description": "The IEEE Frank Rosenblatt Award is a Technical Field Award of the IEEE.",
+          "snippets": [
+            "The 2010 IEEE Frank Rosenblatt Award was presented to Michio Sugeno for contributions to the theory of fuzzy sets.",
+            "The award was established in 2004 and is named in honor of Frank Rosenblatt."
+          ],
+          "page_age": "2024-12-02T19:35:00",
+          "thumbnail_url": "https://example.com/thumb1.jpg",
+          "authors": ["Wikipedia contributors"],
+          "favicon_url": "https://example.com/favicon1.ico"
+        },
+        {
+          "url": "https://ethw.org/IEEE_Frank_Rosenblatt_Award",
+          "title": "IEEE Frank Rosenblatt Award",
+          "description": "Award recipients list including 2010.",
+          "snippets": [
+            "Michio Sugeno, 2010",
+            "Hans-Paul Schwefel, 2011"
+          ],
+          "page_age": "2024-12-02T00:00:00"
+        }
+      ],
+      "news": [
+        {
+          "url": "https://www.cics.umass.edu/news/barto-sutton-receive-ieee-frank-rosenblatt-award",
+          "title": "Andrew Barto and Richard Sutton Receive 2026 IEEE Frank Rosenblatt Award",
+          "description": "CICS professors named recipients of the 2026 award for reinforcement learning.",
+          "page_age": "2025-08-29T00:00:00",
+          "thumbnail_url": "https://example.com/thumb2.jpg"
+        }
+      ]
+    },
+    "metadata": {
+      "request_uuid": "942ccbdd-7705-4d9c-9d37-4ef386658e90",
+      "query": "Who received the IEEE Frank Rosenblatt Award in 2010?",
+      "latency": 0.412
+    }
+  },
+  "provider_latency": 0.6231529712677002
+}
