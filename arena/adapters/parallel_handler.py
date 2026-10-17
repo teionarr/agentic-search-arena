@@ -30,11 +30,20 @@ class ParallelHandler:
         if not self.api_key:
             raise ValueError("PARALLEL_API_KEY not provided to initialize Parallel handler")
         self.token_model = token_model
-        self.search_params = search_params or {}
+        self.search_params = dict(search_params or {})
+        # The current Search API nests max_results under advanced_settings. Keep saved
+        # configs working without mutating them; an explicit nested value takes priority.
+        # https://docs.parallel.ai/api-reference/search/search
+        if "max_results" in self.search_params:
+            legacy_limit = self.search_params.pop("max_results")
+            settings = dict(self.search_params.get("advanced_settings") or {})
+            settings.setdefault("max_results", legacy_limit)
+            self.search_params["advanced_settings"] = settings
         self.is_llm_response = False
 
     async def search(self, query: str) -> Dict[str, Any]:
-        headers = {"x-api-key": self.api_key, "Content-Type": "application/json"}
+        headers = {"x-api-key": self.api_key, "Content-Type": "application/json",
+                   "User-Agent": "agentic-search-arena (https://github.com/teionarr/agentic-search-arena)"}
         # Parallel needs search_queries (list) + objective; derive both from the raw query.
         data = {"objective": query, "search_queries": [query], **self.search_params}
         try:

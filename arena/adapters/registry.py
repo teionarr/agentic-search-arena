@@ -103,7 +103,13 @@ def _parallel_units(config: Dict[str, Any]) -> Optional[float]:
     # up to 10 results; https://docs.parallel.ai/api-reference/search/search: max_results
     # "Defaults to 10". Above 10, extra results bill $1/1k per result actually returned —
     # non-deterministic → None.
-    return 1.0 if config.get("max_results", 10) <= 10 else None
+    # Current API: advanced_settings.max_results. Mirror the handler's legacy fallback
+    # and nested-value precedence; null uses the API's default of 10.
+    settings = config.get("advanced_settings") or {}
+    limit = settings.get("max_results", config.get("max_results", 10))
+    if limit is None:
+        limit = 10
+    return 1.0 if limit <= 10 else None
 
 
 def _tavily_factory(config, token_model):
